@@ -44,7 +44,7 @@ namespace Sberbank.Bidding
                 return new WebProxy()
                 {
                     Address = new Uri($"http://{host}:{port}"),
-                    BypassProxyOnLocal = true,
+                    BypassProxyOnLocal = false,
                     UseDefaultCredentials = false,
                     Credentials = new NetworkCredential(login, password)
                 };
