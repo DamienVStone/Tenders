@@ -15,7 +15,7 @@ namespace Sberbank.Bidding
 {
     public static class Helper
     {
-        static Helper()
+        public static void Init()
         {
             Http.Init(GetProxy().Result);
         }
