@@ -140,15 +140,6 @@ namespace Sberbank.Bidding
                 });
             }
 
-            public static void LogElapsed(Action a, string message)
-            {
-                var sw = new Stopwatch();
-                sw.Start();
-                a();
-                sw.Stop();
-                Log($"Message={message}; Elapsed={sw.Elapsed}");
-            }
-
             public static Task<T> LogElapsed<T>(Func<Task<T>> a, string message)
             {
                 Log($"Message={message};State=\"Started\"");
@@ -203,28 +194,6 @@ namespace Sberbank.Bidding
                             _addAuth(_client);
                         });
                 }
-
-
-
-                //await Logger.LogElapsed(async () =>
-                //{
-                //    var client = Http.GetApiClient();
-                //    using (var response = await client.PostAsync(Constants.API_TOKEN_URL, TokenRequest.AsContent()))
-                //    {
-                //        if (response.StatusCode != HttpStatusCode.OK)
-                //            throw new Exception(response.ReasonPhrase);
-
-                //        var result = response.Content.ReadAsStringAsync()
-                //        .ContinueWith(t =>
-                //        {
-                //            _token = JsonConvert.DeserializeObject<Token>(t.Result);
-                //            _addAuth(_client);
-                //            return _token;
-                //        });
-
-                //        return await result;
-                //    }
-                //}, "API. Авторизация");
             }
 
             private static void _addAuth(HttpClient c)

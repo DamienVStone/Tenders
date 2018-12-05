@@ -52,17 +52,9 @@ namespace Sberbank.Bidding
 
             Fingerprint = await Helper.Api.GetFingerprintAsync(ct);
             doc.Load(step1Async.Result);
-
-            //using (var form = _getAuthStep2Form(doc))
             doc.Load(await Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL), _getAuthStep2Form(doc), client, ct));
-            //await (await client.PostAsync(Helper.Constants.SBER_AUTH_STEP1_URL, form)).Content.ReadAsStreamAsync());
-
             doc.Load(await Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL), client, ct));
-            //doc.Load(await (await client.GetAsync(Helper.Constants.SBER_AUTH_STEP2_URL)).Content.ReadAsStreamAsync());
-
-            //using (var form = _getAuthStep3Form(doc))
             doc.Load(await Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct));
-            //doc.Load(await (await client.PostAsync(Helper.Constants.SBER_AUTH_STEP3_URL, form)).Content.ReadAsStreamAsync());
 
             Helper.Logger.Log("Авторизован как: " + doc.GetElementbyId("ctl00_loginctrl_link").InnerText.Trim());
         }
