@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace Sberbank.Bidding
 {
     public static class Helper
-    {//test 123 
+    {
         public static class Constants
         {
             #region sber
