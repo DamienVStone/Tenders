@@ -23,8 +23,7 @@ namespace Sberbank.Bidding
                 Console.WriteLine($"{name}={value}");
             }
             Console.WriteLine($"----------------------------------------");
-            Console.ReadLine();
-
+            while (true) { }
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
             sw.Start();
