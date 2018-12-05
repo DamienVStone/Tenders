@@ -23,7 +23,7 @@ namespace Sberbank.Bidding
             }
             Console.WriteLine($"----------------------------------------");
 
-            Console.WriteLine("Proxy is: " + Helper.Http.Proxy.Address);
+            Console.WriteLine("token is: " + Helper.Constants.AUCTION_MANAGER_TOKEN);
             while (true) { }
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
