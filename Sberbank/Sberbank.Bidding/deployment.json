@@ -10,11 +10,6 @@
   },
   "spec": {
     "replicas": 1,
-    "selector": {
-      "matchLabels": {
-        "k8s-app": "tenders-sberbank-bidder"
-      }
-    },
     "template": {
       "spec": {
         "containers": [
