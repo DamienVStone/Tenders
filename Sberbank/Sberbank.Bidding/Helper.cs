@@ -194,7 +194,9 @@ namespace Sberbank.Bidding
             {
                 return await Logger.LogElapsed(async () =>
                 {
+                    Console.WriteLine("try to get proxy...");
                     var data = await new HttpClient().GetStringAsync(Constants.API_GET_PROXY_URL + $"{(string.IsNullOrEmpty(Constants.AUCTION_MANAGER_TOKEN) ? "" : "?token=" + Constants.AUCTION_MANAGER_TOKEN)}");
+                    Console.WriteLine("get proxy " + data);
                     var errorText = "Wrong proxy format! Should be - host:port:login@password";
                     var p = data.Split(':');
                     if (p.Length < 3)
