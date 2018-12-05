@@ -51,9 +51,10 @@ namespace Sberbank.Bidding
 
             Fingerprint = await Helper.Api.GetFingerprintAsync(ct);
             doc.Load(step1Async.Result);
-            doc.Load(await Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL), _getAuthStep2Form(doc), client, ct));
-            doc.Load(await Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL), client, ct));
-            doc.Load(await Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct));
+            // Дальше идем синхронно
+            doc.Load(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL), _getAuthStep2Form(doc), client, ct).Result);
+            doc.Load(Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL), client, ct).Result);
+            doc.Load(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct).Result);
 
             Helper.Logger.Log("Авторизован как: " + doc.GetElementbyId("ctl00_loginctrl_link").InnerText.Trim());
         }
@@ -71,11 +72,10 @@ namespace Sberbank.Bidding
             var mainContent_xmlData = Helper.Constants.SBER_LOGON_REGISTER_TEXT
                 .Replace("{{NOW}}", hiddenNow)
                 .Replace("{{TICKET}}", hiddenTicket);
-            var mainContent_DDL1 = string.Empty;
-            mainContent_DDL1 = Fingerprint;
+            var mainContent_DDL1 = Fingerprint;
 
             var mainContent_signValue = string.Empty;
-            mainContent_signValue = Helper.Api.SignAsync(mainContent_xmlData, new CancellationToken()).Result.Replace("\\r\\n", "\r\n").Replace("\"", string.Empty);
+            mainContent_signValue = Helper.Api.SignAsync(mainContent_xmlData, new CancellationToken()).Result;
 
             return new FormUrlEncodedContent(
                 new Dictionary<string, string>()
