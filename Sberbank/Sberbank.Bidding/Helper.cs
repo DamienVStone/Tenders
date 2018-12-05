@@ -15,6 +15,43 @@ namespace Sberbank.Bidding
 {
     public static class Helper
     {
+        static Helper()
+        {
+            Http.Init(GetProxy().Result);
+        }
+
+        internal static async Task<WebProxy> GetProxy()
+        {
+            return await Logger.LogElapsed(async () =>
+            {
+                Console.WriteLine("try to get proxy...");
+                var data = await new HttpClient().GetStringAsync(Constants.API_GET_PROXY_URL + $"{(string.IsNullOrEmpty(Constants.AUCTION_MANAGER_TOKEN) ? "" : "?token=" + Constants.AUCTION_MANAGER_TOKEN)}");
+                Console.WriteLine("get proxy " + data);
+                var errorText = "Wrong proxy format! Should be - host:port:login@password";
+                var p = data.Split(':');
+                if (p.Length < 3)
+                    throw new FormatException(errorText);
+
+                var host = p[0];
+                int.TryParse(p[1], out var port);
+                var auth = p[2].Split('@');
+                if (auth.Length < 2 && port == 0)
+                    throw new FormatException(errorText);
+
+                var login = auth[0];
+                var password = auth[1];
+
+                return new WebProxy()
+                {
+                    Address = new Uri($"{host}:{port}"),
+                    BypassProxyOnLocal = true,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(login, password)
+                };
+            }, "Получение прокси");
+        }
+
+
         public static class Constants
         {
             #region sber
@@ -39,9 +76,9 @@ namespace Sberbank.Bidding
 
         public static class Http
         {
-            static Http()
+            public static void Init(WebProxy p)
             {
-                Proxy = Api.GetProxy().Result;
+                Proxy = p;
 
                 Handler = new HttpClientHandler
                 {
@@ -190,37 +227,6 @@ namespace Sberbank.Bidding
                 }
             }
 
-            internal static async Task<WebProxy> GetProxy()
-            {
-                return await Logger.LogElapsed(async () =>
-                {
-                    Console.WriteLine("try to get proxy...");
-                    var data = await new HttpClient().GetStringAsync(Constants.API_GET_PROXY_URL + $"{(string.IsNullOrEmpty(Constants.AUCTION_MANAGER_TOKEN) ? "" : "?token=" + Constants.AUCTION_MANAGER_TOKEN)}");
-                    Console.WriteLine("get proxy " + data);
-                    var errorText = "Wrong proxy format! Should be - host:port:login@password";
-                    var p = data.Split(':');
-                    if (p.Length < 3)
-                        throw new FormatException(errorText);
-
-                    var host = p[0];
-                    int.TryParse(p[1], out var port);
-                    var auth = p[2].Split('@');
-                    if (auth.Length < 2 && port == 0)
-                        throw new FormatException(errorText);
-
-                    var login = auth[0];
-                    var password = auth[1];
-
-                    return new WebProxy()
-                    {
-                        Address = new Uri($"{host}:{port}"),
-                        BypassProxyOnLocal = true,
-                        UseDefaultCredentials = false,
-                        Credentials = new NetworkCredential(login, password)
-                    };
-                }, "Получение прокси");
-            }
-
             private static void _addAuth(HttpClient c)
             {
                 if (_token == null)
@@ -268,11 +274,6 @@ namespace Sberbank.Bidding
             {
                 public string Data { get; set; }
             }
-        }
-
-        public static class Proxy
-        {
-
         }
     }
 }
