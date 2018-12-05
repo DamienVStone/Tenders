@@ -25,42 +25,36 @@ namespace Sberbank.Bidding
             public const string SBER_COOKIE_TEMPLATE = "_ym_uid=1502459726551214073; _ga=GA1.2.238098008.1502459722; __utma=99173852.238098008.1502459722.1523281306.1527755093.125; _ym_d=1530176747; ASP.NET_SessionId=f4n0j0sn54m5mrvp1jzfv3jk; {{AUTH_EXTRA_INFO}}";
             #endregion
 
-            #region proxy
-            public const string PROXY_URL = "";
-            public const string PROXY_LOGIN = "";
-            public const string PROXY_PASSWORD = "";
-            #endregion
-
             #region API
-            //public const string API_URL = "http://localhost:50183/";
-            public static readonly string API_URL = "";
-            public static readonly string API_SIGN_TEXT_URL = API_URL + "";
-            public static readonly string API_GET_FINGERPRINT_URL = API_URL + "";
-            public static readonly string API_TOKEN_URL = API_URL + "Token";
-            //public static readonly string _login = Environment.GetEnvironmentVariable("env_api_login");
-            //public const string _password = Environment.GetEnvironmentVariable("env_api_password");
-            public static readonly string API_LOGIN = "";
-            public static readonly string API_PASSWORD = "";
+            public static readonly string API_URL = Environment.GetEnvironmentVariable("API_URL");
+            public static readonly string API_SIGN_TEXT_URL = API_URL + Environment.GetEnvironmentVariable("API_SIGN_TEXT_URL");
+            public static readonly string API_GET_FINGERPRINT_URL = API_URL + Environment.GetEnvironmentVariable("API_GET_FINGERPRINT_URL");
+            public static readonly string API_TOKEN_URL = API_URL + Environment.GetEnvironmentVariable("API_TOKEN_URL");
+            public static readonly string API_LOGIN = Environment.GetEnvironmentVariable("API_LOGIN");
+            public static readonly string API_PASSWORD = Environment.GetEnvironmentVariable("API_PASSWORD");
+            public static readonly string API_GET_PROXY_URL = Environment.GetEnvironmentVariable("API_GET_PROXY_URL");
+            public static readonly string AUCTION_MANAGER_TOKEN = Environment.GetEnvironmentVariable("AUCTION_MANAGER_TOKEN");
             #endregion
         }
 
         public static class Http
         {
-            public static WebProxy Proxy = new WebProxy()
+            static Http()
             {
-                Address = new Uri(Constants.PROXY_URL),
-                BypassProxyOnLocal = true,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(Constants.PROXY_LOGIN, Constants.PROXY_PASSWORD)
-            };
+                Proxy = Api.GetProxy().Result;
 
-            public static HttpClientHandler Handler = new HttpClientHandler
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                AllowAutoRedirect = true,
-                UseCookies = true,
-                Proxy = Proxy
-            };
+                Handler = new HttpClientHandler
+                {
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                    AllowAutoRedirect = true,
+                    UseCookies = true,
+                    Proxy = Proxy
+                };
+            }
+
+            public static WebProxy Proxy;
+
+            public static HttpClientHandler Handler;
 
             private static object _sberbankClientLocker = new object();
             private static HttpClient _sberbankClient;
@@ -196,6 +190,35 @@ namespace Sberbank.Bidding
                 }
             }
 
+            internal static async Task<WebProxy> GetProxy()
+            {
+                return await Logger.LogElapsed(async () =>
+                {
+                    var data = await new HttpClient().GetStringAsync(Constants.API_GET_PROXY_URL + $"{(string.IsNullOrEmpty(Constants.AUCTION_MANAGER_TOKEN) ? "" : "?token=" + Constants.AUCTION_MANAGER_TOKEN)}");
+                    var errorText = "Wrong proxy format! Should be - host:port:login@password";
+                    var p = data.Split(':');
+                    if (p.Length < 3)
+                        throw new FormatException(errorText);
+
+                    var host = p[0];
+                    int.TryParse(p[1], out var port);
+                    var auth = p[2].Split('@');
+                    if (auth.Length < 2 && port == 0)
+                        throw new FormatException(errorText);
+
+                    var login = auth[0];
+                    var password = auth[1];
+
+                    return new WebProxy()
+                    {
+                        Address = new Uri($"{host}:{port}"),
+                        BypassProxyOnLocal = true,
+                        UseDefaultCredentials = false,
+                        Credentials = new NetworkCredential(login, password)
+                    };
+                }, "Получение прокси");
+            }
+
             private static void _addAuth(HttpClient c)
             {
                 if (_token == null)
@@ -243,6 +266,11 @@ namespace Sberbank.Bidding
             {
                 public string Data { get; set; }
             }
+        }
+
+        public static class Proxy
+        {
+
         }
     }
 }

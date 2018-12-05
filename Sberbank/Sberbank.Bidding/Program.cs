@@ -14,7 +14,6 @@ namespace Sberbank.Bidding
         static string Fingerprint;
         static void Main(string[] args)
         {
-            Console.WriteLine("I'm work!");
             Console.WriteLine($"----------ENVIRONMENT VARIABLES---------");
             foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables())
             {
@@ -23,6 +22,8 @@ namespace Sberbank.Bidding
                 Console.WriteLine($"{name}={value}");
             }
             Console.WriteLine($"----------------------------------------");
+
+            Console.WriteLine("Proxy is: " + Helper.Http.Proxy.Address);
             while (true) { }
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
