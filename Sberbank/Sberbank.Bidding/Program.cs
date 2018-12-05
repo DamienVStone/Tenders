@@ -22,9 +22,8 @@ namespace Sberbank.Bidding
                 Console.WriteLine($"{name}={value}");
             }
             Console.WriteLine($"----------------------------------------");
+
             Helper.Init();
-            Console.WriteLine("proxy is: " + Helper.Http.Proxy.Address);
-            while (true) { }
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
             sw.Start();
@@ -38,7 +37,7 @@ namespace Sberbank.Bidding
 
             });
 
-            Console.ReadKey();
+            while (true) { }
         }
 
         private static async Task _auth(CancellationToken ct)
