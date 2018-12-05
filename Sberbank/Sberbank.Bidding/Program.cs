@@ -12,7 +12,7 @@ namespace Sberbank.Bidding
     class Program
     {
         static string Fingerprint;
-        static int Main(string[] args)
+        static void Main(string[] args)
         {
             Console.WriteLine("I'm work!");
             Console.WriteLine($"----------ENVIRONMENT VARIABLES---------");
@@ -23,7 +23,7 @@ namespace Sberbank.Bidding
                 Console.WriteLine($"{name}={value}");
             }
             Console.WriteLine($"----------------------------------------");
-            return 0;
+            Console.ReadLine();
 
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
