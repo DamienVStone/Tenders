@@ -53,9 +53,10 @@ namespace Sberbank.Bidding
             doc.Load(step1Async.Result);
             // Дальше идем синхронно
             doc.Load(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL), _getAuthStep2Form(doc), client, ct).Result);
+            Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             doc.Load(Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL), client, ct).Result);
+            Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             doc.Load(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct).Result);
-
             Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             Helper.Logger.Log("Авторизован как: " + doc.GetElementbyId("ctl00_loginctrl_link").InnerText.Trim());
         }
