@@ -1,0 +1,10 @@
+<Playlist Version="1.0">
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.AddPath_AddPathInDb_OkReturned" />
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.AddPath_AddPathInDb_BadReturned" />
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.EditPath_EditPathInDb_OkReturned" />
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.EditPath_EditPathInDb_BadReturned" />
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.ChangeFlagActive_ChangeFlagInDb_OkReturned" />
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.ChangeFlagActive_ChangeFlagInDb_BadReturned" />
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.DeletePath_DeletePathFromDb_OkReturned" />
+<Add Test="TenderPlanAPI.Tests.FTPPathTest.DeletePath_DeletePathFromDb_BadReturned" />
+</Playlist>
