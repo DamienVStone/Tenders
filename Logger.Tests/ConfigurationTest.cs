@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AppLogger.Tests
+namespace Logger.Tests
 {
     [TestClass]
     public class ConfigurationTest
