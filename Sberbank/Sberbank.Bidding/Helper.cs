@@ -140,7 +140,7 @@ namespace Sberbank.Bidding
                         throw new HttpRequestException(response.ReasonPhrase);
 
                     return await response.Content.ReadAsStreamAsync();
-                }, $"GET {url.Scheme}://{url.Host}:{url.Port}{url.AbsolutePath}");
+                }, $"GET {url.ToString()}");
             }
 
             public static async Task<Stream> RequestPost(Uri url, HttpContent data, HttpClient client, CancellationToken ct)
@@ -153,7 +153,7 @@ namespace Sberbank.Bidding
                         throw new HttpRequestException(response.ReasonPhrase);
 
                     return await response.Content.ReadAsStreamAsync();
-                }, $"POST {url.Scheme}://{url.Host}:{url.Port}{url.AbsolutePath}");
+                }, $"POST {url.ToString()}");
             }
         }
 

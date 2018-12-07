@@ -59,15 +59,15 @@ namespace Sberbank.Bidding
             // Дальше идем синхронно
             doc.Load(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL), _getAuthStep2Form(doc), client, ct).Result);
             foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
-                Helper.Logger.Log(item.Value);
+                Helper.Logger.Log(item.Name + "=" + item.Value);
             //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             doc.Load(Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL), client, ct).Result);
             foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
-                Helper.Logger.Log(item.Value);
+                Helper.Logger.Log(item.Name + "=" + item.Value);
             //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             doc.Load(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct).Result);
             foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
-                Helper.Logger.Log(item.Value);
+                Helper.Logger.Log(item.Name + "=" + item.Value);
             ct.ThrowIfCancellationRequested();
 
 
