@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -46,6 +47,7 @@ namespace Sberbank.Bidding
             var client = Helper.Http.GetSberbankClient();
             var h = Helper.Http.Handler;
             var doc = new HtmlDocument();
+            var cookies = new Dictionary<string, string>();
 
             var step1Async = Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL), client, ct);
             var apiAuthAsync = Helper.Api.AuthenticateAsync(ct);
@@ -56,12 +58,16 @@ namespace Sberbank.Bidding
 
             // Дальше идем синхронно
             doc.LoadHtml(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL), _getAuthStep2Form(doc), client, ct).Result);
+
             foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
-                h.CookieContainer.SetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), item.Name + "=" + item.Value);
+                cookies[item.Name] = item.Value;
 
             doc.LoadHtml(Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL), client, ct).Result);
             foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL)))
-                h.CookieContainer.SetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), item.Name + "=" + item.Value);
+                cookies[item.Name] = item.Value;
+
+
+            h.CookieContainer.SetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), string.Join(';', cookies.Select(c => $"{c.Key}={c.Value}")));
 
             //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             ct.ThrowIfCancellationRequested();
@@ -69,8 +75,8 @@ namespace Sberbank.Bidding
             Helper.Logger.Log("cookies before post--------------------------");
             foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL)))
                 Helper.Logger.Log(item.Name + "=" + item.Value);
-            doc.LoadHtml(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct).Result);
             Helper.Logger.Log("cookies before post end--------------------------");
+            doc.LoadHtml(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct).Result);
 
             ct.ThrowIfCancellationRequested();
 
