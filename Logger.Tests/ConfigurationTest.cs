@@ -1,13 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AppLogger.Tests
+namespace Logger.Tests
 {
     [TestClass]
     public class ConfigurationTest
     {
         [TestMethod]
         public void LoggerCreationTest() {
-            var logger = Logger.GetLogger("Profiler1");
+            var logger = AppLogger.Logger.GetLogger("Profiler1");
             Assert.IsNotNull(logger);
         }
     }
