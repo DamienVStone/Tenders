@@ -19,7 +19,6 @@ namespace Sberbank.Bidding
         {
             Http.Init(GetProxy().Result);
         }
-
         internal static async Task<WebProxy> GetProxy()
         {
             return await Logger.LogElapsed(async () =>
@@ -50,7 +49,6 @@ namespace Sberbank.Bidding
                 };
             }, "Получение прокси");
         }
-
 
         public static class Constants
         {
