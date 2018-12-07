@@ -140,7 +140,7 @@ namespace Sberbank.Bidding
                 {
                     var response = await client.GetAsync(url, ct);
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"{((int)response.StatusCode)}{response.StatusCode.ToString()} - {response.ReasonPhrase}");
+                        throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
                     return await response.Content.ReadAsStreamAsync();
                 }, $"GET {url.ToString()}");
@@ -153,7 +153,7 @@ namespace Sberbank.Bidding
                     var response = await client.PostAsync(url, data, ct);
 
                     if (!response.IsSuccessStatusCode)
-                        throw new HttpRequestException($"{((int)response.StatusCode)}{response.StatusCode.ToString()} - {response.ReasonPhrase}");
+                        throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
                     return await response.Content.ReadAsStreamAsync();
                 }, $"POST {url.ToString()}");
