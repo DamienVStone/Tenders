@@ -114,7 +114,7 @@ namespace Sberbank.Bidding
             var values = new Dictionary<string, string>()
                     {
                             { "wa", wa },
-                            { "wresult", wresult },
+                            { "wresult", HttpUtility.HtmlDecode(wresult) },
                             { "StsCertsChecked", StsCertsChecked },
                     };
 
