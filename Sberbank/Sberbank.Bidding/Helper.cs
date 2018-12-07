@@ -3,11 +3,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,7 +15,15 @@ namespace Sberbank.Bidding
     {
         public static void Init()
         {
-            Http.Init(GetProxy().Result);
+            var p = string.IsNullOrEmpty(Constants.CORP_PROXY_URL) ? GetProxy().Result :
+             new WebProxy()
+             {
+                 Address = new Uri(Constants.CORP_PROXY_URL),
+                 BypassProxyOnLocal = true,
+                 Credentials = new NetworkCredential(Constants.CORP_PROXY_LOGIN, Constants.CORP_PROXY_PASSWORD)
+             };
+
+            Http.Init(p);
         }
         internal static async Task<WebProxy> GetProxy()
         {
@@ -62,6 +68,9 @@ namespace Sberbank.Bidding
 
             #region API
             public static readonly string API_URL = Environment.GetEnvironmentVariable("API_URL");
+            public static readonly string CORP_PROXY_URL = Environment.GetEnvironmentVariable("CORP_PROXY_URL");
+            public static readonly string CORP_PROXY_LOGIN = Environment.GetEnvironmentVariable("CORP_PROXY_LOGIN");
+            public static readonly string CORP_PROXY_PASSWORD = Environment.GetEnvironmentVariable("CORP_PROXY_PASSWORD");
             public static readonly string API_SIGN_TEXT_URL = API_URL + Environment.GetEnvironmentVariable("API_SIGN_TEXT_URL");
             public static readonly string API_GET_FINGERPRINT_URL = API_URL + Environment.GetEnvironmentVariable("API_GET_FINGERPRINT_URL");
             public static readonly string API_TOKEN_URL = API_URL + Environment.GetEnvironmentVariable("API_TOKEN_URL");
@@ -82,7 +91,6 @@ namespace Sberbank.Bidding
                 {
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                     AllowAutoRedirect = true,
-                    CookieContainer = new CookieContainer(),
                     UseCookies = true,
                     Proxy = Proxy
                 };
@@ -102,13 +110,13 @@ namespace Sberbank.Bidding
                     {
                         _sberbankClient = new HttpClient(Handler);
                         _sberbankClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-                        _sberbankClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
-                        _sberbankClient.DefaultRequestHeaders.Add("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
-                        _sberbankClient.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
+                        _sberbankClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+                        //_sberbankClient.DefaultRequestHeaders.Add("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
+                        //_sberbankClient.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
                         _sberbankClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
-                        _sberbankClient.DefaultRequestHeaders.Add("Host", "login.sberbank-ast.ru");
+                        //_sberbankClient.DefaultRequestHeaders.Add("Host", "login.sberbank-ast.ru");
                         _sberbankClient.DefaultRequestHeaders.Add("Referer", "http://www.sberbank-ast.ru/Default.aspx?");
-                        _sberbankClient.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
+                        //_sberbankClient.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
                         _sberbankClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36");
                     }
                 }
@@ -132,7 +140,7 @@ namespace Sberbank.Bidding
                 return _apiClient;
             }
 
-            public static async Task<string> RequestGet(Uri url, HttpClient client, CancellationToken ct)
+            public static async Task<string> RequestGet(string url, HttpClient client, CancellationToken ct)
             {
                 return await Logger.LogElapsed(async () =>
                 {
@@ -141,10 +149,10 @@ namespace Sberbank.Bidding
                         throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
                     return await response.Content.ReadAsStringAsync();
-                }, $"GET {url.ToString()}");
+                }, $"GET {url}");
             }
 
-            public static async Task<string> RequestPost(Uri url, HttpContent data, HttpClient client, CancellationToken ct)
+            public static async Task<string> RequestPost(string url, HttpContent data, HttpClient client, CancellationToken ct)
             {
                 return await Logger.LogElapsed(async () =>
                 {
@@ -154,7 +162,7 @@ namespace Sberbank.Bidding
                         throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
                     return await response.Content.ReadAsStringAsync();
-                }, $"POST {url.ToString()}");
+                }, $"POST {url}");
             }
         }
 
@@ -201,20 +209,20 @@ namespace Sberbank.Bidding
             {
                 var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Data", data) });
                 return JsonConvert
-                    .DeserializeObject<StringResponse>(await Http.RequestPost(new Uri(Constants.API_SIGN_TEXT_URL), content, _client, ct))
+                    .DeserializeObject<StringResponse>(await Http.RequestPost(Constants.API_SIGN_TEXT_URL, content, _client, ct))
                     .Data;
             }
 
             public static async Task<string> GetFingerprintAsync(CancellationToken ct)
             {
                 return JsonConvert
-                    .DeserializeObject<StringResponse>(await Http.RequestGet(new Uri(Constants.API_GET_FINGERPRINT_URL), _client, ct))
+                    .DeserializeObject<StringResponse>(await Http.RequestGet(Constants.API_GET_FINGERPRINT_URL, _client, ct))
                     .Data;
             }
 
             public static async Task AuthenticateAsync(CancellationToken ct)
             {
-                var result = await Http.RequestPost(new Uri(Constants.API_TOKEN_URL), TokenRequest.AsContent(), _client, ct);
+                var result = await Http.RequestPost(Constants.API_TOKEN_URL, TokenRequest.AsContent(), _client, ct);
                 _token = JsonConvert.DeserializeObject<Token>(result);
                 _addAuth(_client);
             }
