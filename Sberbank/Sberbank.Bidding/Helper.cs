@@ -107,6 +107,7 @@ namespace Sberbank.Bidding
                         _sberbankClient.DefaultRequestHeaders.Add("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
                         _sberbankClient.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
                         _sberbankClient.DefaultRequestHeaders.Add("Connection", "keep-alive");
+                        _sberbankClient.DefaultRequestHeaders.Add("Cookie", "_ym_uid=1502459726551214073; _ga=GA1.2.238098008.1502459722; __utma=99173852.238098008.1502459722.1523281306.1527755093.125; _ym_d=1530176747; ASP.NET_SessionId=syfbf0zxf0ilirgl5za0hv3h; _ym_isad=2");
                         _sberbankClient.DefaultRequestHeaders.Add("Host", "login.sberbank-ast.ru");
                         _sberbankClient.DefaultRequestHeaders.Add("Referer", "http://www.sberbank-ast.ru/Default.aspx?");
                         _sberbankClient.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
