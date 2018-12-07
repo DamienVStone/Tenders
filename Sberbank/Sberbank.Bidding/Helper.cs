@@ -82,8 +82,6 @@ namespace Sberbank.Bidding
                 {
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                     AllowAutoRedirect = true,
-                    UseProxy = true,
-                    UseDefaultCredentials = false,
                     UseCookies = true,
                     Proxy = Proxy
                 };
@@ -134,7 +132,7 @@ namespace Sberbank.Bidding
                 return _apiClient;
             }
 
-            public static async Task<Stream> RequestGet(Uri url, HttpClient client, CancellationToken ct)
+            public static async Task<string> RequestGet(Uri url, HttpClient client, CancellationToken ct)
             {
                 return await Logger.LogElapsed(async () =>
                 {
@@ -142,11 +140,11 @@ namespace Sberbank.Bidding
                     if (!response.IsSuccessStatusCode)
                         throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
-                    return await response.Content.ReadAsStreamAsync();
+                    return await response.Content.ReadAsStringAsync();
                 }, $"GET {url.ToString()}");
             }
 
-            public static async Task<Stream> RequestPost(Uri url, HttpContent data, HttpClient client, CancellationToken ct)
+            public static async Task<string> RequestPost(Uri url, HttpContent data, HttpClient client, CancellationToken ct)
             {
                 return await Logger.LogElapsed(async () =>
                 {
@@ -155,7 +153,7 @@ namespace Sberbank.Bidding
                     if (!response.IsSuccessStatusCode)
                         throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
-                    return await response.Content.ReadAsStreamAsync();
+                    return await response.Content.ReadAsStringAsync();
                 }, $"POST {url.ToString()}");
             }
         }
@@ -201,31 +199,23 @@ namespace Sberbank.Bidding
             public static async Task<string> SignAsync(string data, CancellationToken ct)
             {
                 var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Data", data) });
-                using (var response = await Http.RequestPost(new Uri(Constants.API_SIGN_TEXT_URL), content, _client, ct))
-                    return JsonConvert
-                        .DeserializeObject<StringResponse>(await new StreamReader(response, Encoding.UTF8).ReadToEndAsync())
-                        .Data;
+                return JsonConvert
+                    .DeserializeObject<StringResponse>(await Http.RequestPost(new Uri(Constants.API_SIGN_TEXT_URL), content, _client, ct))
+                    .Data;
             }
 
             public static async Task<string> GetFingerprintAsync(CancellationToken ct)
             {
-                using (var s = await Http.RequestGet(new Uri(Constants.API_GET_FINGERPRINT_URL), _client, ct))
-                    return JsonConvert
-                        .DeserializeObject<StringResponse>(await new StreamReader(s, Encoding.UTF8).ReadToEndAsync())
-                        .Data;
+                return JsonConvert
+                    .DeserializeObject<StringResponse>(await Http.RequestGet(new Uri(Constants.API_GET_FINGERPRINT_URL), _client, ct))
+                    .Data;
             }
 
             public static async Task AuthenticateAsync(CancellationToken ct)
             {
-                using (var response = await Http.RequestPost(new Uri(Constants.API_TOKEN_URL), TokenRequest.AsContent(), _client, ct))
-                {
-                    await new StreamReader(response, Encoding.UTF8).ReadToEndAsync()
-                        .ContinueWith(t =>
-                        {
-                            _token = JsonConvert.DeserializeObject<Token>(t.Result);
-                            _addAuth(_client);
-                        });
-                }
+                var result = await Http.RequestPost(new Uri(Constants.API_TOKEN_URL), TokenRequest.AsContent(), _client, ct);
+                _token = JsonConvert.DeserializeObject<Token>(result);
+                _addAuth(_client);
             }
 
             private static void _addAuth(HttpClient c)
