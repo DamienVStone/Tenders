@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using System.Xml.Serialization;
 
 namespace Sberbank.Bidding
 {
@@ -28,6 +28,7 @@ namespace Sberbank.Bidding
             Helper.Init();
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
+
             sw.Start();
             _auth(ct.Token).ContinueWith(t =>
             {
@@ -37,78 +38,108 @@ namespace Sberbank.Bidding
                 sw.Stop();
                 Console.WriteLine("Авторизация заняла " + sw.Elapsed);
 
+            }).Wait(ct.Token);
+
+            sw.Restart();
+            _findLot(ct.Token, "0373100123818000053").ContinueWith(t =>
+            {
+                if (!t.IsCompletedSuccessfully)
+                    Helper.Logger.Log(t.Exception?.ToString());
+
+                sw.Stop();
+                Console.WriteLine("Поиск лота занял " + sw.Elapsed);
+
             });
 
             while (true) { }
         }
 
+        private static async Task _findLot(CancellationToken ct, string regNumber)
+        {
+            var client = Helper.Http.GetSberbankClient();
+            var doc = new HtmlDocument();
+
+            doc.LoadHtml(await Helper.Http.RequestGet(Helper.Constants.SBER_SEARCH_URL, client, ct));
+
+            doc.LoadHtml(await Helper.Http.RequestPost(Helper.Constants.SBER_SEARCH_URL, _getSearchForm(doc, regNumber), client, ct));
+
+            var xmlFilterResult = HttpUtility.HtmlDecode(doc.GetElementbyId("ctl00_ctl00_phWorkZone_xmlData")?.InnerText);
+            var lots = (data)new XmlSerializer(typeof(data)).Deserialize(new StringReader(xmlFilterResult));
+            var link = Helper.Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", lots.row.reqID).Replace("{{ASID}}", lots.row.ASID);
+            doc.LoadHtml(await Helper.Http.RequestGet(link, client, ct));
+            Helper.Logger.Log(doc.Text);
+        }
+
+        private static FormUrlEncodedContent _getSearchForm(HtmlDocument doc, string regNumber)
+        {
+            var _EVENTTARGET = doc.GetElementbyId("_EVENTTARGET")?.GetAttributeValue("value", string.Empty);
+            var __EVENTARGUMENT = doc.GetElementbyId("__EVENTARGUMENT")?.GetAttributeValue("value", string.Empty);
+            var __VIEWSTATEFIELDCOUNT = doc.GetElementbyId("__VIEWSTATEFIELDCOUNT")?.GetAttributeValue("value", string.Empty);
+            var __VIEWSTATE = doc.GetElementbyId("__VIEWSTATE")?.GetAttributeValue("value", string.Empty);
+            var __VIEWSTATE1 = doc.GetElementbyId("__VIEWSTATE1")?.GetAttributeValue("value", string.Empty);
+            var __VIEWSTATE2 = doc.GetElementbyId("__VIEWSTATE2")?.GetAttributeValue("value", string.Empty);
+            var __VIEWSTATEGENERATOR = doc.GetElementbyId("__VIEWSTATEGENERATOR")?.GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_xmlFilter = Helper.Constants.SBER_SEARCH_TEMPLATE.Replace("{{REG_NUMBER}}", regNumber);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbxPurchaseCode = regNumber;
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbSearch = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbSearch").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountstart = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountstart").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountend = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountend").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_cldPublicDateStart = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_cldPublicDateStart").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_cldPublicDateEnd = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_cldPublicDateEnd").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldRRequestDateStart = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldRRequestDateStart").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldRequestDateEnd = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldRequestDateEnd").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldAuctionBeginDateStart = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldAuctionBeginDateStart").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldAuctionBeginDateEnd = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldAuctionBeginDateEnd").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_btnSearch = doc.GetElementbyId("ctl00_ctl00_phWorkZone_btnSearch").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_hfFilterZone = doc.GetElementbyId("ctl00_ctl00_phWorkZone_hfFilterZone").GetAttributeValue("value", string.Empty);
+            var ctl00_ctl00_phWorkZone_xmlData = doc.GetElementbyId("ctl00_ctl00_phWorkZone_xmlData").GetAttributeValue("value", string.Empty);
+
+            var values = new Dictionary<string, string>()
+            {
+                { "_EVENTTARGET" , _EVENTTARGET },
+                { "__EVENTARGUMENT" , __EVENTARGUMENT },
+                { "__VIEWSTATEFIELDCOUNT" , __VIEWSTATEFIELDCOUNT },
+                { "__VIEWSTATE" , __VIEWSTATE },
+                { "__VIEWSTATE1" , __VIEWSTATE1 },
+                { "__VIEWSTATE2" , __VIEWSTATE2 },
+                { "__VIEWSTATEGENERATOR" , __VIEWSTATEGENERATOR },
+                { "ctl00$ctl00$phWorkZone$xmlFilter" , ctl00_ctl00_phWorkZone_xmlFilter },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$tbxPurchaseCode" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbxPurchaseCode },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$tbSearch" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbSearch },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$purchamountstart" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountstart },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$purchamountend" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountend },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$cldPublicDateStart" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_cldPublicDateStart },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$cldPublicDateEnd" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_cldPublicDateEnd },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$CldRRequestDateStart" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldRRequestDateStart },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$CldRequestDateEnd" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldRequestDateEnd },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$CldAuctionBeginDateStart" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldAuctionBeginDateStart},
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$CldAuctionBeginDateEnd" , ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_CldAuctionBeginDateEnd },
+                { "ctl00$ctl00$phWorkZone$btnSearch" , ctl00_ctl00_phWorkZone_btnSearch },
+                { "ctl00$ctl00$phWorkZone$hfFilterZone" , ctl00_ctl00_phWorkZone_hfFilterZone },
+                { "ctl00$ctl00$phWorkZone$xmlData" , ctl00_ctl00_phWorkZone_xmlData }
+            };
+
+            return new FormUrlEncodedContent(values);
+        }
+
+        #region auth
         private static async Task _auth(CancellationToken ct)
         {
             var client = Helper.Http.GetSberbankClient();
-            var h = Helper.Http.Handler;
             var doc = new HtmlDocument();
-            var cookies = new Dictionary<string, string>();
 
             var step1Async = Helper.Http.RequestGet(Helper.Constants.SBER_AUTH_STEP1_URL, client, ct);
             var apiAuthAsync = Helper.Api.AuthenticateAsync(ct);
             Task.WaitAll(new[] { step1Async, apiAuthAsync });
 
-            //foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
-            //{
-            //    Helper.Logger.Log($"{item.Name}={item.Value}");
-            //    cookies[item.Name] = item.Value;
-            //}
-
             Fingerprint = await Helper.Api.GetFingerprintAsync(ct);
             doc.LoadHtml(step1Async.Result);
 
-            // Дальше идем синхронно
-            doc.LoadHtml(Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP1_URL, _getAuthStep2Form(doc), client, ct).Result);
-
-            //foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
-            //{
-            //    Helper.Logger.Log($"{item.Name}={item.Value}");
-            //    cookies[item.Name] = item.Value;
-            //}
-
-            doc.LoadHtml(Helper.Http.RequestGet(Helper.Constants.SBER_AUTH_STEP2_URL, client, ct).Result);
-            //foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
-            //{
-            //    Helper.Logger.Log($"{item.Name}={item.Value}");
-            //    cookies[item.Name] = item.Value;
-            //}
-
-            //foreach (var item in cookies.Select(c => $"{c.Key}={c.Value}"))
-            //{
-            //    h.CookieContainer.SetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), item);
-            //}
-
-            //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
-            ct.ThrowIfCancellationRequested();
-
-            //Helper.Logger.Log("cookies before post--------------------------");
-            //foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL)))
-            //    Helper.Logger.Log(item.Name + "=" + item.Value);
-            //Helper.Logger.Log("cookies before post end--------------------------");
-            //var c = new HttpClient(new LoggingHandler(Helper.Http.Handler));
-            //c.BaseAddress = new Uri("http://www.sberbank-ast.ru");
-            //c.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-            //c.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
-            //c.DefaultRequestHeaders.Add("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7");
-            //c.DefaultRequestHeaders.Add("Cache-Control", "max-age=0");
-            //c.DefaultRequestHeaders.Add("Connection", "keep-alive");
-            //c.DefaultRequestHeaders.Add("Host", "login.sberbank-ast.ru");
-            //c.DefaultRequestHeaders.Add("Referer", "http://www.sberbank-ast.ru/Default.aspx?");
-            //c.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
-            //c.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36");
-            //c.DefaultRequestHeaders.Add("Cookie", "_ym_uid=1502459726551214073; _ga=GA1.2.238098008.1502459722; __utma=99173852.238098008.1502459722.1523281306.1527755093.125; _ym_d=1530176747; ASP.NET_SessionId=f4n0j0sn54m5mrvp1jzfv3jk;");
-            //Helper.Logger.Log("base address: " + c.BaseAddress.ToString());
-            doc.LoadHtml(Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP3_URL, _getAuthStep3Form(doc), client, ct).Result);
+            doc.LoadHtml(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP1_URL, _getAuthStep2Form(doc), client, ct));
+            doc.LoadHtml(await Helper.Http.RequestGet(Helper.Constants.SBER_AUTH_STEP2_URL, client, ct));
+            doc.LoadHtml(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP3_URL, _getAuthStep3Form(doc), client, ct));
 
             ct.ThrowIfCancellationRequested();
-
-
-            //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             Helper.Logger.Log("Авторизован как: " + doc.GetElementbyId("ctl00_loginctrl_link").InnerText.Trim());
         }
 
@@ -157,5 +188,6 @@ namespace Sberbank.Bidding
 
             return new FormUrlEncodedContent(values);
         }
+        #endregion
     }
 }

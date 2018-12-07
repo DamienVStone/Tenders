@@ -64,6 +64,9 @@ namespace Sberbank.Bidding
             public const string SBER_AUTH_STEP3_URL = "http://www.sberbank-ast.ru/tradezone/default.aspx";
             public const string SBER_LOGON_REGISTER_TEXT = "<logonregister><request>Просьба обеспечить вход в личный кабинет Электронной торговой площадки «Сбербанк-АСТ». Подлинность и достоверность запроса на аутентификацию подтверждаю.</request><now>{{NOW}}</now><ticket>{{TICKET}}</ticket></logonregister>";
             public const string SBER_COOKIE_TEMPLATE = "_ym_uid=1502459726551214073; _ga=GA1.2.238098008.1502459722; __utma=99173852.238098008.1502459722.1523281306.1527755093.125; _ym_d=1530176747; ASP.NET_SessionId=f4n0j0sn54m5mrvp1jzfv3jk; {{AUTH_EXTRA_INFO}}";
+            public const string SBER_SEARCH_TEMPLATE = "<query><purchcode>{{REG_NUMBER}}</purchcode><purchtype></purchtype><purchname></purchname><purchamountstart></purchamountstart><purchamountend></purchamountend><issmp>-1</issmp><orgid></orgid><orgname></orgname><purchstate></purchstate><purchbranchid></purchbranchid><purchbranchname></purchbranchname><regionid></regionid><regionname></regionname><publicdatestart></publicdatestart><publicdateend></publicdateend><requestdatestart></requestdatestart><requestdateend></requestdateend><auctionbegindatestart></auctionbegindatestart><auctionbegindateend></auctionbegindateend></query>";
+            public const string SBER_SEARCH_URL = "http://www.sberbank-ast.ru/tradezone/Supplier/PurchaseRequestList.aspx";
+            public const string SBER_TRADE_PLACE_URL_TEMPLATE = "http://www.sberbank-ast.ru/tradezone/Supplier/TradePlace.aspx?reqid={{TRADE_ID}}&ASID={{ASID}}";
             #endregion
 
             #region API
@@ -77,6 +80,7 @@ namespace Sberbank.Bidding
             public static readonly string API_LOGIN = Environment.GetEnvironmentVariable("API_LOGIN");
             public static readonly string API_PASSWORD = Environment.GetEnvironmentVariable("API_PASSWORD");
             public static readonly string API_GET_PROXY_URL = Environment.GetEnvironmentVariable("API_GET_PROXY_URL");
+            public static readonly string API_GET_FUTURE_AUCTIONS_URL = Environment.GetEnvironmentVariable("API_GET_PROXY_URL");
             public static readonly string AUCTION_MANAGER_TOKEN = Environment.GetEnvironmentVariable("AUCTION_MANAGER_TOKEN");
             #endregion
         }
@@ -181,14 +185,13 @@ namespace Sberbank.Bidding
 
             public static Task<T> LogElapsed<T>(Func<Task<T>> a, string message)
             {
-                Log($"Message={message};State=\"Started\"");
                 var sw = new Stopwatch();
                 sw.Start();
                 var task = a();
                 task.ContinueWith(t =>
                 {
                     sw.Stop();
-                    Log($"Message={message};State=\"Completed\";Elapsed={sw.Elapsed}");
+                    Log($"Message={message};Elapsed={sw.Elapsed}");
                 });
 
                 return task;
