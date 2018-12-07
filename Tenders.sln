@@ -21,7 +21,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLogger", "AppLogger\AppL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLogger.Tests", "AppLogger.Tests\AppLogger.Tests.csproj", "{94E455D8-4119-415F-AAD7-14DC159E1D2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger", "Logger\Logger.csproj", "{A0FF088B-D15C-4CA2-8645-85697BDCB080}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "Logger\Logger.csproj", "{A0FF088B-D15C-4CA2-8645-85697BDCB080}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger.Tests", "Logger.Tests\Logger.Tests.csproj", "{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +80,12 @@ Global
 		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.NuGetDebug|Any CPU.Build.0 = Debug|Any CPU
 		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}.NuGetDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}.NuGetDebug|Any CPU.Build.0 = Debug|Any CPU
+		{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
