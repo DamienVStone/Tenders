@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
@@ -34,7 +35,9 @@ namespace AppLogger
         
         static Logger()
         {
-            var section = LoggerConfigSection.Instance;
+            var _loggerString = ConfigurationManager.AppSettings["LoggerConfig"];
+            if (_loggerString == null) throw new InvalidOperationException("Не могу найти секцию SSDSApiLogger в файле конфигурации");
+            var section = JsonConvert.DeserializeObject<LoggerConfigSection>(_loggerString);
             _apiUrl = section.ApiUrl;
             LogCallback?.Invoke($"INFO [{DateTime.Now:dd.MM.yyyy HH:mm:ss}] LIBRARY: Точка входа для логгера: '{_apiUrl}'");
 

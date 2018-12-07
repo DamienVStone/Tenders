@@ -1,6 +1,11 @@
 ﻿using AppLogger.Configuration;
 using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace AppLogger
 {
@@ -10,7 +15,7 @@ namespace AppLogger
 
         static Common()
         {
-            var section = LoggerConfigSection.Instance;
+            var section = (LoggerConfigSection)ConfigurationManager.GetSection("SSDSApiLogger");
             if (section == null) throw new InvalidOperationException("Не могу найти секцию SSDSApiLogger в файле конфигурации");
 
             _apiUrl = section.ApiUrl;
