@@ -15,7 +15,7 @@ namespace AppLogger
 
         static Common()
         {
-            var section = (SSDSApiLoggerSection)ConfigurationManager.GetSection("SSDSApiLogger");
+            var section = (LoggerConfigSection)ConfigurationManager.GetSection("SSDSApiLogger");
             if (section == null) throw new InvalidOperationException("Не могу найти секцию SSDSApiLogger в файле конфигурации");
 
             _apiUrl = section.ApiUrl;

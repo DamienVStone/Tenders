@@ -35,9 +35,9 @@ namespace AppLogger
         
         static Logger()
         {
-            var section = (SSDSApiLoggerSection)ConfigurationManager.GetSection("SSDSApiLogger");
-            if (section == null) throw new InvalidOperationException("Не могу найти секцию SSDSApiLogger в файле конфигурации");
-
+            var _loggerString = ConfigurationManager.AppSettings["LoggerConfig"];
+            if (_loggerString == null) throw new InvalidOperationException("Не могу найти секцию SSDSApiLogger в файле конфигурации");
+            var section = JsonConvert.DeserializeObject<LoggerConfigSection>(_loggerString);
             _apiUrl = section.ApiUrl;
             LogCallback?.Invoke($"INFO [{DateTime.Now:dd.MM.yyyy HH:mm:ss}] LIBRARY: Точка входа для логгера: '{_apiUrl}'");
 
@@ -51,7 +51,7 @@ namespace AppLogger
             LogCallback?.Invoke($"INFO [{DateTime.Now:dd.MM.yyyy HH:mm:ss}] LIBRARY: Таймауты (мс): HTTP - '{_httpTimeout}', Статусы - '{_statusTimeout}', Логи - '{_logTimeout}'");
 
             credentials = new Dictionary<string, LoggerConfig>();
-            new List<LoggerConfig>(section.Loggers).ForEach(l => credentials[l.Username] = l);
+            section.Loggers.ForEach(l => credentials[l.Username] = l);
         }
 
         public static Logger GetLogger(string name)
