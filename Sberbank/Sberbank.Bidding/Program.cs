@@ -90,8 +90,7 @@ namespace Sberbank.Bidding
                 .Replace("{{TICKET}}", hiddenTicket);
             var mainContent_DDL1 = Fingerprint;
 
-            var mainContent_signValue = string.Empty;
-            mainContent_signValue = Helper.Api.SignAsync(mainContent_xmlData, new CancellationToken()).Result;
+            var mainContent_signValue = Helper.Api.SignAsync(mainContent_xmlData, new CancellationToken()).Result;
 
             return new FormUrlEncodedContent(
                 new Dictionary<string, string>()

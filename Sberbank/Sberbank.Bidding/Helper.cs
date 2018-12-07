@@ -82,6 +82,8 @@ namespace Sberbank.Bidding
                 {
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                     AllowAutoRedirect = true,
+                    UseProxy = true,
+                    UseDefaultCredentials = false,
                     UseCookies = true,
                     Proxy = Proxy
                 };
