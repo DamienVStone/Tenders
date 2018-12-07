@@ -78,8 +78,10 @@ namespace Sberbank.Bidding
                 cookies[item.Name] = item.Value;
             }
 
-
-            h.CookieContainer.SetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), string.Join(';', cookies.Select(c => $"{c.Key}={c.Value}")));
+            foreach (var item in cookies.Select(c => $"{c.Key}={c.Value}"))
+            {
+                h.CookieContainer.SetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), item);
+            }
 
             //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             ct.ThrowIfCancellationRequested();

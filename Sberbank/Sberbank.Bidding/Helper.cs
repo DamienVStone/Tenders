@@ -165,7 +165,7 @@ namespace Sberbank.Bidding
             {
                 await Task.Run(() =>
                 {
-                    message += Environment.NewLine + Environment.NewLine;
+                    message += Environment.NewLine + "-----------------------------------------------------------------------------------";
                     _logs.Add(message);
                     Console.WriteLine(message);
                 });
