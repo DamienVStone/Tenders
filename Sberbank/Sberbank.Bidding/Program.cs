@@ -62,11 +62,11 @@ namespace Sberbank.Bidding
                 Helper.Logger.Log(item.Name + "=" + item.Value);
             //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             doc.Load(Helper.Http.RequestGet(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL), client, ct).Result);
-            foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
+            foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP2_URL)))
                 Helper.Logger.Log(item.Name + "=" + item.Value);
             //Helper.Logger.Log(doc.DocumentNode.OuterHtml);
             doc.Load(Helper.Http.RequestPost(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL), _getAuthStep3Form(doc), client, ct).Result);
-            foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP1_URL)))
+            foreach (Cookie item in h.CookieContainer.GetCookies(new Uri(Helper.Constants.SBER_AUTH_STEP3_URL)))
                 Helper.Logger.Log(item.Name + "=" + item.Value);
             ct.ThrowIfCancellationRequested();
 
@@ -117,11 +117,6 @@ namespace Sberbank.Bidding
                             { "wresult", HttpUtility.HtmlDecode(wresult) },
                             { "StsCertsChecked", StsCertsChecked },
                     };
-
-            foreach (var item in values)
-            {
-                Helper.Logger.Log(item.Key + " = " + item.Value);
-            }
 
             return new FormUrlEncodedContent(values);
         }
