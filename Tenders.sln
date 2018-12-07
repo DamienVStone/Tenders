@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLogger", "AppLogger\AppL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLogger.Tests", "AppLogger.Tests\AppLogger.Tests.csproj", "{94E455D8-4119-415F-AAD7-14DC159E1D2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger", "Logger\Logger.csproj", "{A0FF088B-D15C-4CA2-8645-85697BDCB080}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,12 @@ Global
 		{94E455D8-4119-415F-AAD7-14DC159E1D2B}.NuGetDebug|Any CPU.Build.0 = Debug|Any CPU
 		{94E455D8-4119-415F-AAD7-14DC159E1D2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94E455D8-4119-415F-AAD7-14DC159E1D2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.NuGetDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.NuGetDebug|Any CPU.Build.0 = Debug|Any CPU
+		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0FF088B-D15C-4CA2-8645-85697BDCB080}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
