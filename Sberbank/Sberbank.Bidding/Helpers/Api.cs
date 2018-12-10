@@ -37,14 +37,14 @@ namespace Sberbank.Bidding.Helpers
 
         public static async Task<FutureAuction[]> GetFutureAuctionsAsync(CancellationToken ct)
         {
+            var result = await Http.StringRequestGet($"{Constants.API_GET_FUTURE_AUCTIONS_URL}?token={Constants.AUCTION_MANAGER_TOKEN}", _client, ct);
             return JsonConvert
-                .DeserializeObject<FutureAuction[]>(await Http.StringRequestGet(Constants.API_GET_FUTURE_AUCTIONS_URL, _client, ct));
+                .DeserializeObject<FutureAuction[]>(result);
         }
 
         public static async Task<FutureAuction> GetFutureAuctionAsync(CancellationToken ct)
         {
-            var result = JsonConvert
-                .DeserializeObject<FutureAuction[]>(await Http.StringRequestGet(Constants.API_GET_FUTURE_AUCTIONS_URL, _client, ct));
+            var result = await GetFutureAuctionsAsync(ct);
             return result.FirstOrDefault();
         }
 
