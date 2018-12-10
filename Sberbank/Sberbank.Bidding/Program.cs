@@ -67,7 +67,8 @@ namespace Sberbank.Bidding
             var lots = (data)new XmlSerializer(typeof(data)).Deserialize(new StringReader(xmlFilterResult));
             var link = Helper.Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", lots.row.reqID).Replace("{{ASID}}", lots.row.ASID);
             doc.LoadHtml(await Helper.Http.RequestGet(link, client, ct));
-            Helper.Logger.Log(doc.Text);
+            var data = doc.GetElementbyId("phWorkZone_xmlData")?.GetAttributeValue("value", string.Empty);
+            Helper.Logger.Log(data);
         }
 
         private static FormUrlEncodedContent _getSearchForm(HtmlDocument doc, string regNumber)
