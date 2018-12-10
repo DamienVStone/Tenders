@@ -50,6 +50,7 @@ namespace AppLogger.Configuration
                     }
                 }
             }
+            Loggers = configs;
         }
 
 
