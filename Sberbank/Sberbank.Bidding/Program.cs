@@ -36,7 +36,7 @@ namespace Sberbank.Bidding
                 "Нет доступных аукционов.".Log();
             else
             {
-                $"Обработка аукциона {auction.Code}".Log();
+                $"Обработка аукциона {auction.Code} начало торгов {auction.StartTime}".Log();
                 sw.Start();
                 _auth(ct.Token).ContinueWith(t =>
                 {
@@ -57,7 +57,10 @@ namespace Sberbank.Bidding
                 });
             }
 
-            while (true) { }
+            while (true)
+            {
+                Api.SyncronizeByKey(ct.Token).Wait();
+            }
         }
 
         private static async Task<FutureAuction> _getFutureAuction(CancellationToken ct)
