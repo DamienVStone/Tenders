@@ -59,14 +59,14 @@ namespace Sberbank.Bidding
             var client = Helper.Http.GetSberbankClient();
             var doc = new HtmlDocument();
 
-            doc.LoadHtml(await Helper.Http.RequestGet(Helper.Constants.SBER_SEARCH_URL, client, ct));
+            doc.Load(await Helper.Http.RequestGet(Helper.Constants.SBER_SEARCH_URL, client, ct));
 
-            doc.LoadHtml(await Helper.Http.RequestPost(Helper.Constants.SBER_SEARCH_URL, _getSearchForm(doc, regNumber), client, ct));
+            doc.Load(await Helper.Http.RequestPost(Helper.Constants.SBER_SEARCH_URL, _getSearchForm(doc, regNumber), client, ct));
 
             var xmlFilterResult = HttpUtility.HtmlDecode(doc.GetElementbyId("ctl00_ctl00_phWorkZone_xmlData")?.InnerText);
             var lots = (data)new XmlSerializer(typeof(data)).Deserialize(new StringReader(xmlFilterResult));
             var link = Helper.Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", lots.row.reqID).Replace("{{ASID}}", lots.row.ASID);
-            doc.LoadHtml(await Helper.Http.RequestGet(link, client, ct));
+            doc.Load(await Helper.Http.RequestGet(link, client, ct));
             var data = doc.GetElementbyId("phWorkZone_xmlData")?.GetAttributeValue("value", string.Empty);
             Helper.Logger.Log(data);
         }
@@ -134,11 +134,11 @@ namespace Sberbank.Bidding
             Task.WaitAll(new[] { step1Async, apiAuthAsync });
 
             Fingerprint = await Helper.Api.GetFingerprintAsync(ct);
-            doc.LoadHtml(step1Async.Result);
+            doc.Load(step1Async.Result);
 
-            doc.LoadHtml(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP1_URL, _getAuthStep2Form(doc), client, ct));
-            doc.LoadHtml(await Helper.Http.RequestGet(Helper.Constants.SBER_AUTH_STEP2_URL, client, ct));
-            doc.LoadHtml(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP3_URL, _getAuthStep3Form(doc), client, ct));
+            doc.Load(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP1_URL, _getAuthStep2Form(doc), client, ct));
+            doc.Load(await Helper.Http.RequestGet(Helper.Constants.SBER_AUTH_STEP2_URL, client, ct));
+            doc.Load(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP3_URL, _getAuthStep3Form(doc), client, ct));
 
             ct.ThrowIfCancellationRequested();
             Helper.Logger.Log("Авторизован как: " + doc.GetElementbyId("ctl00_loginctrl_link").InnerText.Trim());

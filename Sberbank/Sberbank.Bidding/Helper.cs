@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -144,7 +145,7 @@ namespace Sberbank.Bidding
                 return _apiClient;
             }
 
-            public static async Task<string> RequestGet(string url, HttpClient client, CancellationToken ct)
+            public static async Task<Stream> RequestGet(string url, HttpClient client, CancellationToken ct)
             {
                 return await Logger.LogElapsed(async () =>
                 {
@@ -152,11 +153,11 @@ namespace Sberbank.Bidding
                     if (!response.IsSuccessStatusCode)
                         throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
-                    return await response.Content.ReadAsStringAsync();
+                    return await response.Content.ReadAsStreamAsync();
                 }, $"GET {url}");
             }
 
-            public static async Task<string> RequestPost(string url, HttpContent data, HttpClient client, CancellationToken ct)
+            public static async Task<Stream> RequestPost(string url, HttpContent data, HttpClient client, CancellationToken ct)
             {
                 return await Logger.LogElapsed(async () =>
                 {
@@ -165,8 +166,18 @@ namespace Sberbank.Bidding
                     if (!response.IsSuccessStatusCode)
                         throw new HttpRequestException($"{((int)response.StatusCode)} {response.StatusCode.ToString()} - {response.ReasonPhrase}");
 
-                    return await response.Content.ReadAsStringAsync();
+                    return await response.Content.ReadAsStreamAsync();
                 }, $"POST {url}");
+            }
+
+            public static async Task<string> StringRequestGet(string url, HttpClient client, CancellationToken ct)
+            {
+                return await new StreamReader(await RequestGet(url, client, ct)).ReadToEndAsync();
+            }
+
+            public static async Task<string> StringRequestPost(string url, HttpContent data, HttpClient client, CancellationToken ct)
+            {
+                return await new StreamReader(await RequestPost(url, data, client, ct)).ReadToEndAsync();
             }
         }
 
@@ -212,20 +223,20 @@ namespace Sberbank.Bidding
             {
                 var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Data", data) });
                 return JsonConvert
-                    .DeserializeObject<StringResponse>(await Http.RequestPost(Constants.API_SIGN_TEXT_URL, content, _client, ct))
+                    .DeserializeObject<StringResponse>(await Http.StringRequestPost(Constants.API_SIGN_TEXT_URL, content, _client, ct))
                     .Data;
             }
 
             public static async Task<string> GetFingerprintAsync(CancellationToken ct)
             {
                 return JsonConvert
-                    .DeserializeObject<StringResponse>(await Http.RequestGet(Constants.API_GET_FINGERPRINT_URL, _client, ct))
+                    .DeserializeObject<StringResponse>(await Http.StringRequestGet(Constants.API_GET_FINGERPRINT_URL, _client, ct))
                     .Data;
             }
 
             public static async Task AuthenticateAsync(CancellationToken ct)
             {
-                var result = await Http.RequestPost(Constants.API_TOKEN_URL, TokenRequest.AsContent(), _client, ct);
+                var result = await Http.StringRequestPost(Constants.API_TOKEN_URL, TokenRequest.AsContent(), _client, ct);
                 _token = JsonConvert.DeserializeObject<Token>(result);
                 _addAuth(_client);
             }
