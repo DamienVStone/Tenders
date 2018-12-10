@@ -67,7 +67,7 @@ namespace Sberbank.Bidding
             var lots = (data)new XmlSerializer(typeof(data)).Deserialize(new StringReader(xmlFilterResult));
             var link = Helper.Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", lots.row.reqID).Replace("{{ASID}}", lots.row.ASID);
             doc.Load(await Helper.Http.RequestGet(link, client, ct));
-            var data = doc.GetElementbyId("phWorkZone_xmlData")?.GetAttributeValue("value", string.Empty);
+            var data = doc.GetElementbyId("phWorkZone_xmlData").GetAttributeValue("value", "Торги еще не проводились или уже завершены");
             Helper.Logger.Log(data);
         }
 
