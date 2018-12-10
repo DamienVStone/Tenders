@@ -21,9 +21,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLogger", "AppLogger\AppL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLogger.Tests", "AppLogger.Tests\AppLogger.Tests.csproj", "{94E455D8-4119-415F-AAD7-14DC159E1D2B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "Logger\Logger.csproj", "{A0FF088B-D15C-4CA2-8645-85697BDCB080}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppLogger.Core", "Logger\AppLogger.Core.csproj", "{A0FF088B-D15C-4CA2-8645-85697BDCB080}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logger.Tests", "Logger.Tests\Logger.Tests.csproj", "{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppLogger.Core.Tests", "Logger.Tests\AppLogger.Core.Tests.csproj", "{4EFAAF06-A331-4EE7-BD90-BDCE68D76A3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
