@@ -7,7 +7,7 @@ namespace AppLogger.Tests
     {
         [TestMethod]
         public void LoggerCreationTest() {
-            var logger = AppLogger.Logger.GetLogger("Profiler1");
+            var logger = Logger.GetLogger("Profiler1");
             Assert.IsNotNull(logger);
         }
     }
