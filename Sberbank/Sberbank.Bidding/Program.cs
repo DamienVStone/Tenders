@@ -1,4 +1,6 @@
 ﻿using HtmlAgilityPack;
+using Sberbank.Bidding.Helpers;
+using Sberbank.Bidding.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,59 +18,70 @@ namespace Sberbank.Bidding
         static string Fingerprint;
         static void Main(string[] args)
         {
-            Console.WriteLine($"----------ENVIRONMENT VARIABLES---------");
+            "----------ENVIRONMENT VARIABLES---------".Log();
             foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables())
             {
                 string name = (string)env.Key;
                 string value = (string)env.Value;
                 Console.WriteLine($"{name}={value}");
             }
-            Console.WriteLine($"----------------------------------------");
+            "----------------------------------------".Log();
 
-            Helper.Init();
+            Http.Init();
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
 
-            sw.Start();
-            _auth(ct.Token).ContinueWith(t =>
+            var auction = _getFutureAuction(ct.Token).Result;
+            if (auction == null)
+                "Нет доступных аукционов.".Log();
+            else
             {
-                if (!t.IsCompletedSuccessfully)
-                    Helper.Logger.Log(t.Exception?.ToString());
+                $"Обработка аукциона {auction.Code}".Log();
+                sw.Start();
+                _auth(ct.Token).ContinueWith(t =>
+                {
+                    if (!t.IsCompletedSuccessfully) t.Exception?.Log();
 
-                sw.Stop();
-                Console.WriteLine("Авторизация заняла " + sw.Elapsed);
+                    sw.Stop();
+                    $"Авторизация заняла {sw.Elapsed}".Log();
 
-            }).Wait(ct.Token);
+                }).Wait(ct.Token);
 
-            sw.Restart();
-            _findLot(ct.Token, "0373100123818000053").ContinueWith(t =>
-            {
-                if (!t.IsCompletedSuccessfully)
-                    Helper.Logger.Log(t.Exception?.ToString());
+                sw.Restart();
+                _findLot(ct.Token, auction.Code).ContinueWith(t =>
+                {
+                    if (!t.IsCompletedSuccessfully) t.Exception?.Log();
 
-                sw.Stop();
-                Console.WriteLine("Переход на торги занял " + sw.Elapsed);
-
-            });
+                    sw.Stop();
+                    $"Переход на торги занял {sw.Elapsed}".Log();
+                });
+            }
 
             while (true) { }
         }
 
+        private static async Task<FutureAuction> _getFutureAuction(CancellationToken ct)
+        {
+            await Api.AuthenticateAsync(ct);
+            return await Api.GetFutureAuctionAsync(ct);
+        }
+
+        #region move to lot
         private static async Task _findLot(CancellationToken ct, string regNumber)
         {
-            var client = Helper.Http.GetSberbankClient();
+            var client = Http.GetSberbankClient();
             var doc = new HtmlDocument();
 
-            doc.Load(await Helper.Http.RequestGet(Helper.Constants.SBER_SEARCH_URL, client, ct));
+            doc.Load(await Http.RequestGet(Constants.SBER_SEARCH_URL, client, ct));
 
-            doc.Load(await Helper.Http.RequestPost(Helper.Constants.SBER_SEARCH_URL, _getSearchForm(doc, regNumber), client, ct));
+            doc.Load(await Http.RequestPost(Constants.SBER_SEARCH_URL, _getSearchForm(doc, regNumber), client, ct));
 
             var xmlFilterResult = HttpUtility.HtmlDecode(doc.GetElementbyId("ctl00_ctl00_phWorkZone_xmlData")?.InnerText);
             var lots = (data)new XmlSerializer(typeof(data)).Deserialize(new StringReader(xmlFilterResult));
-            var link = Helper.Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", lots.row.reqID).Replace("{{ASID}}", lots.row.ASID);
-            doc.Load(await Helper.Http.RequestGet(link, client, ct));
+            var link = Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", lots.row.reqID).Replace("{{ASID}}", lots.row.ASID);
+            doc.Load(await Http.RequestGet(link, client, ct));
             var data = doc.GetElementbyId("phWorkZone_xmlData").GetAttributeValue("value", "Торги еще не проводились или уже завершены");
-            Helper.Logger.Log(data);
+            Logger.Log(data);
         }
 
         private static FormUrlEncodedContent _getSearchForm(HtmlDocument doc, string regNumber)
@@ -80,7 +93,7 @@ namespace Sberbank.Bidding
             var __VIEWSTATE1 = doc.GetElementbyId("__VIEWSTATE1")?.GetAttributeValue("value", string.Empty);
             var __VIEWSTATE2 = doc.GetElementbyId("__VIEWSTATE2")?.GetAttributeValue("value", string.Empty);
             var __VIEWSTATEGENERATOR = doc.GetElementbyId("__VIEWSTATEGENERATOR")?.GetAttributeValue("value", string.Empty);
-            var ctl00_ctl00_phWorkZone_xmlFilter = Helper.Constants.SBER_SEARCH_TEMPLATE.Replace("{{REG_NUMBER}}", regNumber);
+            var ctl00_ctl00_phWorkZone_xmlFilter = Constants.SBER_SEARCH_TEMPLATE.Replace("{{REG_NUMBER}}", regNumber);
             var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbxPurchaseCode = regNumber;
             var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbSearch = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbSearch").GetAttributeValue("value", string.Empty);
             var ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountstart = doc.GetElementbyId("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountstart").GetAttributeValue("value", string.Empty);
@@ -122,26 +135,23 @@ namespace Sberbank.Bidding
 
             return new FormUrlEncodedContent(values);
         }
+        #endregion
 
         #region auth
         private static async Task _auth(CancellationToken ct)
         {
-            var client = Helper.Http.GetSberbankClient();
+            var client = Http.GetSberbankClient();
             var doc = new HtmlDocument();
 
-            var step1Async = Helper.Http.RequestGet(Helper.Constants.SBER_AUTH_STEP1_URL, client, ct);
-            var apiAuthAsync = Helper.Api.AuthenticateAsync(ct);
-            Task.WaitAll(new[] { step1Async, apiAuthAsync });
+            Fingerprint = await Api.GetFingerprintAsync(ct);
+            doc.Load(await Http.RequestGet(Constants.SBER_AUTH_STEP1_URL, client, ct));
 
-            Fingerprint = await Helper.Api.GetFingerprintAsync(ct);
-            doc.Load(step1Async.Result);
-
-            doc.Load(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP1_URL, _getAuthStep2Form(doc), client, ct));
-            doc.Load(await Helper.Http.RequestGet(Helper.Constants.SBER_AUTH_STEP2_URL, client, ct));
-            doc.Load(await Helper.Http.RequestPost(Helper.Constants.SBER_AUTH_STEP3_URL, _getAuthStep3Form(doc), client, ct));
+            doc.Load(await Http.RequestPost(Constants.SBER_AUTH_STEP1_URL, _getAuthStep2Form(doc), client, ct));
+            doc.Load(await Http.RequestGet(Constants.SBER_AUTH_STEP2_URL, client, ct));
+            doc.Load(await Http.RequestPost(Constants.SBER_AUTH_STEP3_URL, _getAuthStep3Form(doc), client, ct));
 
             ct.ThrowIfCancellationRequested();
-            Helper.Logger.Log("Авторизован как: " + doc.GetElementbyId("ctl00_loginctrl_link").InnerText.Trim());
+            Logger.Log("Авторизован как: " + doc.GetElementbyId("ctl00_loginctrl_link").InnerText.Trim());
         }
 
         private static FormUrlEncodedContent _getAuthStep2Form(HtmlDocument doc)
@@ -154,12 +164,12 @@ namespace Sberbank.Bidding
             var hiddenNow = doc.GetElementbyId("hiddenNow").InnerText;
             var hiddenTicket = doc.GetElementbyId("hiddenTicket").InnerText;
             var form1Action = doc.GetElementbyId("form1").GetAttributeValue("action", string.Empty).Replace("./", "https://login.sberbank-ast.ru/");
-            var mainContent_xmlData = Helper.Constants.SBER_LOGON_REGISTER_TEXT
+            var mainContent_xmlData = Constants.SBER_LOGON_REGISTER_TEXT
                 .Replace("{{NOW}}", hiddenNow)
                 .Replace("{{TICKET}}", hiddenTicket);
             var mainContent_DDL1 = Fingerprint;
 
-            var mainContent_signValue = Helper.Api.SignAsync(mainContent_xmlData, new CancellationToken()).Result;
+            var mainContent_signValue = Api.SignAsync(mainContent_xmlData, new CancellationToken()).Result;
 
             return new FormUrlEncodedContent(
                 new Dictionary<string, string>()
