@@ -47,7 +47,7 @@ namespace Sberbank.Bidding
                     Helper.Logger.Log(t.Exception?.ToString());
 
                 sw.Stop();
-                Console.WriteLine("Поиск лота занял " + sw.Elapsed);
+                Console.WriteLine("Переход на торги занял " + sw.Elapsed);
 
             });
 
