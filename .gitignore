@@ -5,5 +5,4 @@
 **/obj
 **/bin
 **/.vs
-/packages/Newtonsoft.Json.12.0.1/lib
 /packages/Newtonsoft.Json.12.0.1
