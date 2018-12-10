@@ -1,10 +1,10 @@
 ﻿using AppLogger.Models;
 using AppLogger.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-using System.Web.Script.Serialization;
 
 namespace AppLogger
 {
@@ -15,8 +15,6 @@ namespace AppLogger
 
         public LogCache(Action<List<string>> SendAction, long TimerInterval)
         {
-            var serializer = new JavaScriptSerializer();
-
             var timer = new Timer();
             timer.Interval = TimerInterval;
             timer.Elapsed += (s, e) =>
@@ -29,7 +27,7 @@ namespace AppLogger
                     {
                         serializedData = _cache
                             .SplitIntoBatches(5000)
-                            .Select(b => serializer.Serialize(b))
+                            .Select(b => JsonConvert.SerializeObject(s))
                             .ToList();
                         _cache.Clear();
                     }

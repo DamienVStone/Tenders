@@ -1,5 +1,6 @@
 ﻿using AppLogger.Configuration;
 using AppLogger.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,7 +11,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace AppLogger
 {
@@ -234,7 +234,7 @@ namespace AppLogger
             var result = POST("/Token", $"grant_type=password&username={_username}&password={_password}", ShouldAuthorize: false);
 
             var body = result.Content.ReadAsStringAsync().Result;
-            _token = new JavaScriptSerializer().Deserialize<Token>(body);
+            _token = JsonConvert.DeserializeObject<Token>(body);
             _expirationDate = createDate.AddSeconds(_token.expires_in);
         }
 
