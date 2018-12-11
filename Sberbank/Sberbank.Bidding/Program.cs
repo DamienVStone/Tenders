@@ -1,11 +1,14 @@
 ﻿using HtmlAgilityPack;
+using Newtonsoft.Json;
 using Sberbank.Bidding.Helpers;
 using Sberbank.Bidding.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -47,31 +50,96 @@ namespace Sberbank.Bidding
 
                 }).Wait(ct.Token);
 
+                ct.Token.ThrowIfCancellationRequested();
+
                 sw.Restart();
-                _findLot(ct.Token, auction.Code).ContinueWith(t =>
+                var found = _findLot(ct.Token, auction.Code).ContinueWith(t =>
+                {
+                    if (!t.IsCompletedSuccessfully) t.Exception?.Log();
+
+                    sw.Stop();
+                    $"Поиск лота занял {sw.Elapsed}".Log();
+                    return t.Result;
+                }).Result;
+
+                ct.Token.ThrowIfCancellationRequested();
+
+                var doc = _moveToTradePlace(found, ct.Token).ContinueWith(t =>
                 {
                     if (!t.IsCompletedSuccessfully) t.Exception?.Log();
 
                     sw.Stop();
                     $"Переход на торги занял {sw.Elapsed}".Log();
-                });
-            }
+                    return t.Result;
+                }).Result;
 
-            while (true)
-            {
-                Api.SyncronizeByKey(ct.Token).Wait();
-                Http.GetApiClient().GetAsync(Constants.API_GET_PROXY_URL.Replace("GetPayedProxy", "GetIP"));
+                ct.Token.ThrowIfCancellationRequested();
+
+                while (true)
+                {
+                    Api.SyncronizeByKey(ct.Token).Wait();
+                    _bid(auction, found, doc, ct.Token).ContinueWith(t =>
+                    {
+                        if (!t.IsCompletedSuccessfully) t.Exception?.Log();
+
+                        sw.Stop();
+                        $"Подача предложения заняла {sw.Elapsed}".Log();
+                    });
+
+                    //Http.GetApiClient().GetAsync(Constants.API_GET_PROXY_URL.Replace("GetPayedProxy", "GetIP"));
+                }
             }
         }
 
+        private static async Task<HtmlDocument> _moveToTradePlace(data foundAuction, CancellationToken ct)
+        {
+            var doc = new HtmlDocument();
+            var link = Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", foundAuction.row.reqID).Replace("{{ASID}}", foundAuction.row.ASID);
+            doc.Load(await Http.RequestGet(link, Http.GetSberbankClient(), ct));
+            var data = doc.GetElementbyId("phWorkZone_xmlData").GetAttributeValue("value", "Торги еще не проводились или уже завершены");
+            Logger.Log(data);
+            return doc;
+        }
+
+        private static async Task _bid(FutureAuction fa, data foundAuction, HtmlDocument doc, CancellationToken ct)
+        {
+            var requestNo = WebUtility.HtmlDecode(doc.GetElementbyId("requestNo").GetAttributeValue("value", ""));
+            var priceSign = WebUtility.HtmlDecode(doc.GetElementbyId("priceSign").GetAttributeValue("value", ""));
+            var supplierName = WebUtility.HtmlDecode(doc.GetElementbyId("supplierName").GetAttributeValue("value", ""));
+            var data = Constants.SBER_BID_DATA_TEMPLATE
+                .Replace("{{MYNEWPRICE}}", fa.MinCost.ToString().Replace(",", "."))
+                .Replace("{{REQID}}", foundAuction.row.reqID)
+                .Replace("{{REQUESTNO}}", requestNo)
+                .Replace("{{PRICESIGN}}", priceSign)
+                .Replace("{{PURCHASEID}}", foundAuction.row.purchID)
+                .Replace("{{PURCHASECODE}}", foundAuction.row.purchCode)
+                .Replace("{{PURCHASENAME}}", foundAuction.row.purchName)
+                .Replace("{{SUPPLIERNAME}}", supplierName);
+            var hash = await data.SignAsync(ct);
+
+            var client = Http.GetSberbankClient();
+            var bid = new Bid
+            {
+                reqID = foundAuction.row.reqID,
+                xmlData = data,
+                Hash = hash
+            };
+
+            var jsonData = JsonConvert.SerializeObject(bid);
+            var jsonContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            var postUrl = Constants.SBER_TRADE_PLACE_BID_URL_TEMPLATE.Replace("{{TRADE_ID}}", foundAuction.row.reqID).Replace("{{ASID}}", foundAuction.row.ASID);
+            doc.Load(await Http.RequestPost(postUrl, jsonContent, Http.GetSberbankClient(), ct));
+            doc.Text.Log();
+        }
+
+        #region move to lot
         private static async Task<FutureAuction> _getFutureAuction(CancellationToken ct)
         {
             await Api.AuthenticateAsync(ct);
             return await Api.GetFutureAuctionAsync(ct);
         }
 
-        #region move to lot
-        private static async Task _findLot(CancellationToken ct, string regNumber)
+        private static async Task<data> _findLot(CancellationToken ct, string regNumber)
         {
             var client = Http.GetSberbankClient();
             var doc = new HtmlDocument();
@@ -82,10 +150,7 @@ namespace Sberbank.Bidding
 
             var xmlFilterResult = HttpUtility.HtmlDecode(doc.GetElementbyId("ctl00_ctl00_phWorkZone_xmlData")?.InnerText);
             var lots = (data)new XmlSerializer(typeof(data)).Deserialize(new StringReader(xmlFilterResult));
-            var link = Constants.SBER_TRADE_PLACE_URL_TEMPLATE.Replace("{{TRADE_ID}}", lots.row.reqID).Replace("{{ASID}}", lots.row.ASID);
-            doc.Load(await Http.RequestGet(link, client, ct));
-            var data = doc.GetElementbyId("phWorkZone_xmlData").GetAttributeValue("value", "Торги еще не проводились или уже завершены");
-            Logger.Log(data);
+            return lots;
         }
 
         private static FormUrlEncodedContent _getSearchForm(HtmlDocument doc, string regNumber)

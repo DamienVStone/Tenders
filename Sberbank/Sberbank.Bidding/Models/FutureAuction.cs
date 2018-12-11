@@ -26,6 +26,6 @@ namespace Sberbank.Bidding.Models
         /// <summary>
         /// Минимальная цена, достигаемая в ходе аукциона
         /// </summary>
-        public string MinCost { get; set; }
+        public decimal MinCost { get; set; }
     }
 }

@@ -13,6 +13,8 @@ namespace Sberbank.Bidding.Helpers
         public const string SBER_SEARCH_TEMPLATE = "<query><purchcode>{{REG_NUMBER}}</purchcode><purchtype></purchtype><purchname></purchname><purchamountstart></purchamountstart><purchamountend></purchamountend><issmp>-1</issmp><orgid></orgid><orgname></orgname><purchstate></purchstate><purchbranchid></purchbranchid><purchbranchname></purchbranchname><regionid></regionid><regionname></regionname><publicdatestart></publicdatestart><publicdateend></publicdateend><requestdatestart></requestdatestart><requestdateend></requestdateend><auctionbegindatestart></auctionbegindatestart><auctionbegindateend></auctionbegindateend></query>";
         public const string SBER_SEARCH_URL = "http://www.sberbank-ast.ru/tradezone/Supplier/PurchaseRequestList.aspx";
         public const string SBER_TRADE_PLACE_URL_TEMPLATE = "http://www.sberbank-ast.ru/tradezone/Supplier/TradePlace.aspx?reqid={{TRADE_ID}}&ASID={{ASID}}";
+        public const string SBER_TRADE_PLACE_BID_URL_TEMPLATE = "http://www.sberbank-ast.ru/tradezone/Supplier/TradePlace.aspx/AsyncPostBack?reqid={{TRADE_ID}}&ASID={{ASID}}";
+        public const string SBER_BID_DATA_TEMPLATE = "<mynewpricecontainer><mynewprice>{{MYNEWPRICE}}</mynewprice><reqid>{{REQID}}</reqid><requestno>{{REQUESTNO}}</requestno><pricesign>{{PRICESIGN}}</pricesign><purchaseid>{{PURCHASEID}}</purchaseid><purchasecode>{{PURCHASECODE}}</purchasecode><purchasename>{{PURCHASENAME}}</purchasename><suppliername>{{SUPPLIERNAME}}</suppliername></mynewpricecontainer>";
         #endregion
 
         #region API
