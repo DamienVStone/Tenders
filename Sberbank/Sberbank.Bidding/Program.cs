@@ -19,7 +19,7 @@ namespace Sberbank.Bidding
     class Program
     {
         static string Fingerprint;
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             "----------ENVIRONMENT VARIABLES---------".Log();
             foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables())
@@ -72,6 +72,8 @@ namespace Sberbank.Bidding
                     $"Переход на торги занял {sw.Elapsed}".Log();
                     return t.Result;
                 }).Result;
+
+                return 0;
 
                 ct.Token.ThrowIfCancellationRequested();
 
