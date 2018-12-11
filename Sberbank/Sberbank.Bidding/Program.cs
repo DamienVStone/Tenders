@@ -60,6 +60,7 @@ namespace Sberbank.Bidding
             while (true)
             {
                 Api.SyncronizeByKey(ct.Token).Wait();
+                Http.GetApiClient().GetAsync(Constants.API_GET_PROXY_URL.Replace("GetPayedProxy", "GetIP"));
             }
         }
 
