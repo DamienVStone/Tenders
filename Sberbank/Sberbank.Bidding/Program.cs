@@ -91,6 +91,7 @@ namespace Sberbank.Bidding
                     //Http.GetApiClient().GetAsync(Constants.API_GET_PROXY_URL.Replace("GetPayedProxy", "GetIP"));
                 }
             }
+            return 0;
         }
 
         private static async Task<HtmlDocument> _moveToTradePlace(data foundAuction, CancellationToken ct)
