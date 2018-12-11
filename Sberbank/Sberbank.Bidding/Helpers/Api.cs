@@ -44,8 +44,10 @@ namespace Sberbank.Bidding.Helpers
             };
 
             var result = await Http.StringRequestGet($"{Constants.API_GET_FUTURE_AUCTIONS_URL}?token={Constants.AUCTION_MANAGER_TOKEN}", _client, ct);
-            return JsonConvert
-                .DeserializeObject<FutureAuction[]>(result, settings);
+            if (string.IsNullOrEmpty(result))
+                return null;
+
+            return JsonConvert.DeserializeObject<FutureAuction[]>(result, settings);
         }
 
         public static async Task SyncronizeByKey(CancellationToken ct)
