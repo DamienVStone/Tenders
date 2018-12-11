@@ -35,7 +35,27 @@ namespace Sberbank.Bidding.Helpers
                 .Data;
         }
 
-        public static async Task<FutureAuction[]> GetFutureAuctionsAsync(CancellationToken ct)
+        //public static async Task<FutureAuction[]> GetFutureAuctionsAsync(CancellationToken ct)
+        //{
+        //    var settings = new JsonSerializerSettings
+        //    {
+        //        DateFormatHandling = DateFormatHandling.MicrosoftDateFormat,
+        //        DateTimeZoneHandling = DateTimeZoneHandling.Local
+        //    };
+
+        //    var result = await Http.StringRequestGet($"{Constants.API_GET_FUTURE_AUCTIONS_URL}?token={Constants.AUCTION_MANAGER_TOKEN}", _client, ct);
+        //    if (string.IsNullOrEmpty(result))
+        //        return null;
+
+        //    return JsonConvert.DeserializeObject<FutureAuction[]>(result, settings);
+        //}
+
+        public static async Task SyncronizeByKey(CancellationToken ct)
+        {
+            await Http.StringRequestGet($"{Constants.API_SYNCRONIZE_BY_KEY_URL}?token={Constants.AUCTION_MANAGER_TOKEN}&key=tenders-sberbank-bidder", _client, ct);
+        }
+
+        public static async Task<FutureAuction> GetFutureAuctionAsync(CancellationToken ct)
         {
             var settings = new JsonSerializerSettings
             {
@@ -47,18 +67,7 @@ namespace Sberbank.Bidding.Helpers
             if (string.IsNullOrEmpty(result))
                 return null;
 
-            return JsonConvert.DeserializeObject<FutureAuction[]>(result, settings);
-        }
-
-        public static async Task SyncronizeByKey(CancellationToken ct)
-        {
-            await Http.StringRequestGet($"{Constants.API_SYNCRONIZE_BY_KEY_URL}?token={Constants.AUCTION_MANAGER_TOKEN}&key=tenders-sberbank-bidder", _client, ct);
-        }
-
-        public static async Task<FutureAuction> GetFutureAuctionAsync(CancellationToken ct)
-        {
-            var result = await GetFutureAuctionsAsync(ct);
-            return result.FirstOrDefault();
+            return JsonConvert.DeserializeObject<FutureAuction>(result, settings);
         }
 
         public static async Task AuthenticateAsync(CancellationToken ct)
