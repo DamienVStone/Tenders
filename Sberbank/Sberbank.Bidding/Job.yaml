@@ -16,5 +16,7 @@ spec:
         - name: REGNUMBER
           value: "{{REGNUMBER}}"
       restartPolicy: Never
+      imagePullSecrets:
+      - name: "regcred"
   parallelism: {{WORKERS}}
   backoffLimit: 1
