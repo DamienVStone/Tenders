@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tenders-sberbank-bidder-{{REGNUMBER}}
+  namespace: tenders
+spec:
+  template:
+    spec:
+      containers:
+      - name: tenders-sberbank-bidder-{{REGNUMBER}}
+        image: dmitrynikitin/tenders-sberbank-bidder:{{BUILDNUMBER}}
+        envFrom:
+        - configMapRef:
+           name: global
+		env:
+		- name: REGNUMBER
+		  value: "{{REGNUMBER}}"
+      restartPolicy: Never
+  parallelism: {{WORKERS}}
+  backoffLimit: 1
