@@ -1,11 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 while ["" == ""];
 do
- newJob = $(python3 ./SeekJob.py $1 $2);
-
- if [$newJob == ""];
+ newJob=$(python3 ./SeekJob.py $1 $2);
+ if ((${#newJob} < 1));
  then
-  continue;
+ echo "";
  else
    cat <<EOF | kubectl create -f -
 $newJob

@@ -12,9 +12,9 @@ spec:
         envFrom:
         - configMapRef:
            name: global
-		env:
-		- name: REGNUMBER
-		  value: "{{REGNUMBER}}"
+        env:
+        - name: REGNUMBER
+          value: "{{REGNUMBER}}"
       restartPolicy: Never
   parallelism: {{WORKERS}}
   backoffLimit: 1
