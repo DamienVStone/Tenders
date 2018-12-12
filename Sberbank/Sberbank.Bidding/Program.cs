@@ -34,63 +34,63 @@ namespace Sberbank.Bidding
             var ct = new CancellationTokenSource();
             var sw = new Stopwatch();
 
-            var auction = _getFutureAuction(ct.Token).Result;
-            if (auction == null)
-                "Нет доступных аукционов.".Log();
-            else
+            //var auction = _getFutureAuction(ct.Token).Result;
+            //if (auction == null)
+            //    "Нет доступных аукционов.".Log();
+            //else
+            //{
+            $"Обработка аукциона {Constants.REGNUMBER}".Log();
+            sw.Start();
+            _auth(ct.Token).ContinueWith(t =>
             {
-                $"Обработка аукциона {auction.Code} начало торгов {auction.StartTime}".Log();
-                sw.Start();
-                _auth(ct.Token).ContinueWith(t =>
+                if (!t.IsCompletedSuccessfully) t.Exception?.Log();
+
+                sw.Stop();
+                $"Авторизация заняла {sw.Elapsed}".Log();
+
+            }).Wait(ct.Token);
+
+            ct.Token.ThrowIfCancellationRequested();
+
+            sw.Restart();
+            var found = _findLot(ct.Token, Constants.REGNUMBER).ContinueWith(t =>
+            {
+                if (!t.IsCompletedSuccessfully) t.Exception?.Log();
+
+                sw.Stop();
+                $"Поиск лота занял {sw.Elapsed}".Log();
+                return t.Result;
+            }).Result;
+
+            ct.Token.ThrowIfCancellationRequested();
+
+            var doc = _moveToTradePlace(found, ct.Token).ContinueWith(t =>
+            {
+                if (!t.IsCompletedSuccessfully) t.Exception?.Log();
+
+                sw.Stop();
+                $"Переход на торги занял {sw.Elapsed}".Log();
+                return t.Result;
+            }).Result;
+
+            return 0;
+
+            ct.Token.ThrowIfCancellationRequested();
+
+            while (true)
+            {
+                Api.SyncronizeByKey(ct.Token).Wait();
+                _bid(auction, found, doc, ct.Token).ContinueWith(t =>
                 {
                     if (!t.IsCompletedSuccessfully) t.Exception?.Log();
 
                     sw.Stop();
-                    $"Авторизация заняла {sw.Elapsed}".Log();
+                    $"Подача предложения заняла {sw.Elapsed}".Log();
+                });
 
-                }).Wait(ct.Token);
-
-                ct.Token.ThrowIfCancellationRequested();
-
-                sw.Restart();
-                var found = _findLot(ct.Token, auction.Code).ContinueWith(t =>
-                {
-                    if (!t.IsCompletedSuccessfully) t.Exception?.Log();
-
-                    sw.Stop();
-                    $"Поиск лота занял {sw.Elapsed}".Log();
-                    return t.Result;
-                }).Result;
-
-                ct.Token.ThrowIfCancellationRequested();
-
-                var doc = _moveToTradePlace(found, ct.Token).ContinueWith(t =>
-                {
-                    if (!t.IsCompletedSuccessfully) t.Exception?.Log();
-
-                    sw.Stop();
-                    $"Переход на торги занял {sw.Elapsed}".Log();
-                    return t.Result;
-                }).Result;
-
-                return 0;
-
-                ct.Token.ThrowIfCancellationRequested();
-
-                while (true)
-                {
-                    Api.SyncronizeByKey(ct.Token).Wait();
-                    _bid(auction, found, doc, ct.Token).ContinueWith(t =>
-                    {
-                        if (!t.IsCompletedSuccessfully) t.Exception?.Log();
-
-                        sw.Stop();
-                        $"Подача предложения заняла {sw.Elapsed}".Log();
-                    });
-
-                    //Http.GetApiClient().GetAsync(Constants.API_GET_PROXY_URL.Replace("GetPayedProxy", "GetIP"));
-                }
+                //Http.GetApiClient().GetAsync(Constants.API_GET_PROXY_URL.Replace("GetPayedProxy", "GetIP"));
             }
+            //}
             return 0;
         }
 

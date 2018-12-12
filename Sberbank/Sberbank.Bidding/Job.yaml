@@ -13,8 +13,8 @@ spec:
         - configMapRef:
            name: global
         env:
-        - name: REGNUMBER
-          value: "{{REGNUMBER}}"
+        - name: AUCTION_JSON
+          value: "{{AUCTION_JSON}}"
       restartPolicy: Never
       imagePullSecrets:
       - name: "regcred"

@@ -11,7 +11,7 @@ def readFile():
 def findJob():
 	try:
 		result = requests.get(seekUrl).json()
-		return readFile().replace("{{REGNUMBER}}", result["regNumber"]).replace("{{WORKERS}}", str(result["workers"]))
+		return readFile().replace("{{REGNUMBER}}", result["regNumber"]).replace("{{WORKERS}}", str(result["workers"])).replace("{{AUCTION_JSON}}", result)
 	except Exception:
 		return ""
 

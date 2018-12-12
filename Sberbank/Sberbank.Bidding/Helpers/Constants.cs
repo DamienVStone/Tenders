@@ -28,9 +28,9 @@ namespace Sberbank.Bidding.Helpers
         public static readonly string API_LOGIN = Environment.GetEnvironmentVariable("API_LOGIN");
         public static readonly string API_PASSWORD = Environment.GetEnvironmentVariable("API_PASSWORD");
         public static readonly string API_GET_PROXY_URL = Environment.GetEnvironmentVariable("API_GET_PROXY_URL");
-        public static readonly string API_GET_FUTURE_AUCTIONS_URL = Environment.GetEnvironmentVariable("API_GET_FUTURE_AUCTIONS_URL");
         public static readonly string API_SYNCRONIZE_BY_KEY_URL = Environment.GetEnvironmentVariable("API_SYNCRONIZE_BY_KEY_URL");
         public static readonly string AUCTION_MANAGER_TOKEN = Environment.GetEnvironmentVariable("AUCTION_MANAGER_TOKEN");
+        public static readonly string AUCTION_JSON = Environment.GetEnvironmentVariable("AUCTION_JSON");
         #endregion
     }
 }
