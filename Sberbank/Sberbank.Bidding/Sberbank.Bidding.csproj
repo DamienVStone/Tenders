@@ -20,6 +20,9 @@
     <None Update="Job.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="JobSeekerStart.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="JobSeeker.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
