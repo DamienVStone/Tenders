@@ -39,7 +39,10 @@ namespace Sberbank.Bidding
             //    "Нет доступных аукционов.".Log();
             //else
             //{
-            $"Обработка аукциона {Constants.REGNUMBER}".Log();
+
+            var auction = JsonConvert.DeserializeObject<Auction>(Constants.AUCTION_JSON);
+
+            $"Обработка аукциона {auction.Code} время начала {auction.StartTime}".Log();
             sw.Start();
             _auth(ct.Token).ContinueWith(t =>
             {
@@ -53,7 +56,7 @@ namespace Sberbank.Bidding
             ct.Token.ThrowIfCancellationRequested();
 
             sw.Restart();
-            var found = _findLot(ct.Token, Constants.REGNUMBER).ContinueWith(t =>
+            var found = _findLot(ct.Token, auction.Code).ContinueWith(t =>
             {
                 if (!t.IsCompletedSuccessfully) t.Exception?.Log();
 
@@ -104,7 +107,7 @@ namespace Sberbank.Bidding
             return doc;
         }
 
-        private static async Task _bid(FutureAuction fa, data foundAuction, HtmlDocument doc, CancellationToken ct)
+        private static async Task _bid(Auction fa, data foundAuction, HtmlDocument doc, CancellationToken ct)
         {
             var requestNo = WebUtility.HtmlDecode(doc.GetElementbyId("requestNo").GetAttributeValue("value", ""));
             var priceSign = WebUtility.HtmlDecode(doc.GetElementbyId("priceSign").GetAttributeValue("value", ""));
@@ -136,11 +139,11 @@ namespace Sberbank.Bidding
         }
 
         #region move to lot
-        private static async Task<FutureAuction> _getFutureAuction(CancellationToken ct)
-        {
-            await Api.AuthenticateAsync(ct);
-            return await Api.GetFutureAuctionAsync(ct);
-        }
+        //private static async Task<Auction> _getFutureAuction(CancellationToken ct)
+        //{
+        //    await Api.AuthenticateAsync(ct);
+        //    return await Api.GetFutureAuctionAsync(ct);
+        //}
 
         private static async Task<data> _findLot(CancellationToken ct, string regNumber)
         {
