@@ -12,5 +12,6 @@ namespace Sberbank.Bidding.Models
         public int Workers { get; set; }
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }
+        public bool IsActive { get; set; }
     }
 }

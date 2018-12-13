@@ -39,8 +39,7 @@ namespace Sberbank.Bidding
             //    "Нет доступных аукционов.".Log();
             //else
             //{
-
-            var auction = JsonConvert.DeserializeObject<Auction>(Constants.AUCTION_JSON);
+            var auction = JsonConvert.DeserializeObject<Auction>(Constants.AUCTION_JSON.Replace("True", "true").Replace("False", "false"));
 
             $"Обработка аукциона {auction.Code} время начала {auction.StartTime}".Log();
             sw.Start();
