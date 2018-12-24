@@ -11,5 +11,5 @@
         /// <param name="index">имя конфигурации</param>
         /// <returns>конфигурация</returns>
         string this[string index] { get; }
-    }
+    }//Test master commit
 }
