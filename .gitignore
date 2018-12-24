@@ -4,5 +4,7 @@
 
 **/obj
 **/bin
+**/out
 **/.vs
 /Sberbank/Sberbank.Bidding/out
+*.zip

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Core\Tenders.Core.Abstractions\Tenders.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\Core\Tenders.Core.Services\Tenders.Core.Services.csproj" />
+  </ItemGroup>
+
+</Project>
