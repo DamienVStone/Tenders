@@ -44,7 +44,11 @@ namespace Tenders.Core.DI
                 serviceCollection.AddSingleton<IProxyService, ProxyService>();
                 serviceCollection.AddSingleton<ILoggerService, LoggerService>();
                 serviceCollection.AddSingleton<IDataProvider, DataProvider>();
-                serviceCollection.AddSingleton<IConfigService, ConfigService>();
+#if DEBUG
+                serviceCollection.AddSingleton<IConfigService, LocalFileConfigService>();
+#else
+                serviceCollection.AddSingleton<IConfigService, EnvironmentVariablesConfigService>();
+#endif
             }
         }
     }

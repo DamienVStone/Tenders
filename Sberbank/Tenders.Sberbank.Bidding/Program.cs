@@ -109,13 +109,6 @@ namespace Sberbank.Bidding
         }
     }
 
-
-
-
-
-
-
-
     //class Program
     //{
     //    static string Fingerprint;

@@ -8,3 +8,4 @@
 **/.vs
 /Sberbank/Sberbank.Bidding/out
 *.zip
+*.user
