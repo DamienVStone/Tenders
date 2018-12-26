@@ -1,11 +1,14 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Integration.API.Interfaces;
+using Tenders.Sberbank.Abstractions.Models;
+using Tenders.Sberbank.Models;
 
 namespace Tenders.Integration.API.Services
 {
@@ -53,6 +56,16 @@ namespace Tenders.Integration.API.Services
             }
         }
 
+        public async Task<IAuctionInfo> GetNextAuction(CancellationToken ct)
+        {
+            await logger.Log("Получение следующего аукциона");
+            var result = await httpClientService.GetAsync($"{configService.GetFutureAuction}?token={configService.SecurityToken}", ct);
+            var auction = JsonConvert
+                .DeserializeObject<AuctionInfo>(result.Text);
+            await logger.Log("Получен аукцион " + result?.Text);
+            return auction;
+        }
+        
         public async Task<string> SignAsync(string data, CancellationToken ct)
         {
             await logger.Log("Подписание документа");

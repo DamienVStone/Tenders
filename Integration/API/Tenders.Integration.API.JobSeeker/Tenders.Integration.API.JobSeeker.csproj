@@ -11,12 +11,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\Tenders.Core.DI\Tenders.Core.DI.csproj" />
+    <ProjectReference Include="..\..\..\Sberbank\Tenders.Sberbank.Abstractions\Tenders.Sberbank.Abstractions.csproj" />
     <ProjectReference Include="..\Tenders.Integration.API\Tenders.Integration.API.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
