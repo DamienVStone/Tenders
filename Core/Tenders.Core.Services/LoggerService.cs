@@ -16,5 +16,10 @@ namespace Tenders.Core.Services
                 Debug.WriteLine(message);
             });
         }
+
+        public Task State(string key, string state)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
