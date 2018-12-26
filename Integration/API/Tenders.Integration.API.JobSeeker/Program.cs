@@ -46,7 +46,11 @@ namespace Tenders.Integration.API.JobSeeker
                 sc.AddSingleton<IAPIDataProviderService, APIDataProviderService>();
                 sc.AddSingleton<IAPIConfigService, APIConfigService>();
                 sc.AddSingleton<IAPIHttpClientService, APIHttpClientService>();
+#if DEBUG
                 sc.AddSingleton<IConfigService, LocalFileConfigService>();
+#else
+                sc.AddSingleton<IConfigService, EnvironmentVariablesConfigService>();
+#endif
                 sc.AddSingleton<IJobSeekerConfigService, JobSeekerConfigService>();
                 sc.AddSingleton<IJobSeekerActionsService, JobSeekerActionsService>();
                 sc.AddSingleton<ILoggerService, LoggerService>();
