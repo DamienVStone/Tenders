@@ -16,7 +16,7 @@ namespace Tenders.Sberbank.Tests
             Container.Init(sc =>
             {
                 Container.Registration.Register(sc);
-                sc.AddSingleton<IConfigService, ConfigService>();
+                sc.AddSingleton<IConfigService, LocalFileConfigService>();
                 sc.AddSingleton<ISberbankConfigService, SberbankConfigService>();
             });
         }

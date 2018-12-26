@@ -5,7 +5,7 @@ using Tenders.Core.Abstractions.Services;
 
 namespace Tenders.Core.Services
 {
-    public class ConfigService : IConfigService
+    public class LocalFileConfigService : IConfigService
     {
         private object o = new object();
         private Dictionary<string, string> _configs;

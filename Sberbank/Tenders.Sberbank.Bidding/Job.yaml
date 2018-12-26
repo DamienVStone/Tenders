@@ -11,10 +11,13 @@ spec:
         image: dmitrynikitin/tenders-sberbank-bidder:{{BUILDNUMBER}}
         envFrom:
         - configMapRef:
-           name: global
+           name: api
+		envFrom:
+        - configMapRef:
+           name: sberbank
         env:
-        - name: AUCTION_JSON
-          value: "{{AUCTION_JSON}}"
+        - name: sberbank.AuctionInfo
+          value: "{{sberbank.AuctionInfo}}"
       restartPolicy: Never
       imagePullSecrets:
       - name: "regcred"
