@@ -17,6 +17,7 @@ namespace Tenders.Integration.API.Tests
                 sc.AddSingleton<IAPIConfigService, APIConfigService>();
             });
         }
+
         [Fact]
         public void ConfigsNotEmptyOrNull()
         {
@@ -34,6 +35,10 @@ namespace Tenders.Integration.API.Tests
             Assert.NotNull(service.SynchronizeByKey);
             Assert.IsType<Uri>(service.Token);
             Assert.NotNull(service.Token);
+            Assert.IsType<Uri>(service.GetFutureAuction);
+            Assert.NotNull(service.GetFutureAuction);
+            Assert.IsType<Uri>(service.SetFutureAuctionState);
+            Assert.NotNull(service.SetFutureAuctionState);
 
             Assert.True(!string.IsNullOrEmpty(service.Password));
             Assert.True(!string.IsNullOrEmpty(service.SecurityToken));

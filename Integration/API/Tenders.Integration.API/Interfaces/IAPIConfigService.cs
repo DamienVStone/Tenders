@@ -32,9 +32,18 @@ namespace Tenders.Integration.API.Interfaces
         /// </summary>
         Uri SynchronizeByKey { get; }
         /// <summary>
+        /// Url для задания состояния будущего аукциона
+        /// </summary>
+        Uri SetFutureAuctionState { get; }
+        /// <summary>
+        /// Url для получения будущего аукциона
+        /// </summary>
+        Uri GetFutureAuction { get; }
+        /// <summary>
         /// Токен безопасности для доступа к старому API
         /// </summary>
         string SecurityToken { get; }
+
 
         /// <summary>
         /// Логин к API

@@ -17,6 +17,8 @@ namespace Tenders.Integration.API.Services
             Token = new Uri(Host + configService["api.TokenUrl"]);
             GetProxy = new Uri(configService["api.GetProxyUrl"]);
             SynchronizeByKey = new Uri(configService["api.SynchronizeByKeyUrl"]);
+            SetFutureAuctionState = new Uri(configService["api.SetFutureAuctionState"]);
+            GetFutureAuction = new Uri(configService["api.GetFutureAuction"]);
 
             SecurityToken = configService["api.SecurityToken"];
             Username = configService["api.Username"];
@@ -34,6 +36,8 @@ namespace Tenders.Integration.API.Services
         public Uri Token { get; }
         public Uri GetProxy { get; }
         public Uri SynchronizeByKey { get; }
+        public Uri SetFutureAuctionState { get; }
+        public Uri GetFutureAuction { get; }
         public string SecurityToken { get; }
         public string Username { get; }
         public string Password { get; }
