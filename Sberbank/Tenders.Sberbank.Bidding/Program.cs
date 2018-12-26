@@ -19,6 +19,7 @@ namespace Sberbank.Bidding
         private static ISberbankActionsService actionsService;
         private static ISberbankConfigService configService;
         private static IAPIDataProviderService apiDataProvider;
+        private static ILoggerService logger;
         private static IAuctionInfo auctionInfo;
 
         static int Main(string[] args)
@@ -33,12 +34,23 @@ namespace Sberbank.Bidding
         {
             var cts = new CancellationTokenSource();
             var ct = cts.Token;
-            actionsService.AuthenticateAsync(ct).Wait();
+            actionsService
+                .AuthenticateAsync(ct)
+                .ContinueWith(t =>
+                {
+                    if (!t.IsCompletedSuccessfully) logger.Log(t.Exception?.ToString()).Wait();
+                }).Wait();
 
             var auctions = await actionsService.SearchAsync(new SearchParameters()
             {
                 Regnumber = auctionInfo.RegNumber
-            }, ct);
+            }, ct)
+            .ContinueWith(t =>
+            {
+                if (!t.IsCompletedSuccessfully) logger.Log(t.Exception?.ToString()).Wait();
+
+                return t.Result;
+            });
 
             var auction = auctions.Entries[0];
             var tradeData = await _waitTradePlace(auction, ct);
@@ -80,6 +92,7 @@ namespace Sberbank.Bidding
             actionsService = Container.GetService<ISberbankActionsService>();
             configService = Container.GetService<ISberbankConfigService>();
             apiDataProvider = Container.GetService<IAPIDataProviderService>();
+            logger = Container.GetService<ILoggerService>();
             auctionInfo = configService.AuctionInfo;
         }
 
