@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Tenders.Core.Abstractions\Tenders.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\Tenders.Core.Helpers\Tenders.Core.Helpers.csproj" />
+    <ProjectReference Include="..\..\Core\Tenders.Core.Services\Tenders.Core.Services.csproj" />
+    <ProjectReference Include="..\..\Integration\API\Tenders.Integration.API\Tenders.Integration.API.csproj" />
+    <ProjectReference Include="..\Tenders.Sberbank.Abstractions\Tenders.Sberbank.Abstractions.csproj" />
+    <ProjectReference Include="..\Tenders.Sberbank.Models\Tenders.Sberbank.Models.csproj" />
+  </ItemGroup>
+
+</Project>
