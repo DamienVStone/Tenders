@@ -38,8 +38,5 @@ namespace Tenders.Integration.API.Services
         public string Username { get; }
         public string Password { get; }
         public bool UseProxy { get; }
-        public string DebugProxyHost { get; }
-        public string DebugProxyUsername { get; }
-        public string DebugProxyPassword { get; }
     }
 }

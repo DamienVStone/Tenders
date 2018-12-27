@@ -42,7 +42,7 @@ namespace Tenders.Sberbank.Services
             _bidDataTemplate = configService["sberbank.BidDataTemplate"];
             _asyncRefreshDataTemplate = configService["sberbank.AsyncRefreshDataTemplate"];
 
-            IsDebug = string.Equals(configService["debug"], "true", System.StringComparison.InvariantCultureIgnoreCase);
+            IsDebug = string.Equals(configService["sberbank.debug"], "true", System.StringComparison.InvariantCultureIgnoreCase);
         }
 
         public string GetLogonRegisterData(string timeNow, string ticket)
