@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Web;
 using Tenders.Core.Abstractions.Services;
@@ -52,6 +53,7 @@ namespace Tenders.Integration.API.JobSeeker.Services
                     lock (o)
                         if (!_configs.ContainsKey(index))
                         {
+                            Console.WriteLine("I am is " + ("whoami".Bash()));
                             var result = @"kubectl get cm api -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
                                 result = @"kubectl get cm sberbank -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
