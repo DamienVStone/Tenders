@@ -21,7 +21,7 @@ namespace Tenders.Integration.API.Services
             GetFutureAuction = new Uri(configService["api.GetFutureAuction"]);
 
             SecurityToken = configService["api.SecurityToken"];
-            Username = configService["api.Username"];
+            Username = configService["api.Username"];//
             Password = configService["api.Password"];
             UseProxy = string.Equals(configService["api.UseProxy"], "true", StringComparison.InvariantCultureIgnoreCase);
         }
