@@ -7,9 +7,10 @@ namespace Tenders.Integration.API.JobSeeker.Services
     {
         public string RunJob(string job)
         {
-            return $@"cat <<EOF | kubectl create -f -
+            var command = $@"cat <<EOF | kubectl create -f -
 {job}
-EOF"
+EOF";
+            return command
             .Bash();
         }
     }
