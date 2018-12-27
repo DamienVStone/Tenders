@@ -23,22 +23,4 @@
     <ProjectReference Include="..\..\Sberbank\Tenders.Sberbank.Services\Tenders.Sberbank.Services.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Job.yaml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="JobSeekerStart.sh">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="JobSeeker.sh">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="SetBuildNumber.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="SeekJob.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

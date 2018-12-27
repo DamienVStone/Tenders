@@ -27,15 +27,15 @@ namespace Tenders.Core.Services
                         if (_configs == null)
                         {
                             _configs = new Dictionary<string, string>();
-                            loggerService.Log($"***************Переменные окружения:*****************");
+                            //loggerService.Log($"***************Переменные окружения:*****************");
                             foreach (DictionaryEntry env in Environment.GetEnvironmentVariables())
                             {
                                 string name = (string)env.Key;
                                 string value = (string)env.Value;
-                                loggerService.Log($"{name}={value}");
+                                //loggerService.Log($"{name}={value}");
                                 _configs[name] = value;
                             }
-                            loggerService.Log($"****************************************************");
+                            //loggerService.Log($"****************************************************");
                         }
 
                 return _configs[index];

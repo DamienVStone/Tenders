@@ -26,7 +26,15 @@ namespace Sberbank.Bidding
         {
             _initContainer();
             _startBidding();
-            return 0;
+            var result = apiDataProvider.SetFutureAuctionServicedState(auctionInfo, new CancellationTokenSource().Token).Result;
+            if (result)
+            {
+                logger.Log("Успешно завершено");
+                return 0;
+            }
+
+            logger.Log("Фигня какая-то");
+            return 1;
         }
 
         private static void _startBidding()

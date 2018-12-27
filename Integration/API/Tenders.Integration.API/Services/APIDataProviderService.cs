@@ -65,7 +65,31 @@ namespace Tenders.Integration.API.Services
             await logger.Log("Получен аукцион " + result?.Text);
             return auction;
         }
-        
+
+        public async Task<bool> SetFutureAuctionOnServiceState(IAuctionInfo auction, CancellationToken ct)
+        {
+            await logger.Log($"Перевод аукциона {auction.Code} в обработку");
+            var result = await _setState(auction, ct, "1");
+            await logger.Log($"Аукцион {auction.Code} в обработке");
+            return result;
+        }
+
+        public async Task<bool> SetFutureAuctionServicedState(IAuctionInfo auction, CancellationToken ct)
+        {
+            await logger.Log($"Перевод аукциона {auction.Code} в обработанные");
+            var result = await _setState(auction, ct, "2");
+            await logger.Log($"Аукцион {auction.Code} обработан");
+            return result;
+        }
+
+        private async Task<bool> _setState(IAuctionInfo auction, CancellationToken ct, string state)
+        {
+            await httpClientService.GetAsync(
+                $"{configService.SetFutureAuctionState}?token={configService.SecurityToken}&regNumber={auction.Code}&state={state}",
+                ct);
+            return true;
+        }
+
         public async Task<string> SignAsync(string data, CancellationToken ct)
         {
             await logger.Log("Подписание документа");

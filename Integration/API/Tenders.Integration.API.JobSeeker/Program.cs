@@ -39,9 +39,13 @@ namespace Tenders.Integration.API.JobSeeker
             var cts = new CancellationTokenSource();
             await apiDataProvider.Authenticate(cts.Token);
             var auction = await apiDataProvider.GetNextAuction(cts.Token);
-            auction.Workers = 1; // TODO: REMOVE!
             var job = configService.GetJob(auction, containerTag);
             await logger.Log(actionsService.RunJob(job));
+            var result = await apiDataProvider.SetFutureAuctionOnServiceState(auction, cts.Token);
+            if (result)
+                logger.Log("Успешно завершено").Wait();
+            else
+                logger.Log("Не удалось изменить статус аукциона").Wait();
         }
 
         public static void InitContainer()

@@ -11,5 +11,7 @@ namespace Tenders.Integration.API.Interfaces
         Task<string> GetFingerprintAsync(CancellationToken ct);
         Task SyncronizeByKeyAsync(string key, CancellationToken ct);
         Task<IAuctionInfo> GetNextAuction(CancellationToken ct);
+        Task<bool> SetFutureAuctionOnServiceState(IAuctionInfo auction, CancellationToken ct);
+        Task<bool> SetFutureAuctionServicedState(IAuctionInfo auction, CancellationToken ct);
     }
 }
