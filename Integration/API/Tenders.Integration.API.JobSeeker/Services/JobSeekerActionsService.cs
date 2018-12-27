@@ -1,4 +1,5 @@
-﻿using Tenders.Core.Helpers;
+﻿using System;
+using Tenders.Core.Helpers;
 using Tenders.Integration.API.JobSeeker.Interfaces;
 
 namespace Tenders.Integration.API.JobSeeker.Services
@@ -10,6 +11,7 @@ namespace Tenders.Integration.API.JobSeeker.Services
             var command = $@"cat <<EOF | kubectl create -f -
 {job}
 EOF";
+            Console.WriteLine(command);
             return command
             .Bash();
         }
