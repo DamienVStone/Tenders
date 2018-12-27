@@ -21,7 +21,7 @@ namespace Tenders.Integration.API.JobSeeker.Services
         {
             var result = HttpUtility
                 .UrlDecode(configService["jobseeker.JobTemplate"])
-                .Replace("{{REGNUMBER}}", auctionInfo.RegNumber)
+                .Replace("{{REGNUMBER}}", auctionInfo.Code)
                 .Replace("{{BUILDNUMBER}}", containerTag)
                 .Replace("{{AUCTIONINFO}}", JsonConvert.SerializeObject(auctionInfo).Replace("\"", "'"))
                 .Replace("{{WORKERS}}", auctionInfo.Workers.ToString());

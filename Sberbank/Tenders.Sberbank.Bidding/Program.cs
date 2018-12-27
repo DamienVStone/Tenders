@@ -43,7 +43,7 @@ namespace Sberbank.Bidding
 
             var auctions = await actionsService.SearchAsync(new SearchParameters()
             {
-                Regnumber = auctionInfo.RegNumber
+                Regnumber = auctionInfo.Code
             }, ct)
             .ContinueWith(t =>
             {
@@ -68,7 +68,7 @@ namespace Sberbank.Bidding
                         throw;
                 }
 
-                await apiDataProvider.SyncronizeByKeyAsync(auctionInfo.RegNumber, ct);
+                await apiDataProvider.SyncronizeByKeyAsync(auctionInfo.Code, ct);
             }
         }
 
@@ -115,7 +115,7 @@ namespace Sberbank.Bidding
                         throw;
                 }
 
-                await apiDataProvider.SyncronizeByKeyAsync(auctionInfo.RegNumber, ct);
+                await apiDataProvider.SyncronizeByKeyAsync(auctionInfo.Code, ct);
             }
 
             return tradeData;

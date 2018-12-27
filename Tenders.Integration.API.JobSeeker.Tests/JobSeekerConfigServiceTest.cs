@@ -25,7 +25,7 @@ namespace Tenders.Integration.API.JobSeeker.Tests
         static IAuctionInfo auction = new AuctionInfo
         {
             Bid = 0.0m,
-            RegNumber = "000000000000",
+            Code = "000000000000",
             Workers = 30
         };
 

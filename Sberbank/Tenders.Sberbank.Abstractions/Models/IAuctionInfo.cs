@@ -2,7 +2,7 @@
 {
     public interface IAuctionInfo
     {
-        string RegNumber { get; set; }
+        string Code { get; set; }
         int Workers { get; set; }
         decimal Bid { get; set; }
     }
