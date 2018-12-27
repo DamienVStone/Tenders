@@ -26,11 +26,11 @@ namespace Tenders.Integration.API.JobSeeker.Services
                     lock (o)
                         if (!_configs.ContainsKey(index))
                         {
-                            var result = @"kubectl get cm api -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
+                            var result = (@"kubectl get cm api -n tenders -o jsonpath='{.data." + index + "}'").Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
-                                result = @"kubectl get cm sberbank -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
+                                result = (@"kubectl get cm sberbank -n tenders -o jsonpath='{.data." + index + "}'").Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
-                                result = @"kubectl get cm jobseeker -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
+                                result = (@"kubectl get cm jobseeker -n tenders -o jsonpath='{.data." + index + "}'").Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
                                 throw new KeyNotFoundException(index);
                             _configs[index] = result;
