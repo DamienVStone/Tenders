@@ -84,9 +84,11 @@ namespace Tenders.Integration.API.Services
 
         private async Task<bool> _setState(IAuctionInfo auction, CancellationToken ct, string state)
         {
-            await httpClientService.GetAsync(
+            await httpClientService.PostAsync(
                 $"{configService.SetFutureAuctionState}?token={configService.SecurityToken}&regNumber={auction.Code}&state={state}",
-                ct);
+                new StringContent(""),
+                ct
+            );
             return true;
         }
 
