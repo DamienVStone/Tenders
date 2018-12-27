@@ -31,6 +31,7 @@ namespace Tenders.Integration.API.JobSeeker
                 throw new ArgumentNullException("containerTag. " + string.Join(';', args));
 
             _doWork();
+            Console.ReadLine();
         }
 
         static async void _doWork()
