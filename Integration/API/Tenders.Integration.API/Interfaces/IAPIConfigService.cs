@@ -44,7 +44,6 @@ namespace Tenders.Integration.API.Interfaces
         /// </summary>
         string SecurityToken { get; }
 
-
         /// <summary>
         /// Логин к API
         /// </summary>
@@ -58,18 +57,5 @@ namespace Tenders.Integration.API.Interfaces
         /// Флаг использования прокси
         /// </summary>
         bool UseProxy { get; }
-
-        /// <summary>
-        /// Хост прокси для отладки
-        /// </summary>
-        string DebugProxyHost { get; }
-        /// <summary>
-        /// Пользователь прокси для отладки
-        /// </summary>
-        string DebugProxyUsername { get; }
-        /// <summary>
-        /// Пароль прокси для отладки
-        /// </summary>
-        string DebugProxyPassword { get; }
     }
 }

@@ -24,10 +24,6 @@ namespace Tenders.Integration.API.Services
             Username = configService["api.Username"];
             Password = configService["api.Password"];
             UseProxy = string.Equals(configService["api.UseProxy"], "true", StringComparison.InvariantCultureIgnoreCase);
-
-            DebugProxyHost = configService["debug.proxy.host"];
-            DebugProxyUsername = configService["debug.proxy.username"];
-            DebugProxyPassword = configService["debug.proxy.password"];
         }
 
         public Uri Host { get; }
