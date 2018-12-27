@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace Tenders.Core.Helpers
 {
@@ -7,7 +8,7 @@ namespace Tenders.Core.Helpers
         public static string Bash(this string command)
         {
             var escapedArgs = command.Replace("\"", "\\\"");
-
+            Console.WriteLine("executing: " + escapedArgs);
             var process = new Process()
             {
                 StartInfo = new ProcessStartInfo

@@ -7,7 +7,6 @@ namespace Tenders.Integration.API.JobSeeker.Services
 {
     public class K8sConfigMapsConfigService : IConfigService
     {
-        // 
         private object o = new object();
         private Dictionary<string, string> _configs;
 
@@ -27,11 +26,11 @@ namespace Tenders.Integration.API.JobSeeker.Services
                     lock (o)
                         if (!_configs.ContainsKey(index))
                         {
-                            var result = @"sudo kubectl get cm api -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
+                            var result = @"kubectl get cm api -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
-                                result = @"sudo kubectl get cm sberbank -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
+                                result = @"kubectl get cm sberbank -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
-                                result = @"sudo kubectl get cm jobseeker -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
+                                result = @"kubectl get cm jobseeker -n tenders -o jsonpath='{.data." + index + "}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
                                 throw new KeyNotFoundException(index);
                             _configs[index] = result;
