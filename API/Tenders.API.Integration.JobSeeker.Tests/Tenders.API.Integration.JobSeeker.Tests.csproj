@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Integration\API\Tenders.Integration.API.JobSeeker\Tenders.Integration.API.JobSeeker.csproj" />
+    <ProjectReference Include="..\Tenders.API.Integration.JobSeeker\Tenders.API.Integration.JobSeeker.csproj" />
   </ItemGroup>
 
 </Project>
