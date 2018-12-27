@@ -22,6 +22,10 @@ namespace Tenders.Integration.API.JobSeeker
         static void Main(string[] args)
         {
             InitContainer();
+
+            if (args.Length == 0)
+                throw new ArgumentNullException(nameof(args));
+
             containerTag = args[0];
             if (string.IsNullOrEmpty(containerTag))
                 throw new ArgumentNullException("containerTag. " + string.Join(';', args));
