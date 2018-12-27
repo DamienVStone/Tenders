@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Core\Tenders.Core.DI\Tenders.Core.DI.csproj" />
+    <ProjectReference Include="..\..\Core\Tenders.Core.DI\Tenders.Core.DI.csproj" />
   </ItemGroup>
 
 </Project>

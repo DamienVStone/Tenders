@@ -9,9 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\API\Tenders.API.Integration\Tenders.API.Integration.csproj" />
     <ProjectReference Include="..\Tenders.Core.Abstractions\Tenders.Core.Abstractions.csproj" />
     <ProjectReference Include="..\Tenders.Core.Services\Tenders.Core.Services.csproj" />
-    <ProjectReference Include="..\..\Integration\API\Tenders.Integration.API\Tenders.Integration.API.csproj" />
   </ItemGroup>
 
 </Project>

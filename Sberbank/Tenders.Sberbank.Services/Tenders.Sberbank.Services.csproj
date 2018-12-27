@@ -9,10 +9,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\API\Tenders.API.Integration\Tenders.API.Integration.csproj" />
     <ProjectReference Include="..\..\Core\Tenders.Core.Abstractions\Tenders.Core.Abstractions.csproj" />
     <ProjectReference Include="..\..\Core\Tenders.Core.Helpers\Tenders.Core.Helpers.csproj" />
     <ProjectReference Include="..\..\Core\Tenders.Core.Services\Tenders.Core.Services.csproj" />
-    <ProjectReference Include="..\..\Integration\API\Tenders.Integration.API\Tenders.Integration.API.csproj" />
     <ProjectReference Include="..\Tenders.Sberbank.Abstractions\Tenders.Sberbank.Abstractions.csproj" />
     <ProjectReference Include="..\Tenders.Sberbank.Models\Tenders.Sberbank.Models.csproj" />
   </ItemGroup>

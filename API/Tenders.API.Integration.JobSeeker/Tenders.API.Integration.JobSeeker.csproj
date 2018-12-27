@@ -7,13 +7,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Core\Tenders.Core.DI\Tenders.Core.DI.csproj" />
-    <ProjectReference Include="..\..\..\Core\Tenders.Core.Helpers\Tenders.Core.Helpers.csproj" />
-    <ProjectReference Include="..\..\..\Sberbank\Tenders.Sberbank.Abstractions\Tenders.Sberbank.Abstractions.csproj" />
-    <ProjectReference Include="..\Tenders.Integration.API\Tenders.Integration.API.csproj" />
+    <ProjectReference Include="..\..\Core\Tenders.Core.DI\Tenders.Core.DI.csproj" />
+    <ProjectReference Include="..\..\Core\Tenders.Core.Helpers\Tenders.Core.Helpers.csproj" />
+    <ProjectReference Include="..\..\Sberbank\Tenders.Sberbank.Abstractions\Tenders.Sberbank.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

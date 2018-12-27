@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Logger\AppLogger.Core.csproj" />
+    <ProjectReference Include="..\Tenders.Core.Logger\Tenders.Core.Logger.csproj" />
   </ItemGroup>
 
   <ItemGroup>
