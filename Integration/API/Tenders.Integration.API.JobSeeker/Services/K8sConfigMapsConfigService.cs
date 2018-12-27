@@ -16,7 +16,7 @@ namespace Tenders.Integration.API.JobSeeker.Services
             get
             {
                 Console.WriteLine("I am is " + ("whoami".Bash()));
-                index = index.Replace(".", "\\.");
+                index = index.Replace(".", @"\.");
                 Console.WriteLine("try to get " + index);
                 if (_configs == null)
                     lock (o)
