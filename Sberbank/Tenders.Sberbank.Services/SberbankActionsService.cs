@@ -61,16 +61,24 @@ namespace Tenders.Sberbank.Services
 
         public async Task<ISearchResult> SearchAsync(ISearchParameters parameters, CancellationToken ct)
         {
-            await logger.Log("Поиск аукциона " + parameters.Regnumber);
-            ct.ThrowIfCancellationRequested();
-            var step1GetResult = await httpClientService.GetAsync(configService.PurchaseRequestListUrl, ct);
-            _throwIfDocumentError(step1GetResult);
-            var step2PostResult = await httpClientService.PostAsync(configService.PurchaseRequestListUrl, _getSearchForm(step1GetResult, parameters), ct);
-            _throwIfDocumentError(step2PostResult);
-            var xmlFilterResult = HttpUtility.HtmlDecode(step2PostResult.GetTextById("ctl00_ctl00_phWorkZone_xmlData"));
-            var result = serializationService.GetSearchResult(xmlFilterResult);
-            await logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0));
-            return result;
+            try
+            {
+                await logger.Log("Поиск аукциона " + parameters.Regnumber);
+                ct.ThrowIfCancellationRequested();
+                var step1GetResult = await httpClientService.GetAsync(configService.PurchaseRequestListUrl, ct);
+                _throwIfDocumentError(step1GetResult);
+                var step2PostResult = await httpClientService.PostAsync(configService.PurchaseRequestListUrl, _getSearchForm(step1GetResult, parameters), ct);
+                _throwIfDocumentError(step2PostResult);
+                var xmlFilterResult = HttpUtility.HtmlDecode(step2PostResult.GetTextById("ctl00_ctl00_phWorkZone_xmlData"));
+                var result = serializationService.GetSearchResult(xmlFilterResult);
+                await logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0));
+                return result;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public async Task<ITradePlace> GetTradeDataAsync(ISearchResultEntry auction, CancellationToken ct)
