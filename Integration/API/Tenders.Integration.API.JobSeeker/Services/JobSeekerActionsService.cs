@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using Tenders.Core.Helpers;
 using Tenders.Integration.API.JobSeeker.Interfaces;
 
 namespace Tenders.Integration.API.JobSeeker.Services
@@ -7,31 +7,10 @@ namespace Tenders.Integration.API.JobSeeker.Services
     {
         public string RunJob(string job)
         {
-            return _bash($@"cat <<EOF | kubectl create -f -
+            return $@"cat <<EOF | kubectl create -f -
 {job}
-EOF");
+EOF"
+            .Bash();
         }
-
-        private string _bash(string cmd)
-        {
-            var escapedArgs = cmd.Replace("\"", "\\\"");
-
-            var process = new Process()
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "/bin/bash",
-                    Arguments = $"-c \"{escapedArgs}\"",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-            };
-            process.Start();
-            string result = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-            return result;
-        }
-
     }
 }

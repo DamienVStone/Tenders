@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Core\Tenders.Core.DI\Tenders.Core.DI.csproj" />
+    <ProjectReference Include="..\..\..\Core\Tenders.Core.Helpers\Tenders.Core.Helpers.csproj" />
     <ProjectReference Include="..\..\..\Sberbank\Tenders.Sberbank.Abstractions\Tenders.Sberbank.Abstractions.csproj" />
     <ProjectReference Include="..\Tenders.Integration.API\Tenders.Integration.API.csproj" />
   </ItemGroup>

@@ -49,7 +49,7 @@ namespace Tenders.Integration.API.JobSeeker
 #if DEBUG
                 sc.AddSingleton<IConfigService, LocalFileConfigService>();
 #else
-                sc.AddSingleton<IConfigService, EnvironmentVariablesConfigService>();
+                sc.AddSingleton<IConfigService, K8sConfigMapsConfigService>();
 #endif
                 sc.AddSingleton<IJobSeekerConfigService, JobSeekerConfigService>();
                 sc.AddSingleton<IJobSeekerActionsService, JobSeekerActionsService>();
