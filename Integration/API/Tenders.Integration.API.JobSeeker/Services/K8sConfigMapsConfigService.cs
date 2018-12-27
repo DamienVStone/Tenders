@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Core.Helpers;
 
@@ -13,6 +14,7 @@ namespace Tenders.Integration.API.JobSeeker.Services
         {
             get
             {
+                Console.WriteLine("try to get: " + index);
                 index = index.Replace(".", @"\.");
                 if (_configs == null)
                     lock (o)
@@ -33,6 +35,7 @@ namespace Tenders.Integration.API.JobSeeker.Services
                             _configs[index] = result;
                         }
 
+                Console.WriteLine("value got: " + _configs[index]);
                 return _configs[index];
             }
         }
