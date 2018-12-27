@@ -54,11 +54,11 @@ namespace Tenders.Integration.API.JobSeeker.Services
                         if (!_configs.ContainsKey(index))
                         {
                             Console.WriteLine("I am is " + ("whoami".Bash()));
-                            var result = @"kubectl get cm api -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
+                            var result = @"sudo kubectl get cm api -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
-                                result = @"kubectl get cm sberbank -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
+                                result = @"sudo kubectl get cm sberbank -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
-                                result = @"kubectl get cm jobseeker -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
+                                result = @"sudo kubectl get cm jobseeker -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
                                 throw new KeyNotFoundException(index);
                             _configs[index] = result;
