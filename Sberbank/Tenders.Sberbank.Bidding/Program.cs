@@ -26,7 +26,6 @@ namespace Sberbank.Bidding
         {
             _initContainer();
             _startBidding();
-            Console.ReadLine();
             return 0;
         }
 
@@ -55,6 +54,12 @@ namespace Sberbank.Bidding
 
             var auction = auctions.Entries[0];
             var tradeData = _waitTradePlace(auction, ct).Result;
+            if (tradeData == null)
+            {
+                logger.Log("Данные о торгах не получены, выходим.");
+                return;
+            }
+
             while (true)
             {
                 try
