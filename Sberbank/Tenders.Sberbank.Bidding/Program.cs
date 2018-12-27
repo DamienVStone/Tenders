@@ -30,10 +30,11 @@ namespace Sberbank.Bidding
             return 0;
         }
 
-        private static async void _startBidding()
+        private static void _startBidding()
         {
             var cts = new CancellationTokenSource();
             var ct = cts.Token;
+            // Почему-то await работает не так как я ожидал в Ubuntu 16 на dotnet 2.2
             actionsService
                 .AuthenticateAsync(ct)
                 .ContinueWith(t =>
@@ -41,7 +42,7 @@ namespace Sberbank.Bidding
                     if (!t.IsCompletedSuccessfully) logger.Log(t.Exception?.ToString()).Wait();
                 }).Wait();
 
-            var auctions = await actionsService.SearchAsync(new SearchParameters()
+            var auctions = actionsService.SearchAsync(new SearchParameters()
             {
                 Regnumber = auctionInfo.Code
             }, ct)
@@ -50,15 +51,15 @@ namespace Sberbank.Bidding
                 if (!t.IsCompletedSuccessfully) logger.Log(t.Exception?.ToString()).Wait();
 
                 return t.Result;
-            });
+            }).Result;
 
             var auction = auctions.Entries[0];
-            var tradeData = await _waitTradePlace(auction, ct);
+            var tradeData = _waitTradePlace(auction, ct).Result;
             while (true)
             {
                 try
                 {
-                    tradeData = await actionsService.BidAsync(auctionInfo.Bid, auction.ASID, tradeData, ct);
+                    tradeData = actionsService.BidAsync(auctionInfo.Bid, auction.ASID, tradeData, ct).Result;
                 }
                 catch (Exception e)
                 {
@@ -68,7 +69,7 @@ namespace Sberbank.Bidding
                         throw;
                 }
 
-                await apiDataProvider.SyncronizeByKeyAsync(auctionInfo.Code, ct);
+                apiDataProvider.SyncronizeByKeyAsync(auctionInfo.Code, ct).Wait();
             }
         }
 

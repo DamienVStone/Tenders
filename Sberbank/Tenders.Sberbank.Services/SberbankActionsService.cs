@@ -59,26 +59,18 @@ namespace Tenders.Sberbank.Services
             await logger.Log("Авторизован как: " + step3PostResult.GetTextById("ctl00_loginctrl_link"));
         }
 
-        public Task<ISearchResult> SearchAsync(ISearchParameters parameters, CancellationToken ct)
+        public async Task<ISearchResult> SearchAsync(ISearchParameters parameters, CancellationToken ct)
         {
-            try
-            {
-                logger.Log("Поиск аукциона " + parameters.Regnumber).Wait();
-                ct.ThrowIfCancellationRequested();
-                var step1GetResult = httpClientService.GetAsync(configService.PurchaseRequestListUrl, ct).Result;
-                _throwIfDocumentError(step1GetResult);
-                var step2PostResult = httpClientService.PostAsync(configService.PurchaseRequestListUrl, _getSearchForm(step1GetResult, parameters), ct).Result;
-                _throwIfDocumentError(step2PostResult);
-                var xmlFilterResult = HttpUtility.HtmlDecode(step2PostResult.GetTextById("ctl00_ctl00_phWorkZone_xmlData"));
-                var result = serializationService.GetSearchResult(xmlFilterResult);
-                logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0)).Wait();
-                return Task.Run(() => result);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            await logger.Log("Поиск аукциона " + parameters.Regnumber);
+            ct.ThrowIfCancellationRequested();
+            var step1GetResult = await httpClientService.GetAsync(configService.PurchaseRequestListUrl, ct);
+            _throwIfDocumentError(step1GetResult);
+            var step2PostResult = await httpClientService.PostAsync(configService.PurchaseRequestListUrl, _getSearchForm(step1GetResult, parameters), ct);
+            _throwIfDocumentError(step2PostResult);
+            var xmlFilterResult = HttpUtility.HtmlDecode(step2PostResult.GetTextById("ctl00_ctl00_phWorkZone_xmlData"));
+            var result = serializationService.GetSearchResult(xmlFilterResult);
+            await logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0));
+            return result;
         }
 
         public async Task<ITradePlace> GetTradeDataAsync(ISearchResultEntry auction, CancellationToken ct)
@@ -89,7 +81,7 @@ namespace Tenders.Sberbank.Services
             var postUrl = configService.GetTradePlaceUrl(auction.reqID, auction.ASID);
             var postResult = await httpClientService.PostAsync(postUrl, jsonContent, ct);
             var result = serializationService.GetTradePlace(postResult.Text);
-            await logger.Log("Данные о торгах получены");
+            await logger.Log("Данные о торгах получены: " + result.PurchName);
             return result;
         }
 
