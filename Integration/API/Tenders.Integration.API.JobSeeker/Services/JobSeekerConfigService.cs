@@ -61,6 +61,7 @@ namespace Tenders.Integration.API.JobSeeker.Services
                                 result = @"sudo kubectl get cm jobseeker -n tenders -o jsonpath='{.data.api\.TokenUrl}'".Bash()?.Trim();
                             if (string.IsNullOrEmpty(result))
                                 throw new KeyNotFoundException(index);
+                            Console.WriteLine("config value got: " + result);
                             _configs[index] = result;
                         }
 
