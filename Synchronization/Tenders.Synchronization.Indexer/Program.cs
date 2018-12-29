@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Mime;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TenderPlanIndexer.Models;
@@ -73,7 +75,7 @@ namespace TenderPlanIndexer
                 }
             });
 
-            return await apiDataProvider.SendNewIndexedFiles(new StringContent(JsonConvert.SerializeObject(filesToSend)), ct);
+            return await apiDataProvider.SendNewIndexedFiles(new StringContent(JsonConvert.SerializeObject(filesToSend), Encoding.UTF8, MediaTypeNames.Application.Json), ct);
         }
 
         private static void _initContainer()
