@@ -1,7 +1,8 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Tenders.Sberbank.Abstractions.Models;
-using Tenders.Synchronization.FtpMonitoring.Abstractions;
 
 namespace Tenders.Integration.API.Interfaces
 {
@@ -14,6 +15,11 @@ namespace Tenders.Integration.API.Interfaces
         Task<IAuctionInfo> GetNextAuction(CancellationToken ct);
         Task<bool> SetFutureAuctionOnServiceState(IAuctionInfo auction, CancellationToken ct);
         Task<bool> SetFutureAuctionServicedState(IAuctionInfo auction, CancellationToken ct);
-        Task<IFtpPath> GetNextPathToIndex();
+        Task<T> GetNextPathForIndexing<T>(CancellationToken ct);
+        Task<string> SendFilesAsync(StringContent files, string pathId, CancellationToken ct);
+        Task<string> SendFileTreeAsync(StringContent files, CancellationToken ct);
+        Task<bool> SendNewIndexedFiles(StringContent index, CancellationToken ct);
+        Task<List<T>> GetCurrentIndexAsync<T>(CancellationToken ct);
+        Task<List<T>> GetUpdatedTenderPlansAsync<T>(CancellationToken ct);
     }
 }
