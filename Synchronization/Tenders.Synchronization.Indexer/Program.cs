@@ -31,6 +31,8 @@ namespace TenderPlanIndexer
 
         private async static Task<bool> _doIndex(CancellationToken ct)
         {
+            apiDataProvider.Authenticate(ct).Wait();
+
             var index = await apiDataProvider
                 .GetCurrentIndexAsync<TenderPlanIndex>(ct)
                 .ContinueWith(r => r.Result.ToDictionary(i => i.TenderPlanId));
