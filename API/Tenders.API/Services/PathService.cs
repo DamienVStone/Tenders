@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using System;
 using TenderPlanAPI.Controllers;
 using TenderPlanAPI.Models;
+using Tenders.API.Services;
 
 namespace TenderPlanAPI.Services
 {
@@ -15,12 +15,12 @@ namespace TenderPlanAPI.Services
     public class PathService : IPathService
     {
         private readonly object key = new object();
-        private readonly IConfiguration _config;
+        private readonly IAPIConfigService config;
         private readonly IDBConnectContext dbContext;
 
-        public PathService(IConfiguration config, IDBConnectContext dbContext) : base()
+        public PathService(IAPIConfigService config, IDBConnectContext dbContext) : base()
         {
-            _config = config;
+            this.config = config ?? throw new ArgumentNullException(nameof(config));
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
@@ -28,7 +28,7 @@ namespace TenderPlanAPI.Services
         {
             lock (key)
             {
-                var timeout = int.Parse(_config["FTPPathIndexingTimeout"]);
+                var timeout = config.FTPIndexingTimeout;
                 var filter = Builders<FTPPath>.Filter.Lte("LastTimeIndexed", DateTimeOffset.Now.AddHours(-timeout));
                 var update = Builders<FTPPath>.Update.Set("LastTimeIndexed", DateTimeOffset.Now);
                 return dbContext.FTPPath.FindOneAndUpdate(filter, update);
