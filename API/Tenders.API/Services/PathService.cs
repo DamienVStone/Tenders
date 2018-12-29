@@ -12,19 +12,20 @@ namespace TenderPlanAPI.Services
     }
 
     // Это синглтон. Смотри конфигурацию в файле Startup
-    public class PathService: IPathService
+    public class PathService : IPathService
     {
         private readonly object key = new object();
-        private IConfiguration _config;
+        private readonly IConfiguration _config;
 
-        public PathService(IConfiguration config):base()
+        public PathService(IConfiguration config) : base()
         {
             _config = config;
         }
 
         public FTPPath GetNotIndexedPath()
         {
-            lock(key){
+            lock (key)
+            {
                 var timeout = int.Parse(_config["FTPPathIndexingTimeout"]);
                 var filter = Builders<FTPPath>.Filter.Lte("LastTimeIndexed", DateTimeOffset.Now.AddHours(-timeout));
                 var update = Builders<FTPPath>.Update.Set("LastTimeIndexed", DateTimeOffset.Now);

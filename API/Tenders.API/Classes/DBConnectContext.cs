@@ -1,15 +1,42 @@
 ﻿using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TenderPlanAPI.Models;
 
 namespace TenderPlanAPI.Controllers
 {
-    public class DBConnectContext
+    public interface IDBConnectContext
     {
-        
+        IMongoCollection<Customer> Customers { get; }
+        IMongoCollection<TenderPlan> TenderPlans { get; }
+        IMongoCollection<TenderPlanPosition> TenderPlanPositions { get; }
+        IMongoCollection<TenderPlanIndex> TenderPlansIndex { get; }
+        IMongoCollection<FTPPath> FTPPath { get; }
+        IMongoCollection<FTPEntry> FTPEntry { get; }
+    }
+
+    public class DBConnectContext : IDBConnectContext
+    {
+
+        public IMongoCollection<Customer> Customers => _connectionTenderPlan<Customer>("customers");
+        public IMongoCollection<TenderPlan> TenderPlans => _connectionTenderPlan<TenderPlan>("tenderPlans");
+        public IMongoCollection<TenderPlanPosition> TenderPlanPositions => _connectionTenderPlan<TenderPlanPosition>("tenderPlanPosition");
+
+        public IMongoCollection<TenderPlanIndex> TenderPlansIndex
+        {
+            get
+            {
+                var tpInd = _connectionTenderPlan<TenderPlanIndex>("tenderPlansIndex");
+                var crtInd = Builders<TenderPlanIndex>.IndexKeys.Ascending(tpi => tpi.TenderPlanId);
+                var crtIndOpt = new CreateIndexOptions<TenderPlanIndex> { Unique = true };
+                var crtIndModel = new CreateIndexModel<TenderPlanIndex>(crtInd, crtIndOpt);
+                tpInd.Indexes.CreateOne(crtIndModel);
+                return tpInd;
+            }
+        }
+
+        public IMongoCollection<FTPPath> FTPPath => _connectionFTPMonitor<FTPPath>("ftpPath");
+
+        public IMongoCollection<FTPEntry> FTPEntry => _connectionFTPMonitor<FTPEntry>("ftpFile");
+
         private MongoClient client
         {
             get
@@ -30,31 +57,12 @@ namespace TenderPlanAPI.Controllers
             return db.GetCollection<T>(name);
         }
 
-        public IMongoCollection<Customer> Customers => _connectionTenderPlan<Customer>("customers");
-        public IMongoCollection<TenderPlan> TenderPlans => _connectionTenderPlan<TenderPlan>("tenderPlans");
-        public IMongoCollection<TenderPlanPosition> TenderPlanPositions => _connectionTenderPlan<TenderPlanPosition>("tenderPlanPosition");
-
-        public IMongoCollection<TenderPlanIndex> TenderPlansIndex {
-            get {
-                var tpInd = _connectionTenderPlan<TenderPlanIndex>("tenderPlansIndex");
-                var crtInd = Builders<TenderPlanIndex>.IndexKeys.Ascending(tpi => tpi.TenderPlanId);
-                var crtIndOpt = new CreateIndexOptions<TenderPlanIndex> { Unique = true };
-                var crtIndModel = new CreateIndexModel<TenderPlanIndex>(crtInd, crtIndOpt);
-                tpInd.Indexes.CreateOne(crtIndModel);
-                return tpInd;
-            }
-        }
-
         private IMongoCollection<T> _connectionFTPMonitor<T>(string name)
         {
             var dbName = TestEnvHelper.IsTestEnv ? "Test" : "FTPMonitor";
             var db = client.GetDatabase(dbName);
             return db.GetCollection<T>(name);
         }
-
-        public IMongoCollection<FTPPath> FTPPath => _connectionFTPMonitor<FTPPath>("ftpPath");
-
-        public IMongoCollection<FTPEntry> FTPEntry => _connectionFTPMonitor<FTPEntry>("ftpFile");
 
     }
 }
