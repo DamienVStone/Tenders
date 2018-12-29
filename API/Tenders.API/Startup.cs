@@ -37,7 +37,7 @@ namespace TenderPlanAPI
                     opt.SerializerSettings.Converters.Add(new ObjectIdConverter());
                 });
             services.AddSingleton<IAPIConfigService, APIConfigService>();
-            services.AddTransient<IDBConnectContext, DBConnectContext>();
+            services.AddSingleton<IDBConnectContext, DBConnectContext>();
             services.AddSingleton<IPathService, PathService>();
         }
 
