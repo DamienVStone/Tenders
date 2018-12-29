@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TenderPlanAPI.Classes;
 using TenderPlanAPI.Controllers;
 using TenderPlanAPI.Services;
+using Tenders.API.Services;
 using static Tenders.Core.DI.Container;
 
 namespace TenderPlanAPI
@@ -35,9 +36,9 @@ namespace TenderPlanAPI
                 {
                     opt.SerializerSettings.Converters.Add(new ObjectIdConverter());
                 });
-            services.AddSingleton<IPathService, PathService>();
+            services.AddSingleton<IAPIConfigService, APIConfigService>();
             services.AddTransient<IDBConnectContext, DBConnectContext>();
-            
+            services.AddSingleton<IPathService, PathService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

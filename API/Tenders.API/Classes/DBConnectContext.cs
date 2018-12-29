@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using TenderPlanAPI.Models;
+using Tenders.API.Services;
 
 namespace TenderPlanAPI.Controllers
 {
@@ -15,6 +16,12 @@ namespace TenderPlanAPI.Controllers
 
     public class DBConnectContext : IDBConnectContext
     {
+        private readonly IAPIConfigService config;
+
+        public DBConnectContext(IAPIConfigService config)
+        {
+            this.config = config ?? throw new System.ArgumentNullException(nameof(config));
+        }
 
         public IMongoCollection<Customer> Customers => _connectionTenderPlan<Customer>("customers");
         public IMongoCollection<TenderPlan> TenderPlans => _connectionTenderPlan<TenderPlan>("tenderPlans");
@@ -41,12 +48,7 @@ namespace TenderPlanAPI.Controllers
         {
             get
             {
-#if DEBUG
-                //return new MongoClient("mongodb://10.48.93.43:27017/");
-                return new MongoClient("mongodb://127.0.0.1:27017");
-#else
-                return new MongoClient("mongodb://5.8.180.100:27017/");
-#endif
+                return new MongoClient(config.DbConnectionString);
             }
         }
 
@@ -59,7 +61,7 @@ namespace TenderPlanAPI.Controllers
 
         private IMongoCollection<T> _connectionFTPMonitor<T>(string name)
         {
-            var dbName = TestEnvHelper.IsTestEnv ? "Test" : "FTPMonitor";
+            var dbName = "FTPMonitor";
             var db = client.GetDatabase(dbName);
             return db.GetCollection<T>(name);
         }
