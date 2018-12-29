@@ -12,13 +12,19 @@ namespace TenderPlanAPI.Controllers
     [ApiController]
     public class TenderPlanIndexController:ControllerBase
     {
+        private readonly IDBConnectContext db;
+
+        public TenderPlanIndexController(IDBConnectContext Db)
+        {
+            db = Db ?? throw new System.ArgumentNullException(nameof(Db));
+        }
+
         /// <summary>
         /// </summary>
         /// <returns>Список всех файлов в индексе</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TenderPlanIndex>>> Get()
         {
-            var db = new DBConnectContext();
             return (await db.TenderPlansIndex.FindAsync(Builders<TenderPlanIndex>.Filter.Empty)).ToList();
         }
 
@@ -29,7 +35,7 @@ namespace TenderPlanAPI.Controllers
             {
                 var filter= Builders<TenderPlanIndex>.Filter.Eq("TenderPlanId", i.TenderPlanId);
 
-                var indexedFile = new DBConnectContext().TenderPlansIndex.Find(filter).ToList().FirstOrDefault();
+                var indexedFile = db.TenderPlansIndex.Find(filter).ToList().FirstOrDefault();
                 if (indexedFile == null)
                 {
                     // Файл не был проиндексирован ранее
@@ -39,7 +45,7 @@ namespace TenderPlanAPI.Controllers
                         TenderPlanId = i.TenderPlanId,
                         RevisionId = i.RevisionId
                     };
-                    new DBConnectContext().TenderPlansIndex.InsertOne(newIndexedFile);
+                    db.TenderPlansIndex.InsertOne(newIndexedFile);
                 }
                 else
                 {
@@ -50,7 +56,7 @@ namespace TenderPlanAPI.Controllers
                         var setRevisionId = Builders<TenderPlanIndex>.Update.Set("RevisionId", i.RevisionId);
                         var update = Builders<TenderPlanIndex>.Update.Combine(setOutdated, setRevisionId);
                         var updateFilter = Builders<TenderPlanIndex>.Filter.Eq("_id", indexedFile.Id);
-                        new DBConnectContext().TenderPlansIndex.UpdateOne(updateFilter, update);
+                        db.TenderPlansIndex.UpdateOne(updateFilter, update);
                     }
                 }
             });

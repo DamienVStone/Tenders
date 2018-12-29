@@ -15,6 +15,7 @@ namespace TenderPlanAPI.Classes
         private ObjectId _pathId; //идентификатор FTP пути по которому лежит дерево
         private List<FTPEntry> _dbFiles; //список файлов, полученных из базы данных
         private List<FTPEntryParam> _inputFiles; //список файлов, полученных из тела запроса
+        private readonly IDBConnectContext dbContext;
 
         /// <summary>
         /// Класс, рекурсивно обходящий и индексирующий деревья файлов
@@ -22,11 +23,12 @@ namespace TenderPlanAPI.Classes
         /// <param name="PathId">идентификатор FTP пути по которому лежит дерево</param>
         /// <param name="DbFiles">список файлов, полученных из базы данных</param>
         /// <param name="InputFiles">список файлов, полученных из тела запроса</param>
-        public TreeLooker(ObjectId PathId, List<FTPEntry> DbFiles, List<FTPEntryParam> InputFiles) {
+        public TreeLooker(ObjectId PathId, List<FTPEntry> DbFiles, List<FTPEntryParam> InputFiles, IDBConnectContext DbContext)
+        {
             _pathId = PathId;
             _dbFiles = DbFiles;
             _inputFiles = InputFiles;
-
+            this.dbContext = DbContext ?? throw new ArgumentNullException(nameof(DbContext));
             _dbFiles.AsParallel().ForAll(f => f.State = StateFile.Pending);
         }
 
@@ -72,7 +74,7 @@ namespace TenderPlanAPI.Classes
                                 dbFolderContents[f.Name].State = StateFile.Modified;
                             }
                             updates.Add(Builders<FTPEntry>.Update.Set("State", StateFile.Modified));
-                            new DBConnectContext().FTPEntry.UpdateOne(filter, Builders<FTPEntry>.Update.Combine(updates));
+                            dbContext.FTPEntry.UpdateOne(filter, Builders<FTPEntry>.Update.Combine(updates));
                         }
                         else
                         {
@@ -97,7 +99,7 @@ namespace TenderPlanAPI.Classes
                             Parent = dbParentId
                         };
 
-                        new DBConnectContext().FTPEntry.InsertOne(newFile);
+                        dbContext.FTPEntry.InsertOne(newFile);
 
                         // Вызываю ту же функцию для данного файла, чтобы проиндексироваьт всех детей
                         UpdateFiles(newFile.Id, f.Id);
@@ -106,7 +108,7 @@ namespace TenderPlanAPI.Classes
                 });
 
             var forDelete = dbFolderContents.Values.Where(f => f.State == StateFile.Pending).Select(f => Builders<FTPEntry>.Filter.Eq("_id", f.Id)).ToArray();
-            if(forDelete.Length>0) new DBConnectContext().FTPEntry.DeleteMany(Builders<FTPEntry>.Filter.Or(forDelete));
+            if (forDelete.Length > 0) dbContext.FTPEntry.DeleteMany(Builders<FTPEntry>.Filter.Or(forDelete));
         }
     }
 }

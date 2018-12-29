@@ -16,10 +16,12 @@ namespace TenderPlanAPI.Services
     {
         private readonly object key = new object();
         private readonly IConfiguration _config;
+        private readonly IDBConnectContext dbContext;
 
-        public PathService(IConfiguration config) : base()
+        public PathService(IConfiguration config, IDBConnectContext dbContext) : base()
         {
             _config = config;
+            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public FTPPath GetNotIndexedPath()
@@ -29,7 +31,7 @@ namespace TenderPlanAPI.Services
                 var timeout = int.Parse(_config["FTPPathIndexingTimeout"]);
                 var filter = Builders<FTPPath>.Filter.Lte("LastTimeIndexed", DateTimeOffset.Now.AddHours(-timeout));
                 var update = Builders<FTPPath>.Update.Set("LastTimeIndexed", DateTimeOffset.Now);
-                return new DBConnectContext().FTPPath.FindOneAndUpdate(filter, update);
+                return dbContext.FTPPath.FindOneAndUpdate(filter, update);
             }
         }
     }
