@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
+﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using TenderPlanAPI.Controllers;
+using System;
+using System.Linq;
 using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
 using TenderPlanAPI.Services;
@@ -19,10 +13,12 @@ namespace TenderPlanAPI.Controllers
     public class FTPPathController : ControllerBase
     {
         private IPathService _pathService;
+        private readonly IDBConnectContext db;
 
-        public FTPPathController(IPathService pathService) : base()
+        public FTPPathController(IPathService pathService, IDBConnectContext Db) : base()
         {
             _pathService = pathService;
+            db = Db ?? throw new ArgumentNullException(nameof(Db));
         }
 
         /// <summary>
@@ -33,7 +29,7 @@ namespace TenderPlanAPI.Controllers
         [HttpGet("Check")]
         public IActionResult HelperCheckValidPath([FromQuery]string path)
         {
-            var db = new DBConnectContext();
+
             var filter = Builders<FTPPath>.Filter.Eq("Path", path);
             if (string.IsNullOrEmpty(path))
             {
@@ -61,7 +57,7 @@ namespace TenderPlanAPI.Controllers
             var resultCheck = HelperCheckValidPath(path.Path) as ObjectResult;
             if (resultCheck.StatusCode == 200)
             {
-                var db = new DBConnectContext();
+
                 db.FTPPath.InsertOne(new FTPPath
                 {
                     Path = path.Path,
@@ -83,7 +79,7 @@ namespace TenderPlanAPI.Controllers
         [HttpDelete]
         public IActionResult Delete([FromQuery]ObjectIdParam idParam)
         {
-            var db = new DBConnectContext();
+
             var filter = Builders<FTPPath>.Filter.Eq("_id", idParam.Id);
             var s = db.FTPPath.DeleteOne(filter);
             if (s.DeletedCount <= 0)
@@ -100,7 +96,7 @@ namespace TenderPlanAPI.Controllers
         [HttpPost("ChangeFlagActive")]
         public IActionResult ChangeFlagActive([FromBody]ObjectIdParam objId)
         {
-            var db = new DBConnectContext();
+
             var filter = Builders<FTPPath>.Filter.Eq("_id", objId);
             var update = Builders<FTPPath>.Update.Set("IsActive", false);
             var s = db.FTPPath.UpdateOne(filter, update);
@@ -122,7 +118,7 @@ namespace TenderPlanAPI.Controllers
             var resultCheck = HelperCheckValidPath(path.Path) as ObjectResult;
             if (resultCheck.StatusCode == 200)
             {
-                var db = new DBConnectContext();
+
                 var filter = Builders<FTPPath>.Filter.Eq("_id", path.Id);
                 var updatePath = Builders<FTPPath>.Update.Set("Path", path.Path).Set("Login", path.Login);
                 var s = db.FTPPath.UpdateOne(filter, updatePath);
@@ -146,8 +142,8 @@ namespace TenderPlanAPI.Controllers
         {
             if (options.PageSize == 0) options.PageSize = 10;
 
-            var db = new DBConnectContext();
-            var paths = db.FTPPath.Find(p => p.IsActive ||(!string.IsNullOrWhiteSpace(options.Path)&&p.Path.Equals(options.Path)&&p.IsActive)).ToList();
+
+            var paths = db.FTPPath.Find(p => p.IsActive || (!string.IsNullOrWhiteSpace(options.Path) && p.Path.Equals(options.Path) && p.IsActive)).ToList();
             return new JsonResult(new ListResponse<FTPPath>
             {
                 Count = paths.Count(),

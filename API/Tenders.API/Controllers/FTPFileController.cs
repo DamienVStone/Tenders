@@ -16,6 +16,13 @@ namespace TenderPlanAPI.Controllers
     [ApiController]
     public class FTPFileController : ControllerBase
     {
+        private readonly IDBConnectContext db;
+
+        public FTPFileController(IDBConnectContext DbContext)
+        {
+            db = DbContext ?? throw new ArgumentNullException(nameof(DbContext));
+        }
+
         /// <summary>
         /// Добавление и обновления файлов у которых нет родителей
         /// </summary>
@@ -25,12 +32,10 @@ namespace TenderPlanAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromQuery]string pathId, [FromBody]List<FTPEntryParam> rootInputFiles)
         {
-            if(rootInputFiles.Count == 0)
+            if (rootInputFiles.Count == 0)
             {
                 return BadRequest("Нет файлов для добавления");
             }
-
-            var db = new DBConnectContext();
 
             var path = getPathOrNull(ObjectId.Parse(pathId));
             if (path == null)
@@ -79,7 +84,7 @@ namespace TenderPlanAPI.Controllers
                                 dbFiles[f.Name].State = StateFile.Modified;
                             }
                             updates.Add(Builders<FTPEntry>.Update.Set("State", StateFile.Modified));
-                            new DBConnectContext().FTPEntry.UpdateOne(filter, Builders<FTPEntry>.Update.Combine(updates));
+                            db.FTPEntry.UpdateOne(filter, Builders<FTPEntry>.Update.Combine(updates));
                         }
                         else
                         {
@@ -102,18 +107,18 @@ namespace TenderPlanAPI.Controllers
                             Parent = ObjectId.Empty
                         };
 
-                        new DBConnectContext().FTPEntry.InsertOne(newFile);
+                        db.FTPEntry.InsertOne(newFile);
                     }
                 });
 
             //Удаляю все файлы которых уже нет на FTP сервере
-            var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f=>Builders<FTPEntry>.Filter.Eq("_id", f.Id)).ToArray();
-            if(forDelete.Length>0)
+            var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => Builders<FTPEntry>.Filter.Eq("_id", f.Id)).ToArray();
+            if (forDelete.Length > 0)
                 db.FTPEntry.DeleteMany(Builders<FTPEntry>.Filter.Or(forDelete));
 
             return Ok("");
         }
-        
+
         /// <summary>
         /// Индексация деревьев файлов из ZIP архивов
         /// </summary>
@@ -138,8 +143,8 @@ namespace TenderPlanAPI.Controllers
             var treeRootNoParentFilter = Builders<FTPEntry>.Filter.Eq("Parent", ObjectId.Empty);
             var treeRootFilter = Builders<FTPEntry>.Filter.And(treeRootNameFilter, treeRootNoParentFilter);
 
-            var treeRootFromDb = new DBConnectContext().FTPEntry.Find(treeRootFilter).FirstOrDefault();
-            if(treeRootFromDb == null)
+            var treeRootFromDb = db.FTPEntry.Find(treeRootFilter).FirstOrDefault();
+            if (treeRootFromDb == null)
             {
                 treeRootFromDb = new FTPEntry()
                 {
@@ -152,7 +157,7 @@ namespace TenderPlanAPI.Controllers
                     Path = path.Id
                 };
 
-                new DBConnectContext().FTPEntry.InsertOne(treeRootFromDb);
+                db.FTPEntry.InsertOne(treeRootFromDb);
             }
             else
             {
@@ -163,8 +168,9 @@ namespace TenderPlanAPI.Controllers
                     updates.Add(Builders<FTPEntry>.Update.Set("Size", treeRoot.Size));
                     isModified = true;
                 }
-                
-                if(!treeRootFromDb.Modified.Equals(treeRoot.DateModified)){
+
+                if (!treeRootFromDb.Modified.Equals(treeRoot.DateModified))
+                {
                     updates.Add(Builders<FTPEntry>.Update.Set("Modified", treeRoot.DateModified));
                     isModified = true;
                 }
@@ -173,8 +179,8 @@ namespace TenderPlanAPI.Controllers
                 {
                     updates.Add(Builders<FTPEntry>.Update.Set("State", StateFile.Modified));
                     var updateQuery = Builders<FTPEntry>.Update.Combine(updates);
-                    new DBConnectContext().FTPEntry.UpdateOne(treeRootFilter, updateQuery);
-                    treeRootFromDb = new DBConnectContext().FTPEntry.Find(treeRootFilter).FirstOrDefault();
+                    db.FTPEntry.UpdateOne(treeRootFilter, updateQuery);
+                    treeRootFromDb = db.FTPEntry.Find(treeRootFilter).FirstOrDefault();
                 }
                 else
                 {
@@ -185,7 +191,7 @@ namespace TenderPlanAPI.Controllers
             //Далее получаю все дерево из бд для которого данный файл являтся родителем.
             var treeFromDb = getAllChildren(treeRootFromDb);
 
-            var treeLooker = new TreeLooker(path.Id, treeFromDb, fileTree.Files);
+            var treeLooker = new TreeLooker(path.Id, treeFromDb, fileTree.Files, db);
             treeLooker.UpdateFiles(treeRootFromDb.Id, fileTree.TreeRoot.Id);
 
             return Ok("");
@@ -198,7 +204,6 @@ namespace TenderPlanAPI.Controllers
         [HttpGet]
         public IEnumerable<FTPEntry> Get()
         {
-            var db = new DBConnectContext();
             var filter1 = Builders<FTPEntry>.Filter.Eq("State", StateFile.New);
             var filter2 = Builders<FTPEntry>.Filter.Eq("State", StateFile.Modified);
             var filterOr = Builders<FTPEntry>.Filter.Or(new List<FilterDefinition<FTPEntry>> { filter1, filter2 });
@@ -220,7 +225,7 @@ namespace TenderPlanAPI.Controllers
             }
 
             ObjectId id;
-            if(!ObjectId.TryParse(pathId, out id))
+            if (!ObjectId.TryParse(pathId, out id))
             {
                 return BadRequest("Неверный формат идентификатора пути");
             }
@@ -229,7 +234,7 @@ namespace TenderPlanAPI.Controllers
             var zipFilter = Builders<FTPEntry>.Filter.Regex("Name", @".*\.zip");
             var notZipFilter = Builders<FTPEntry>.Filter.Not(zipFilter);
             var filter = Builders<FTPEntry>.Filter.And(pathIdFilter, notZipFilter);
-            return new DBConnectContext().FTPEntry.Find(filter).ToList();
+            return db.FTPEntry.Find(filter).ToList();
         }
 
         /// <summary>
@@ -256,11 +261,12 @@ namespace TenderPlanAPI.Controllers
             var zipFilter = Builders<FTPEntry>.Filter.Regex("Name", @".*\.zip");
             var notZipFilter = Builders<FTPEntry>.Filter.Not(zipFilter);
             var filter = Builders<FTPEntry>.Filter.And(tenderPlansFilter, fileStateFilter, notZipFilter);
-            return new DBConnectContext().FTPEntry
+            return db.FTPEntry
                 .Find(filter)
                 .ToEnumerable()
-                .Select(p => 
-                    new TenderPlanFileToIndexViewmodel {
+                .Select(p =>
+                    new TenderPlanFileToIndexViewmodel
+                    {
                         FTPFileId = p.Id,
                         Name = p.Name
                     })
@@ -282,7 +288,7 @@ namespace TenderPlanAPI.Controllers
             }
 
             ObjectId id;
-            if(!ObjectId.TryParse(pathId, out id))
+            if (!ObjectId.TryParse(pathId, out id))
             {
                 return BadRequest("Неверно указан идентификатор пути");
             }
@@ -291,20 +297,20 @@ namespace TenderPlanAPI.Controllers
             var stateFilter = Builders<FTPEntry>.Filter.Eq("State", state);
             var pathAndStateFilter = Builders<FTPEntry>.Filter.And(pathFilter, stateFilter);
 
-            return new DBConnectContext().FTPEntry.Find(pathAndStateFilter).ToList();
+            return db.FTPEntry.Find(pathAndStateFilter).ToList();
         }
 
         private FTPPath getPathOrNull(ObjectId pathId)
         {
             var pathFilter = Builders<FTPPath>.Filter.Eq("_id", pathId);
-            var path = new DBConnectContext().FTPPath.Find(pathFilter).FirstOrDefault();
+            var path = db.FTPPath.Find(pathFilter).FirstOrDefault();
             return path;
         }
 
         private List<FTPEntry> getAllChildren(FTPEntry root)
         {
             var filter = Builders<FTPEntry>.Filter.Eq("Parent", root.Id);
-            var children = new DBConnectContext().FTPEntry.Find(filter).ToList().SelectMany(getAllChildren).ToList();
+            var children = db.FTPEntry.Find(filter).ToList().SelectMany(getAllChildren).ToList();
             children.Add(root);
             return children;
         }
