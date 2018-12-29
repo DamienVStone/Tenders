@@ -76,14 +76,13 @@ namespace TenderPlanAPI.Controllers
 
             private IMongoCollection<T> _connectionTenderPlan<T>(string name)
             {
-                var db = client.GetDatabase("TenderPlans");
+                var db = client.GetDatabase(config.DbName);
                 return db.GetCollection<T>(name);
             }
 
             private IMongoCollection<T> _connectionFTPMonitor<T>(string name)
             {
-                var dbName = "FTPMonitor";
-                var db = client.GetDatabase(dbName);
+                var db = client.GetDatabase(config.DbName);
                 return db.GetCollection<T>(name);
             }
         }
