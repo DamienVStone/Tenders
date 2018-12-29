@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,6 +107,43 @@ namespace Tenders.Integration.API.Services
             await logger.Log("Ожидание очереди");
             await httpClientService.GetAsync($"{configService.SynchronizeByKey}?token={configService.SecurityToken}&key={key}", ct);
             await logger.Log("Очередь освободилась");
+        }
+
+        public async Task<T> GetNextPathForIndexing<T>(CancellationToken ct)
+        {
+            var result = await httpClientService.GetAsync(configService.GetNextPathForIndexingUrl, ct);
+            var path = JsonConvert.DeserializeObject<T>(result.Text);
+            return path;
+        }
+
+        public async Task<string> SendFilesAsync(StringContent files, string pathId, CancellationToken ct)
+        {
+            var result = await httpClientService.PostAsync(configService.SendFilesUrl(pathId), files, ct);
+            return result.Text;
+        }
+
+        public async Task<string> SendFileTreeAsync(StringContent files, CancellationToken ct)
+        {
+            var result = await httpClientService.PostAsync(configService.SendFileTreeUrl, files, ct);
+            return result.Text;
+        }
+
+        public async Task<bool> SendNewIndexedFiles(StringContent index, CancellationToken ct)
+        {
+            var result = await httpClientService.PostAsync(configService.SendNewIndexedFilesUrl, index, ct);
+            return true;
+        }
+
+        public async Task<List<T>> GetCurrentIndexAsync<T>(CancellationToken ct)
+        {
+            var result = await httpClientService.GetAsync(configService.GetCurrentIndexUrl, ct);
+            return JsonConvert.DeserializeObject<List<T>>(result.Text);
+        }
+
+        public async Task<List<T>> GetUpdatedTenderPlansAsync<T>(CancellationToken ct)
+        {
+            var result = await httpClientService.GetAsync(configService.GetUpdatedTenderPlansUrl, ct);
+            return JsonConvert.DeserializeObject<List<T>>(result.Text);
         }
     }
 }

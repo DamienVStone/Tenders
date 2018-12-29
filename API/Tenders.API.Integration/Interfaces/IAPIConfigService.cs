@@ -58,7 +58,7 @@ namespace Tenders.Integration.API.Interfaces
         /// <summary>
         /// Url для отправки файлов
         /// </summary>
-        Uri SendFilesUrl { get; }
+        Uri SendFilesUrl(string pathId);
         /// <summary>
         /// Url для отправки дерева файлов
         /// </summary>

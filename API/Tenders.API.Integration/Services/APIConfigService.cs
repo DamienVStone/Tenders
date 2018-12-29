@@ -24,7 +24,7 @@ namespace Tenders.Integration.API.Services
             GetCurrentIndexUrl = new Uri(configService["api.GetCurrentIndexUrl"]);
             GetUpdatedTenderPlansUrl = new Uri(configService["api.GetUpdatedTenderPlansUrl"]);
             GetNextPathForIndexingUrl = new Uri(configService["api.GetNextPathForIndexingUrl"]);
-            SendFilesUrl = new Uri(configService["api.SendFilesUrl"]);
+            _sendFilesUrl = configService["api.SendFilesUrl"];
             SendFileTreeUrl = new Uri(configService["api.SendFileTreeUrl"]);
 
             SecurityToken = configService["api.SecurityToken"];
@@ -46,7 +46,14 @@ namespace Tenders.Integration.API.Services
         public Uri GetCurrentIndexUrl { get; }
         public Uri GetUpdatedTenderPlansUrl { get; }
         public Uri GetNextPathForIndexingUrl { get; }
-        public Uri SendFilesUrl { get; }
+
+        private string _sendFilesUrl;
+
+        public Uri SendFilesUrl(string pathId)
+        {
+            return new Uri(_sendFilesUrl + $"?pathId={pathId}");
+        }
+
         public Uri SendFileTreeUrl { get; }
 
         public string SecurityToken { get; }
