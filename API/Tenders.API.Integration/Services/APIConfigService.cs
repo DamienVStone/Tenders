@@ -20,6 +20,13 @@ namespace Tenders.Integration.API.Services
             SetFutureAuctionState = new Uri(configService["api.SetFutureAuctionState"]);
             GetFutureAuction = new Uri(configService["api.GetFutureAuction"]);
 
+            SendNewIndexedFilesUrl = new Uri(configService["api.SendNewIndexedFilesUrl"]);
+            GetCurrentIndexUrl = new Uri(configService["api.GetCurrentIndexUrl"]);
+            GetUpdatedTenderPlansUrl = new Uri(configService["api.GetUpdatedTenderPlansUrl"]);
+            GetNextPathForIndexingUrl = new Uri(configService["api.GetNextPathForIndexingUrl"]);
+            SendFilesUrl = new Uri(configService["api.SendFilesUrl"]);
+            SendFileTreeUrl = new Uri(configService["api.SendFileTreeUrl"]);
+
             SecurityToken = configService["api.SecurityToken"];
             Username = configService["api.Username"];//
             Password = configService["api.Password"];
@@ -34,6 +41,14 @@ namespace Tenders.Integration.API.Services
         public Uri SynchronizeByKey { get; }
         public Uri SetFutureAuctionState { get; }
         public Uri GetFutureAuction { get; }
+
+        public Uri SendNewIndexedFilesUrl { get; }
+        public Uri GetCurrentIndexUrl { get; }
+        public Uri GetUpdatedTenderPlansUrl { get; }
+        public Uri GetNextPathForIndexingUrl { get; }
+        public Uri SendFilesUrl { get; }
+        public Uri SendFileTreeUrl { get; }
+
         public string SecurityToken { get; }
         public string Username { get; }
         public string Password { get; }
