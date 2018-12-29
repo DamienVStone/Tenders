@@ -40,6 +40,31 @@ namespace Tenders.Integration.API.Interfaces
         /// </summary>
         Uri GetFutureAuction { get; }
         /// <summary>
+        /// Url для файлов которые подлежат обновлению в индексе
+        /// </summary>
+        Uri SendNewIndexedFilesUrl { get; }
+        /// <summary>
+        /// Url текущего состояния индекса
+        /// </summary>
+        Uri GetCurrentIndexUrl { get; }
+        /// <summary>
+        /// Url списока файлов, подлежащих индексации
+        /// </summary>
+        Uri GetUpdatedTenderPlansUrl { get; }
+        /// <summary>
+        /// Url получения следующего пути для индексации
+        /// </summary>
+        Uri GetNextPathForIndexingUrl { get; }
+        /// <summary>
+        /// Url для отправки файлов
+        /// </summary>
+        Uri SendFilesUrl { get; }
+        /// <summary>
+        /// Url для отправки дерева файлов
+        /// </summary>
+        Uri SendFileTreeUrl { get; }
+
+        /// <summary>
         /// Токен безопасности для доступа к старому API
         /// </summary>
         string SecurityToken { get; }
