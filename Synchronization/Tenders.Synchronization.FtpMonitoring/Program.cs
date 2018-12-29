@@ -1,28 +1,47 @@
 ﻿using FtpMonitoringService.Models;
-using System;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Tenders.Core.Abstractions.Services;
+using Tenders.Core.DI;
+using Tenders.Core.Services;
+using Tenders.Integration.API.Interfaces;
+using Tenders.Integration.API.Services;
 
 namespace FtpMonitoringService
 {
     class Program
     {
+        private static IAPIDataProviderService apiDataProvider;
+        private static ILoggerService logger;
+
         static void Main(string[] args)
         {
-            ApiClient.Host = "http://localhost";
+            var cts = new CancellationTokenSource();
+            _initContainer();
+            _doMonitoring(cts.Token).Wait();
+        }
 
-            var p = ApiClient.Get().GetNextPathToIndex();
-            if (p.Equals(FtpPath.Empty)) return;
+        private static async Task _doMonitoring(CancellationToken ct)
+        {
+            apiDataProvider.Authenticate(ct).Wait();
+            var p = await apiDataProvider.GetNextPathForIndexing<FtpPath>(ct);
+            if (p == null) return;
 
             List<FtpFile> allEntries = new List<FtpFile>();
-#if DEBUG
-            var creds = File.ReadAllLines("creds.txt");
-            p.Login = creds[0];
-            p.Password = creds[1];
-#endif
+            //#if DEBUG
+            //            var creds = File.ReadAllLines("creds.txt");
+            //            p.Login = creds[0];
+            //            p.Password = creds[1];
+            //#endif
             var files = FtpClient.Get().ListDirectoryFiels(p.Path, p.Login, p.Password);
-            ApiClient.Get().SendFilesAsync(files.Where(f => !f.Name.EndsWith(".zip")).ToList(), p).Wait();
+            var content = new StringContent(JsonConvert.SerializeObject(files.Where(f => !f.Name.EndsWith(".zip")).ToList()));
+            apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
+
             files
                 .Where(f => f.Name.EndsWith(".zip"))
                 .AsParallel()
@@ -30,26 +49,29 @@ namespace FtpMonitoringService
                 {
                     var fs = ZipHelper.Get().ParseArchve(FtpClient.Get().GetArchiveEntries(p.Path + f.Name, p.Login, p.Password));
                     fs.ForEach(file => file.Parent = f.Id);
-                    var res = ApiClient.Get().SendFileTreeAsync(fs, p, f).Result;
-                    Console.WriteLine(res);
+                    var res = apiDataProvider.SendFileTreeAsync(new StringContent(JsonConvert.SerializeObject(fs)), ct).Result;
+                    logger.Log(res);
                 });
+        }
 
-            
+        private static void _initContainer()
+        {
+            Container.Init(sc =>
+            {
+                Container.Registration.Register(sc);
+                sc.AddSingleton<IAPIDataProviderService, APIDataProviderService>();
+                sc.AddSingleton<IAPIConfigService, APIConfigService>();
+#if DEBUG
+                sc.AddSingleton<IConfigService, LocalFileConfigService>();
+#else
+                sc.AddSingleton<IConfigService, EnvironmentVariablesConfigService>();
+#endif
+                sc.AddSingleton<IAPIHttpClientService, APIHttpClientService>();
+                sc.AddSingleton<ILoggerService, LoggerService>();
+            });
 
-//            allEntries.AddRange(files);
-//            allEntries.AddRange(allArchivesEntries);
-
-//            var rootFiles = allEntries.Where(f => f.Parent.Equals(ObjectId.Empty) && !f.Name.EndsWith(".zip")).ToList();
-
-//#if DEBUG
-//            ApiClient.Get().WriteRootFilesInfoToDisk(rootFiles, p);
-
-//            allEntries
-//                .Where(f => f.Name.EndsWith(".zip"))
-//                .AsParallel()
-//                .Select(f => new { Root = f, Children = allEntries.Where(ch => ch.Parent.Equals(f.Id)).ToList() })
-//                .ForAll(f => ApiClient.Get().WriteFileTreeToDisk(f.Children, p, f.Root));
-//#endif
+            apiDataProvider = Container.GetService<IAPIDataProviderService>();
+            logger = Container.GetService<ILoggerService>();
         }
     }
 }

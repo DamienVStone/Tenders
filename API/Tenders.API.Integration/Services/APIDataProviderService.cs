@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -134,13 +135,13 @@ namespace Tenders.Integration.API.Services
             return true;
         }
 
-        public async Task<List<T>> GetCurrentIndexAsync<T>(CancellationToken ct)
+        public async Task<IEnumerable<T>> GetCurrentIndexAsync<T>(CancellationToken ct)
         {
             var result = await httpClientService.GetAsync(configService.GetCurrentIndexUrl, ct);
             return JsonConvert.DeserializeObject<List<T>>(result.Text);
         }
 
-        public async Task<List<T>> GetUpdatedTenderPlansAsync<T>(CancellationToken ct)
+        public async Task<IEnumerable<T>> GetUpdatedTenderPlansAsync<T>(CancellationToken ct)
         {
             var result = await httpClientService.GetAsync(configService.GetUpdatedTenderPlansUrl, ct);
             return JsonConvert.DeserializeObject<List<T>>(result.Text);
