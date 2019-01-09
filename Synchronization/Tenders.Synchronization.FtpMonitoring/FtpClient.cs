@@ -50,6 +50,7 @@ namespace FtpMonitoringService
                 responseText = Encoding.Default.GetString(responseBody.ToArray());
             };
 
+            logger.Log($"ListDirectoryFiels responseText: {responseText}");
             return responseText.Split("\r\n").Where(l => !string.IsNullOrEmpty(l)).Select(l => _lineToFile(dirPath, l)).Where(f => !f.IsDirectory).ToArray();
         }
 
