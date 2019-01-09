@@ -80,6 +80,7 @@ namespace FtpMonitoringService
 
         private FtpFile _lineToFile(string parentDir, string lineToFile)
         {
+            logger.Log($"_lineToFile parentDir: {parentDir} lineToFile: {lineToFile}");
             var parts = Regex.Replace(lineToFile, @"\s+", " ").Split(" ");
             var file = new FtpFile();
             file.Name = parts[3];
