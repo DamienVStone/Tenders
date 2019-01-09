@@ -41,7 +41,7 @@ namespace FtpMonitoringService
             p.Login = creds[0];
             p.Password = creds[1];
 #endif
-            var files = FtpClient.Get().ListDirectoryFiels(p.Path, p.Login, p.Password);
+            var files = FtpClient.Get(logger).ListDirectoryFiels(p.Path, p.Login, p.Password);
             var notZipFilesToSend = files.Where(f => !f.Name.EndsWith(".zip")).ToList();
             if(notZipFilesToSend.Count != 0)
             {
@@ -55,7 +55,7 @@ namespace FtpMonitoringService
                 .AsParallel()
                 .ForAll(f =>
                 {
-                    var fs = ZipHelper.Get().ParseArchve(FtpClient.Get().GetArchiveEntries(p.Path + f.Name, p.Login, p.Password));
+                    var fs = ZipHelper.Get().ParseArchve(FtpClient.Get(logger).GetArchiveEntries(p.Path + f.Name, p.Login, p.Password));
                     fs.ForEach(file => file.Parent = f.Id);
                     var res = apiDataProvider.SendFileTreeAsync(new StringContent(JsonConvert.SerializeObject(new { PathId = p.Id, TreeRoot = f, Files = fs }), Encoding.UTF8, MediaTypeNames.Application.Json), ct).Result;
                     logger.Log(res);
