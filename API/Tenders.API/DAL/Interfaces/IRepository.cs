@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using TenderPlanAPI.Models;
 
-namespace Tenders.API.DAL.Intefaces
+namespace Tenders.API.DAL.Interfaces
 {
-    public interface IRepository<T> where T:ModelBase
+    public interface IAPIRepository<T> where T:ModelBase
     {
         IEnumerable<T> GetAll();
         T GetOne(Guid id);
