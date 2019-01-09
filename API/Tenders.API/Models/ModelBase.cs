@@ -1,8 +1,4 @@
-﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace TenderPlanAPI.Models
 {
@@ -11,10 +7,10 @@ namespace TenderPlanAPI.Models
         public ModelBase()
         {
             CreatedDate = DateTime.Now;
-            Id = ObjectId.GenerateNewId();
+            Id = Guid.NewGuid();
             IsActive = true;
         }
-        public ObjectId Id { get; set; }
+        public Guid Id { get; set; }
         public virtual bool IsActive { get; set; }
         public virtual DateTime CreatedDate { get; set; }
     }

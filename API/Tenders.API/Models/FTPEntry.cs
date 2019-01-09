@@ -1,8 +1,4 @@
-﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System;
 using TenderPlanAPI.Enums;
 
 namespace TenderPlanAPI.Models
@@ -28,11 +24,11 @@ namespace TenderPlanAPI.Models
         /// <summary>
         /// Ссылка на путь
         /// </summary>
-        public ObjectId Path { get; set; }
+        public Guid Path { get; set; }
         /// <summary>
         /// Ссылка на родителя 
         /// </summary>
-        public ObjectId? Parent { get; set; }
+        public Guid? Parent { get; set; }
         /// <summary>
         /// Является ли этот элемент дерикторией
         /// </summary>
