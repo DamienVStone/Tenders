@@ -83,7 +83,6 @@ namespace TenderPlanAPI.Controllers
                     {
                         logger.Log("Creating mongo client with connection string : " + config.DbConnectionString);
                         var c = new MongoClient(config.DbConnectionString);
-                        logger.Log("Creating mongo client succeded");
                         return c;
                     }
                     catch (System.Exception e)
@@ -101,10 +100,8 @@ namespace TenderPlanAPI.Controllers
                 {
                     logger.Log($"Getting database {config.DbName}");
                     var db = client.GetDatabase(config.DbName);
-                    logger.Log($"Getting database {config.DbName} succeded");
-                    logger.Log($"Getting collection {name} succeded");
+                    logger.Log($"Getting collection {name}");
                     var collection = db.GetCollection<T>(name);
-                    logger.Log($"Getting collection {name} succeded");
                     return collection;
                 }
                 catch (System.Exception e)
