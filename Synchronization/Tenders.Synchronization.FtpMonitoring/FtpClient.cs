@@ -57,7 +57,7 @@ namespace FtpMonitoringService
 
         public ZipArchiveEntry[] GetArchiveEntries(string filePath, string username, string password)
         {
-            logger.Log($"GetArchiveEntries at {HttpUtility.UrlEncode(filePath)} with creds: {username}:{password}");
+            logger.Log($"GetArchiveEntries contains {filePath.Split('\t').Length} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(filePath);
             request.Credentials = new NetworkCredential(username, password);
 #if DEBUG
