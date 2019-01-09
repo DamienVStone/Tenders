@@ -43,7 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.API.Integration.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.Synchronization.FtpMonitoring", "Synchronization\Tenders.Synchronization.FtpMonitoring\Tenders.Synchronization.FtpMonitoring.csproj", "{C388BCBA-646E-4E84-816B-DB5C96898DA5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.Synchronization.TenderPlan.Indexer", "Synchronization\Tenders.Synchronization.Indexer\Tenders.Synchronization.TenderPlan.Indexer.csproj", "{9BD95623-E76D-4A95-8729-D89205A459BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.Synchronization.TenderPlan.Indexer", "Synchronization\Tenders.Synchronization.TenderPlan.Indexer\Tenders.Synchronization.TenderPlan.Indexer.csproj", "{9BD95623-E76D-4A95-8729-D89205A459BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.API.Integration.JobSeeker.Tests", "API\Tenders.API.Integration.JobSeeker.Tests\Tenders.API.Integration.JobSeeker.Tests.csproj", "{A67F63A5-7A48-4B39-B907-67CC34FE8455}"
 EndProject
