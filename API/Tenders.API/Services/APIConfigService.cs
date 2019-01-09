@@ -42,10 +42,15 @@ namespace Tenders.API.Services
                     creds += "@";
                 }
             }
-            catch (KeyNotFoundException) {}
+            catch (KeyNotFoundException) { }
 
             DbConnectionString = $"{config["api.DbConnectionScheme"]}://{creds}{config["api.DbHost"]}:{config["api.DbPort"]}/";
             DbName = config["api.DbName"];
+            if (!string.IsNullOrEmpty(DbName))
+            {
+                DbConnectionString += DbName;
+            }
+
             FTPIndexingTimeout = int.Parse(config["api.FTPIndexingTimeout"]);
         }
 
