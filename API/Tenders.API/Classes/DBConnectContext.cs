@@ -81,7 +81,7 @@ namespace TenderPlanAPI.Controllers
                 {
                     try
                     {
-                        logger.Log("Creating mongo client");
+                        logger.Log("Creating mongo client with connection string : " + config.DbConnectionString);
                         var c = new MongoClient(config.DbConnectionString);
                         logger.Log("Creating mongo client succeded");
                         return c;
