@@ -8,14 +8,14 @@ using System.Net.Mime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using TenderPlanIndexer.Models;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Core.DI;
 using Tenders.Core.Services;
 using Tenders.Integration.API.Interfaces;
 using Tenders.Integration.API.Services;
+using Tenders.Synchronization.TenderPlan.Indexer.Models;
 
-namespace TenderPlanIndexer
+namespace Tenders.Synchronization.TenderPlan.Indexer
 {
     class Program
     {
