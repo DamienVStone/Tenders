@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using TenderPlanAPI.Models;
 using Tenders.API.Services;
+using Tenders.Core.Abstractions.Services;
 
 namespace TenderPlanAPI.Controllers
 {
@@ -17,31 +18,40 @@ namespace TenderPlanAPI.Controllers
     public class DBConnectContext : IDBConnectContext
     {
         private readonly IAPIConfigService config;
+        private readonly ILoggerService logger;
 
-        public DBConnectContext(IAPIConfigService config)
+        public DBConnectContext(
+            IAPIConfigService config,
+            ILoggerService logger)
         {
             this.config = config ?? throw new System.ArgumentNullException(nameof(config));
+            this.logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
         }
 
-        public IMongoCollection<Customer> Customers => new TransientDBContext(config).Customers;
+        public IMongoCollection<Customer> Customers => new TransientDBContext(config, logger).Customers;
 
-        public IMongoCollection<TenderPlan> TenderPlans => new TransientDBContext(config).TenderPlans;
+        public IMongoCollection<TenderPlan> TenderPlans => new TransientDBContext(config, logger).TenderPlans;
 
-        public IMongoCollection<TenderPlanPosition> TenderPlanPositions => new TransientDBContext(config).TenderPlanPositions;
+        public IMongoCollection<TenderPlanPosition> TenderPlanPositions => new TransientDBContext(config, logger).TenderPlanPositions;
 
-        public IMongoCollection<TenderPlanIndex> TenderPlansIndex => new TransientDBContext(config).TenderPlansIndex;
+        public IMongoCollection<TenderPlanIndex> TenderPlansIndex => new TransientDBContext(config, logger).TenderPlansIndex;
 
-        public IMongoCollection<FTPPath> FTPPath => new TransientDBContext(config).FTPPath;
+        public IMongoCollection<FTPPath> FTPPath => new TransientDBContext(config, logger).FTPPath;
 
-        public IMongoCollection<FTPEntry> FTPEntry => new TransientDBContext(config).FTPEntry;
+        public IMongoCollection<FTPEntry> FTPEntry => new TransientDBContext(config, logger).FTPEntry;
 
         private class TransientDBContext
         {
             private readonly IAPIConfigService config;
+            private readonly ILoggerService logger;
 
-            public TransientDBContext(IAPIConfigService config)
+            public TransientDBContext(
+                IAPIConfigService config,
+                ILoggerService logger
+                )
             {
                 this.config = config ?? throw new System.ArgumentNullException(nameof(config));
+                this.logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             }
 
             public IMongoCollection<Customer> Customers => _connectionTenderPlan<Customer>("customers");
@@ -69,15 +79,39 @@ namespace TenderPlanAPI.Controllers
             {
                 get
                 {
-                    return new MongoClient(config.DbConnectionString);
+                    try
+                    {
+                        logger.Log("Creating mongo client with connection string : " + config.DbConnectionString);
+                        var c = new MongoClient(config.DbConnectionString);
+                        logger.Log("Creating mongo client succeded");
+                        return c;
+                    }
+                    catch (System.Exception e)
+                    {
+                        logger.Log(e.ToString());
+                        throw;
+                    }
                 }
             }
 
 
             private IMongoCollection<T> _connectionTenderPlan<T>(string name)
             {
-                var db = client.GetDatabase(config.DbName);
-                return db.GetCollection<T>(name);
+                try
+                {
+                    logger.Log($"Getting database {config.DbName}");
+                    var db = client.GetDatabase(config.DbName);
+                    logger.Log($"Getting database {config.DbName} succeded");
+                    logger.Log($"Getting collection {name} succeded");
+                    var collection = db.GetCollection<T>(name);
+                    logger.Log($"Getting collection {name} succeded");
+                    return collection;
+                }
+                catch (System.Exception e)
+                {
+                    logger.Log(e.ToString());
+                    throw;
+                }
             }
 
             private IMongoCollection<T> _connectionFTPMonitor<T>(string name)
