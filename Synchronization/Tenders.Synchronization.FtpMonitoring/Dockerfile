@@ -10,4 +10,4 @@ RUN dotnet publish -c Release -o out
 FROM microsoft/dotnet:2.2-aspnetcore-runtime
 WORKDIR /app
 COPY --from=build-env /app/Synchronization/Tenders.Synchronization.FtpMonitoring/out .
-ENTRYPOINT ["dotnet", "Tenders.Synchronization.FtpMonitoring"]
+ENTRYPOINT ["dotnet", "Tenders.Synchronization.FtpMonitoring.dll"]
