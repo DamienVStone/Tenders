@@ -57,7 +57,7 @@ namespace FtpMonitoringService
 
         public ZipArchiveEntry[] GetArchiveEntries(string filePath, string username, string password)
         {
-            logger.Log($"GetArchiveEntries contains {filePath.Split('\t').Length} with creds: {username}:{password}");
+            logger.Log($"GetArchiveEntries at {filePath} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(filePath);
             request.Credentials = new NetworkCredential(username, password);
 #if DEBUG
@@ -82,7 +82,7 @@ namespace FtpMonitoringService
 
         private FtpFile _lineToFile(string parentDir, string lineToFile)
         {
-            logger.Log($"_lineToFile parentDir: {parentDir} lineToFile: {lineToFile}");
+            logger.Log($"_lineToFile parentDir: {parentDir} lineToFile is {HttpUtility.UrlEncode(lineToFile)} and contains {lineToFile.Split('\t').Length}");
             var parts = Regex.Replace(lineToFile, @"\s+", " ").Split(" ");
             var file = new FtpFile();
             file.Name = parts[3];
