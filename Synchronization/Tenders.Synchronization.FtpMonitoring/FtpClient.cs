@@ -7,20 +7,32 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using Tenders.Core.Abstractions.Services;
 
 namespace FtpMonitoringService
 {
     public class FtpClient
     {
-        public static FtpClient Get()
+        private readonly ILoggerService logger;
+
+        public static FtpClient Get(ILoggerService logger)
         {
-            return new FtpClient();
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            return new FtpClient(logger);
         }
 
-        private FtpClient() {}
+        private FtpClient(ILoggerService logger)
+        {
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
 
         public FtpFile[] ListDirectoryFiels(string dirPath, string username, string password)
         {
+            logger.Log($"ListDirectoryFiels at {dirPath} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(dirPath);
             request.Credentials = new NetworkCredential(username, password);
 #if DEBUG
@@ -43,6 +55,7 @@ namespace FtpMonitoringService
 
         public ZipArchiveEntry[] GetArchiveEntries(string filePath, string username, string password)
         {
+            logger.Log($"GetArchiveEntries at {filePath} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(filePath);
             request.Credentials = new NetworkCredential(username, password);
 #if DEBUG
