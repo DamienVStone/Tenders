@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using Tenders.Core.Abstractions.Services;
 
 namespace FtpMonitoringService
@@ -56,7 +57,7 @@ namespace FtpMonitoringService
 
         public ZipArchiveEntry[] GetArchiveEntries(string filePath, string username, string password)
         {
-            logger.Log($"GetArchiveEntries at {filePath} with creds: {username}:{password}");
+            logger.Log($"GetArchiveEntries at {HttpUtility.UrlEncode(filePath)} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(filePath);
             request.Credentials = new NetworkCredential(username, password);
 #if DEBUG
