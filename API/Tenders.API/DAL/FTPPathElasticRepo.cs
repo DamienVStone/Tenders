@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nest;
+using System;
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
 
@@ -8,18 +9,16 @@ namespace Tenders.API.DAL
     {
         public FTPPathElasticRepo(IElasticDbContext DbContext) : base(DbContext) { }
 
-        public override FTPPath GetOne(Guid id)
+        protected override FTPPath MapFields(FieldValues Fields)
         {
-            var resp = Client.Get<FTPPath>(id);
-
             var path = new FTPPath
             {
-                Id = resp.Fields["id"].As<Guid>(),
-                Path = resp.Fields["path"].As<string>(),
-                Login = resp.Fields["login"].As<string>(),
-                Password = resp.Fields["password"].As<string>(),
-                IsActive = resp.Fields["isActive"].As<bool>(),
-                CreatedDate = resp.Fields["createdDate"].As<DateTime>()
+                Id = Fields["id"].As<Guid>(),
+                Path = Fields["path"].As<string>(),
+                Login = Fields["login"].As<string>(),
+                Password = Fields["password"].As<string>(),
+                IsActive = Fields["isActive"].As<bool>(),
+                CreatedDate = Fields["createdDate"].As<DateTime>()
             };
 
             return path;

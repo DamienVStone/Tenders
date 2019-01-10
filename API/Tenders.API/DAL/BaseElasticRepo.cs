@@ -16,7 +16,13 @@ namespace Tenders.API.DAL
             Client = dbContext.Client;
         }
 
-        public abstract T GetOne(Guid id);
+        protected abstract T MapFields(FieldValues fields);
+
+        public T GetOne(Guid id)
+        {
+            var resp = Client.Get<T>(id);
+            return MapFields(resp.Fields);
+        }
 
         public void Create(T item)
         {
