@@ -41,7 +41,7 @@ namespace FtpMonitoringService
 #else
             request.EnableSsl = false;
 #endif
-            request.Method = WebRequestMethods.Ftp.ListDirectory;
+            request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
 
             string responseText;
             using (var response = (FtpWebResponse)request.GetResponse())
@@ -63,7 +63,7 @@ namespace FtpMonitoringService
 #if DEBUG
             request.EnableSsl = false;
 #else
-            request.EnableSsl = true;
+            request.EnableSsl = false;
 #endif
             request.Method = WebRequestMethods.Ftp.DownloadFile;
 
