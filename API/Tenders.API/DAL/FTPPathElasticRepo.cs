@@ -35,15 +35,20 @@ namespace Tenders.API.DAL
             var resp = _client.Get<FTPPath>(id);
 
             var path = new FTPPath {
-                Id = resp.Fields.
+                Id = resp.Fields["id"].As<Guid>(),
+                Path = resp.Fields["path"].As<string>(),
+                Login = resp.Fields["login"].As<string>(),
+                Password = resp.Fields["password"].As<string>(),
+                IsActive = resp.Fields["isActive"].As<bool>(),
+                CreatedDate = resp.Fields["createdDate"].As<DateTime>()
             };
 
-            return ;
+            return path;
         }
 
         public void Update(FTPPath item)
         {
-            
+            _client.Update(new DocumentPath<FTPPath>(item.Id), u => u.Doc(item));
         }
     }
 }
