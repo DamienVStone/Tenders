@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TenderPlanAPI.Classes;
 using TenderPlanAPI.Controllers;
+using TenderPlanAPI.Models;
 using TenderPlanAPI.Services;
 using Tenders.API.DAL;
 using Tenders.API.DAL.Interfaces;
@@ -42,6 +43,7 @@ namespace TenderPlanAPI
             services.AddSingleton<IDBConnectContext, DBConnectContext>();
             services.AddSingleton<IPathService, PathService>();
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();
+            services.AddSingleton<IFTPPathRepo, FTPPathElasticRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
