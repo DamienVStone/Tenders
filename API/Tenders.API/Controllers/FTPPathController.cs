@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 using System;
 using System.Linq;
 using TenderPlanAPI.Models;
@@ -38,7 +37,7 @@ namespace TenderPlanAPI.Controllers
             {
                 return BadRequest("Строка не валидна, укажите абслютный путь");
             }
-            if (_repo.GetSinglePathByName(path)!=null)
+            if (_repo.PathExistsByName(path))
             {
                 return BadRequest("Путь уже существует");
             }
@@ -56,18 +55,19 @@ namespace TenderPlanAPI.Controllers
             var resultCheck = HelperCheckValidPath(path.Path) as ObjectResult;
             if (resultCheck.StatusCode == 200)
             {
-
-                _repo.Create(new FTPPath
+                var id = _repo.Create(new FTPPath
                 {
                     Path = path.Path,
                     Login = path.Login,
                     Password = path.Password
                 });
+                if (id == Guid.Empty) return StatusCode(500, "Не удалось добавить путь");
+                return Created("/", id);
             }
             else
                 return BadRequest(resultCheck.Value);
 
-            return Ok("");
+
         }
 
         /// <summary>
@@ -78,7 +78,8 @@ namespace TenderPlanAPI.Controllers
         [HttpDelete]
         public IActionResult Delete([FromQuery]Guid id)
         {
-            _repo.Delete(id);
+            if (!_repo.Exists(id)) return BadRequest("Путь не найден");
+            if (!_repo.Delete(id)) return StatusCode(500, "Не удалось удалить путь");
             return Ok("Путь удален");
         }
 
@@ -88,14 +89,10 @@ namespace TenderPlanAPI.Controllers
         /// <param name="objId">Идентификатор пути</param>
         /// <returns>200OK если флаг обновлен успешно</returns>
         [HttpPost("ChangeFlagActive")]
-        public IActionResult ChangeFlagActive([FromBody]ObjectIdParam objId)
+        public IActionResult ChangeFlagActive([FromBody]Guid id)
         {
-
-            var filter = Builders<FTPPath>.Filter.Eq("_id", objId);
-            var update = Builders<FTPPath>.Update.Set("IsActive", false);
-            var s = db.FTPPath.UpdateOne(filter, update);
-            if (s.ModifiedCount <= 0)
-                return BadRequest("Не найден элемент");
+            if (!_repo.Exists(id)) return NotFound("Элемент не существует");
+            if (!_repo.ChangeActiveFlag(id, false)) return StatusCode(500, "Не удалось изменить флаг");
 
             return Ok("");
         }
@@ -109,6 +106,8 @@ namespace TenderPlanAPI.Controllers
         [HttpPut]
         public IActionResult Put([FromBody]FTPPathParam path)
         {
+            if (!_repo.Exists(path.Id)) return BadRequest("Путь не найден");
+
             var resultCheck = HelperCheckValidPath(path.Path) as ObjectResult;
             if (resultCheck.StatusCode == 200)
             {
@@ -118,7 +117,7 @@ namespace TenderPlanAPI.Controllers
                 oldPath.Login = path.Login;
                 oldPath.Password = path.Password;
 
-                _repo.Update(oldPath);
+                if (!_repo.Update(oldPath)) return StatusCode(500, "Не удалось обновить путь");
             }
             else
                 return BadRequest(resultCheck.Value);
@@ -135,12 +134,10 @@ namespace TenderPlanAPI.Controllers
         {
             if (options.PageSize == 0) options.PageSize = 10;
 
-
-            var paths = _repo.GetAll();
             return new JsonResult(new ListResponse<FTPPath>
             {
-                Count = paths.Count(),
-                Data = paths.Skip(options.Skip).Take(options.Take).ToArray()
+                Count = (int)_repo.CountAll(),
+                Data = _repo.Get(options.Skip, options.Take).ToArray()
             });
         }
 

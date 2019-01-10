@@ -31,6 +31,28 @@ namespace Tenders.API.DAL
             ).Documents.AsEnumerable().FirstOrDefault();
         }
 
+        public bool PathExistsByName(string PathName, bool IsActive = true)
+        {
+            var res = Client.Count<FTPPath>(c => c
+                .Query(q => q
+                    .Bool(b => b
+                        .Must(mu => mu
+                            .Term(t => t
+                                .Field(f => f.IsActive)
+                                .Value(IsActive)
+                            ), mu => mu
+                            .Term(t => t
+                                .Field(f => f.Path)
+                                .Value(PathName)
+                            )
+                        )
+                    )
+                )
+            );
+
+            return res.Count != 0;
+        }
+
         protected override FTPPath MapFields(FieldValues Fields)
         {
             var path = new FTPPath
@@ -45,6 +67,7 @@ namespace Tenders.API.DAL
 
             return path;
         }
+
 
 
     }
