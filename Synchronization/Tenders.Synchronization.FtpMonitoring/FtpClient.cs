@@ -83,8 +83,11 @@ namespace FtpMonitoringService
         private FtpFile _lineToFile(string parentDir, string lineToFile)
         {
             logger.Log($"_lineToFile parentDir: {parentDir} lineToFile is {HttpUtility.UrlEncode(lineToFile)} and contains {lineToFile.Split('\t').Length}");
-            var parts = Regex.Replace(lineToFile, @"\s+", " ").Split(" ");
             var file = new FtpFile();
+
+#if DEBUG
+            var parts = Regex.Replace(lineToFile, @"\s+", " ").Split(" ");
+            
             file.Name = parts[3];
             file.DateModified = DateTime.ParseExact(parts[0] + " " + parts[1], "MM-dd-yy hh:mmtt", CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
             if (parts[2].Equals("<DIR>"))
@@ -96,6 +99,17 @@ namespace FtpMonitoringService
             {
                 file.Size = long.Parse(parts[2]);
             }
+#else
+            var isDir = lineToFile.StartsWith("d");
+            var cutted = lineToFile.Substring(29).Trim();
+            var parts = cutted.Split(' ');
+
+            file.Name = parts[4]+(isDir?"/":"");
+            file.IsDirectory = isDir;
+            file.DateModified = DateTime.Parse(string.Join(' ', parts[1], parts[2], parts[3]), CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
+            file.Size = long.Parse(parts[0]);
+#endif
+
             return file;
         }
 
