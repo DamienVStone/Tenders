@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using Tenders.Core.Abstractions.Services;
 
 namespace FtpMonitoringService
@@ -38,7 +39,7 @@ namespace FtpMonitoringService
 #if DEBUG
             request.EnableSsl = false;
 #else
-            request.EnableSsl = true;
+            request.EnableSsl = false;
 #endif
             request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
 
@@ -50,6 +51,7 @@ namespace FtpMonitoringService
                 responseText = Encoding.Default.GetString(responseBody.ToArray());
             };
 
+            logger.Log($"ListDirectoryFiels responseText: {responseText}");
             return responseText.Split("\r\n").Where(l => !string.IsNullOrEmpty(l)).Select(l => _lineToFile(dirPath, l)).Where(f => !f.IsDirectory).ToArray();
         }
 
@@ -61,7 +63,7 @@ namespace FtpMonitoringService
 #if DEBUG
             request.EnableSsl = false;
 #else
-            request.EnableSsl = true;
+            request.EnableSsl = false;
 #endif
             request.Method = WebRequestMethods.Ftp.DownloadFile;
 
@@ -80,8 +82,12 @@ namespace FtpMonitoringService
 
         private FtpFile _lineToFile(string parentDir, string lineToFile)
         {
-            var parts = Regex.Replace(lineToFile, @"\s+", " ").Split(" ");
+            logger.Log($"_lineToFile parentDir: {parentDir} lineToFile is {HttpUtility.UrlEncode(lineToFile)} and contains {lineToFile.Split('\t').Length}");
             var file = new FtpFile();
+
+#if DEBUG
+            var parts = Regex.Replace(lineToFile, @"\s+", " ").Split(" ");
+            
             file.Name = parts[3];
             file.DateModified = DateTime.ParseExact(parts[0] + " " + parts[1], "MM-dd-yy hh:mmtt", CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
             if (parts[2].Equals("<DIR>"))
@@ -93,6 +99,17 @@ namespace FtpMonitoringService
             {
                 file.Size = long.Parse(parts[2]);
             }
+#else
+            var isDir = lineToFile.StartsWith("d");
+            var cutted = lineToFile.Substring(29).Trim();
+            var parts = cutted.Split(' ');
+
+            file.Name = parts[4]+(isDir?"/":"");
+            file.IsDirectory = isDir;
+            file.DateModified = DateTime.Parse(string.Join(' ', parts[1], parts[2], parts[3]), CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
+            file.Size = long.Parse(parts[0]);
+#endif
+
             return file;
         }
 
