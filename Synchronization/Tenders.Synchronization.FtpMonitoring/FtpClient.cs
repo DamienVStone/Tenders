@@ -33,7 +33,7 @@ namespace FtpMonitoringService
 
         public FtpFile[] ListDirectoryFiels(string dirPath, string username, string password)
         {
-            logger.Log($"ListDirectoryFiels at {dirPath} with creds: {username}:{password}");
+            //logger.Log($"ListDirectoryFiels at {dirPath} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(dirPath);
             request.Credentials = new NetworkCredential(username, password);
 #if DEBUG
@@ -51,13 +51,13 @@ namespace FtpMonitoringService
                 responseText = Encoding.Default.GetString(responseBody.ToArray());
             };
 
-            logger.Log($"ListDirectoryFiels responseText: {responseText}");
+            //logger.Log($"ListDirectoryFiels responseText: {responseText}");
             return responseText.Split("\r\n").Where(l => !string.IsNullOrEmpty(l)).Select(l => _lineToFile(dirPath, l)).Where(f => !f.IsDirectory).ToArray();
         }
 
         public ZipArchiveEntry[] GetArchiveEntries(string filePath, string username, string password)
         {
-            logger.Log($"GetArchiveEntries at {filePath} with creds: {username}:{password}");
+            //logger.Log($"GetArchiveEntries at {filePath} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(filePath);
             request.Credentials = new NetworkCredential(username, password);
 #if DEBUG
@@ -82,7 +82,7 @@ namespace FtpMonitoringService
 
         private FtpFile _lineToFile(string parentDir, string lineToFile)
         {
-            logger.Log($"_lineToFile parentDir: {parentDir} lineToFile is {HttpUtility.UrlEncode(lineToFile)} and contains {lineToFile.Split('\t').Length}");
+            //logger.Log($"_lineToFile parentDir: {parentDir} lineToFile is {HttpUtility.UrlEncode(lineToFile)} and contains {lineToFile.Split('\t').Length}");
             var file = new FtpFile();
 
 #if DEBUG
