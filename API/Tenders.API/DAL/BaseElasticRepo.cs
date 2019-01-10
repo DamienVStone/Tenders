@@ -1,0 +1,41 @@
+﻿using Nest;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using TenderPlanAPI.Models;
+using Tenders.API.DAL.Interfaces;
+
+namespace Tenders.API.DAL
+{
+    public abstract class BaseElasticRepo<T> : IAPIRepository<T> where T : ModelBase
+    {
+        protected readonly ElasticClient Client;
+
+        protected BaseElasticRepo(IElasticDbContext dbContext)
+        {
+            Client = dbContext.Client;
+        }
+
+        public abstract T GetOne(Guid id);
+
+        public void Create(T item)
+        {
+            Client.IndexDocument(item);
+        }
+
+        public void Delete(Guid id)
+        {
+            Client.Delete<T>(id);
+        }
+
+        public IEnumerable<T> GetAll()
+        {
+            return Client.Search<T>(s => s.Query(q => q.MatchAll())).Documents.AsEnumerable();
+        }
+
+        public void Update(T item)
+        {
+            Client.Update(new DocumentPath<T>(item.Id), u => u.Doc(item));
+        }
+    }
+}
