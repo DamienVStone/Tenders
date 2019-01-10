@@ -41,7 +41,7 @@ namespace FtpMonitoringService
 #else
             request.EnableSsl = false;
 #endif
-            request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
+            request.Method = WebRequestMethods.Ftp.ListDirectory;
 
             string responseText;
             using (var response = (FtpWebResponse)request.GetResponse())
