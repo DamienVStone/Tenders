@@ -1,4 +1,4 @@
-﻿namespace TenderPlanIndexer.Models
+﻿namespace Tenders.Synchronization.TenderPlan.Indexer.Models
 {
     /// <summary>
     /// Файл индекса плана тендера
