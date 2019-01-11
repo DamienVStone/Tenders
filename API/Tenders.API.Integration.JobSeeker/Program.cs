@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Core.DI;
 using Tenders.Core.Services;
@@ -30,11 +31,10 @@ namespace Tenders.Integration.API.JobSeeker
             if (string.IsNullOrEmpty(containerTag))
                 throw new ArgumentNullException("containerTag. " + string.Join(';', args));
 
-            _doWork();
-            Console.ReadLine();
+            _doWork().Wait();
         }
 
-        static async void _doWork()
+        static async Task _doWork()
         {
             var cts = new CancellationTokenSource();
             await apiDataProvider.Authenticate(cts.Token);
@@ -43,9 +43,9 @@ namespace Tenders.Integration.API.JobSeeker
             await logger.Log(actionsService.RunJob(job));
             var result = await apiDataProvider.SetFutureAuctionOnServiceState(auction, cts.Token);
             if (result)
-                logger.Log("Успешно завершено").Wait();
+                await logger.Log("Успешно завершено");
             else
-                logger.Log("Не удалось изменить статус аукциона").Wait();
+                await logger.Log("Не удалось изменить статус аукциона");
         }
 
         public static void InitContainer()
