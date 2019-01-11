@@ -28,6 +28,7 @@ namespace FtpMonitoringService
             _initContainer();
             logger.Log("Запуск обработки путей.").Wait();
             var cts = new CancellationTokenSource();
+            apiDataProvider.Authenticate(cts.Token).Wait();
             while (_doMonitoring(cts.Token).Result) { }
             logger.Log("Завершение обработки путей.").Wait();
         }
@@ -36,7 +37,6 @@ namespace FtpMonitoringService
         {
             var sw = new Stopwatch();
             sw.Start();
-            apiDataProvider.Authenticate(ct).Wait();
             var p = await apiDataProvider.GetNextPathForIndexing<FtpPath>(ct);
             if (p == null)
             {
@@ -50,9 +50,10 @@ namespace FtpMonitoringService
             p.Login = creds[0];
             p.Password = creds[1];
 #endif
+            await logger.Log($"Обработка пути {p.Path}.");
             var files = FtpClient.Get(logger).ListDirectoryFields(p.Path, p.Login, p.Password);
             var filesCount = files.Count();
-            await logger.Log($"Найдено {filesCount} файлов в {p.Path}");
+            await logger.Log($"Найдено {filesCount}");
             var i = 0;
             var notZipFilesToSend = files.Where(f => !f.Name.EndsWith(".zip__")).ToList(); // пока обрабатываем все файлы без погружения
             if (notZipFilesToSend.Count != 0)
@@ -76,7 +77,7 @@ namespace FtpMonitoringService
                 });
 
             sw.Stop();
-            logger.Log($"Обработка пути {p.Path} завершена.").Wait();
+            await logger.Log($"Обработка пути {p.Path} завершена.");
             return true;
         }
 
