@@ -25,9 +25,9 @@ namespace FtpMonitoringService
 
         static void Main(string[] args)
         {
+            _initContainer();
             logger.Log("Запуск обработки путей.").Wait();
             var cts = new CancellationTokenSource();
-            _initContainer();
             while (_doMonitoring(cts.Token).Result) { }
             logger.Log("Завершение обработки путей.").Wait();
         }
