@@ -120,7 +120,7 @@ namespace FtpMonitoringService
 
         private DateTime _parseDate(string[] parts)
         {
-            var isContainsTime = parts.Length < 5;
+            var isContainsTime = parts.Length < 6;
             var year = isContainsTime ? $"{DateTime.Now.Year} {parts[3]}" : parts[4]; // Добавляем год если указано только время
             var changeDate = DateTime.Parse($"{parts[1]} {parts[2]} {year}", CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
             // Если месяц больше текущего - значит это данные данные за прошлый год (догадка)
