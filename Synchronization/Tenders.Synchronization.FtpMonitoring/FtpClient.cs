@@ -31,7 +31,7 @@ namespace FtpMonitoringService
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public FtpFile[] ListDirectoryFiels(string dirPath, string username, string password)
+        public FtpFile[] ListDirectoryFields(string dirPath, string username, string password)
         {
             //logger.Log($"ListDirectoryFiels at {dirPath} with creds: {username}:{password}");
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(dirPath);
