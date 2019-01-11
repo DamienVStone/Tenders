@@ -87,7 +87,7 @@ namespace FtpMonitoringService
 
 #if DEBUG
             var parts = Regex.Replace(lineToFile, @"\s+", " ").Split(" ");
-            
+
             file.Name = parts[3];
             file.DateModified = DateTime.ParseExact(parts[0] + " " + parts[1], "MM-dd-yy hh:mmtt", CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
             if (parts[2].Equals("<DIR>"))
@@ -103,11 +103,19 @@ namespace FtpMonitoringService
             var isDir = lineToFile.StartsWith("d");
             var cutted = lineToFile.Substring(29).Trim();
             var parts = cutted.Split(' ');
+            var year = parts[3].Contains(':') ? $"{DateTime.Now.Year} {parts[3]}" : parts[3];
+            var changeDate = DateTime.Parse($"{parts[1]} {parts[2]} {year}", CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
 
-            file.Name = parts[4]+(isDir?"/":"");
+
+            file.Name = parts[4] + (isDir ? "/" : "");
             file.IsDirectory = isDir;
-            file.DateModified = DateTime.Parse(string.Join(' ', parts[1], parts[2], parts[3]), CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
+            file.DateModified = changeDate;
             file.Size = long.Parse(parts[0]);
+
+            if (changeDate > DateTime.Now)
+            {
+                logger.Log($"Дата изменения файла {file.Name} - {changeDate} больше текущей!");
+            }
 #endif
 
             return file;
