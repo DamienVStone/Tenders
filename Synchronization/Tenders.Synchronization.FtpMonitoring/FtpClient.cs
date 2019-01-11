@@ -103,22 +103,31 @@ namespace FtpMonitoringService
             var isDir = lineToFile.StartsWith("d");
             var cutted = lineToFile.Substring(29).Trim();
             var parts = cutted.Split(' ');
-            var year = parts[3].Contains(':') ? $"{DateTime.Now.Year} {parts[3]}" : parts[3];
-            var changeDate = DateTime.Parse($"{parts[1]} {parts[2]} {year}", CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
+            var changeDate = _parseDate(parts);
 
-
-            file.Name = parts[4] + (isDir ? "/" : "");
+            file.Name = parts.Last() + (isDir ? "/" : "");
             file.IsDirectory = isDir;
             file.DateModified = changeDate;
             file.Size = long.Parse(parts[0]);
 
+            // Для уверенности проверим полученную дату
             if (changeDate > DateTime.Now)
-            {
                 logger.Log($"Дата изменения файла {file.Name} - {changeDate} больше текущей!");
-            }
 #endif
 
             return file;
+        }
+
+        private DateTime _parseDate(string[] parts)
+        {
+            var isContainsTime = parts.Length < 5;
+            var year = isContainsTime ? $"{DateTime.Now.Year} {parts[3]}" : parts[4]; // Добавляем год если указано только время
+            var changeDate = DateTime.Parse($"{parts[1]} {parts[2]} {year}", CultureInfo.GetCultureInfoByIetfLanguageTag("en"));
+            // Если месяц больше текущего - значит это данные данные за прошлый год (догадка)
+            if (changeDate.Month > DateTime.Now.Month)
+                changeDate = changeDate.AddYears(-1);
+
+            return changeDate;
         }
 
     }
