@@ -50,11 +50,11 @@ namespace FtpMonitoringService
             p.Login = creds[0];
             p.Password = creds[1];
 #endif
-            var files = FtpClient.Get(logger).ListDirectoryFiels(p.Path, p.Login, p.Password);
+            var files = FtpClient.Get(logger).ListDirectoryFields(p.Path, p.Login, p.Password);
             var filesCount = files.Count();
             await logger.Log($"Найдено {filesCount} файлов в {p.Path}");
             var i = 0;
-            var notZipFilesToSend = files.Where(f => !f.Name.EndsWith(".zip")).ToList();
+            var notZipFilesToSend = files.Where(f => !f.Name.EndsWith(".zip__")).ToList(); // пока обрабатываем все файлы без погружения
             if (notZipFilesToSend.Count != 0)
             {
                 var content = new StringContent(JsonConvert.SerializeObject(notZipFilesToSend), Encoding.UTF8, MediaTypeNames.Application.Json);
@@ -64,7 +64,7 @@ namespace FtpMonitoringService
             }
 
             files
-                .Where(f => f.Name.EndsWith(".zip"))
+                .Where(f => f.Name.EndsWith(".zip__"))
                 .AsParallel()
                 .ForAll(f =>
                 {
