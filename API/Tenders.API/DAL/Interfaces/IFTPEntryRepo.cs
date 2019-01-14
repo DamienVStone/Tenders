@@ -1,11 +1,10 @@
-﻿using System;
-using TenderPlanAPI.Models;
+﻿using TenderPlanAPI.Models;
 
 namespace Tenders.API.DAL.Interfaces
 {
     public interface IFTPEntryRepo : IAPIRepository<FTPEntry>
     {
-        FTPEntry GetFilesFromPath(Guid PathId, bool HasParents = false);
+        FTPEntry GetFilesFromPath(string PathId, bool HasParents = false);
 
     }
 }

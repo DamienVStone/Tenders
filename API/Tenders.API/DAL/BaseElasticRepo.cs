@@ -19,21 +19,22 @@ namespace Tenders.API.DAL
 
         protected abstract T MapFields(FieldValues fields);
 
-        public T GetOne(Guid id)
+        public T GetOne(string id)
         {
-            var resp = Client.Get<T>(id);
+            var resp = Client.Get<T>(Guid.Parse(id));
             return MapFields(resp.Fields);
         }
 
-        public Guid Create(T item)
+        public string Create(T item)
         {
             var res = Client.IndexDocument(item);
-            return res.IsValid?item.Id:Guid.Empty;
+            var id =  res.IsValid?item.Id:Guid.Empty;
+            return id.ToString();
         }
 
-        public bool Delete(Guid id)
+        public bool Delete(string id)
         {
-            return Client.Delete<T>(id).IsValid;
+            return Client.Delete<T>(Guid.Parse(id)).IsValid;
         }
 
         public IEnumerable<T> Get(int Skip, int Take, bool IsActive = true)
@@ -55,12 +56,12 @@ namespace Tenders.API.DAL
             return Client.Update(new DocumentPath<T>(item.Id), u => u.Doc(item)).IsValid;
         }
 
-        public bool ChangeActiveFlag(Guid Id, bool IsActive)
+        public bool ChangeActiveFlag(string Id, bool IsActive)
         {
-            return Client.Update<T, object>(new DocumentPath<T>(Id), u => u.Doc(new { IsActive })).IsValid;
+            return Client.Update<T, object>(new DocumentPath<T>(Guid.Parse(Id)), u => u.Doc(new { IsActive })).IsValid;
         }
 
-        public bool Exists(Guid Id, bool IsActive = true)
+        public bool Exists(string Id, bool IsActive = true)
         {
             var res = Client.Count<T>(c => c
                 .Query(q => q
@@ -72,7 +73,7 @@ namespace Tenders.API.DAL
                             ), mu => mu
                             .Term(t => t
                                 .Field(f => f.Id)
-                                .Value(Id)
+                                .Value(Guid.Parse(Id))
                             )
                         )
                     )
