@@ -87,6 +87,74 @@ namespace Tenders.API.DAL
             ).Documents;
         }
 
+        public FTPEntry GetByName(string Name, bool HasParents = false)
+        {
+            return Client.Search<FTPEntry>(s => s
+                .Query(q => q
+                    .Bool(b => 
+                        mustHaveParents(
+                            b.Must(mu => mu
+                                .Term(t => t
+                                    .Field(f => f.IsActive)
+                                    .Value(true)
+                                ), mu => mu
+                                .Term(t => t
+                                    .Field(f => f.Name)
+                                    .Value(Name)
+                                )
+                            ),
+                            HasParents
+                        )
+                    )
+                )
+            ).Documents.First();
+        }
+
+        public bool ExistsByName(string Name, bool HasParents = false)
+        {
+            return Client.Count<FTPEntry>(c => c
+                .Query(q => q
+                    .Bool(b =>
+                        mustHaveParents(
+                            b.Must(mu => mu
+                                .Term(t => t
+                                    .Field(f => f.IsActive)
+                                    .Value(true)
+                                ), mu => mu
+                                .Term(t => t
+                                    .Field(f => f.Name)
+                                    .Value(Name)
+                                )
+                            ),
+                            HasParents
+                        )
+                    )
+                )
+            ).Count!=0;
+        }
+
+        public IEnumerable<FTPEntry> GetByParent(string ParentId)
+        {
+            var id = Guid.Parse(ParentId);
+
+            return Client.Search<FTPEntry>(s => s
+                .Query(q => q
+                    .Bool(b => b
+                        .Must(mu => mu
+                            .Term(t => t
+                                .Field(f => f.IsActive)
+                                .Value(true)
+                            ), mu => mu
+                            .Term(t => t
+                                .Field(f => f.Parent)
+                                .Value(id)
+                            )
+                        )
+                    )
+                )
+            ).Documents;
+        }
+
         private Func<QueryContainerDescriptor<FTPEntry>, QueryContainer>[] fileStateTermCreator(StateFile[] States)
         {
             var containers = new List<Func<QueryContainerDescriptor<FTPEntry>, QueryContainer>>();

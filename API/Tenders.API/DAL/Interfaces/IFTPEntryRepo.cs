@@ -9,5 +9,8 @@ namespace Tenders.API.DAL.Interfaces
         IEnumerable<FTPEntry> GetByPath(int Skip, int Take, string PathId, bool HasParents = false);
         IEnumerable<FTPEntry> GetByFileState(int Skip, int Take, bool HasParents = false, params StateFile[] States);
         IEnumerable<FTPEntry> GetByFileStateAndPath(int Skip, int Take, string PathId, bool HasParents = false, params StateFile[] States);
+        FTPEntry GetByName(string Name, bool HasParents = false);
+        bool ExistsByName(string Name, bool HasParents = false);
+        IEnumerable<FTPEntry> GetByParentId(string ParentId);
     }
 }

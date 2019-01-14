@@ -69,7 +69,9 @@ namespace TenderPlanAPI.Controllers
                         {
                             lock (key)
                             {
-                                dbFiles[f.Name].State = StateFile.Modified;
+                                dbFile.Name = f.Name;
+                                dbFile.Size = f.Size;
+                                dbFile.State = StateFile.Modified;
                             }
                             _entryRepo.Update(dbFile);
                         }
@@ -77,7 +79,7 @@ namespace TenderPlanAPI.Controllers
                         {
                             lock (key)
                             {
-                                dbFiles[f.Name].State = StateFile.Indexed;
+                                dbFile.State = StateFile.Indexed;
                             }
                         }
                     }
@@ -117,60 +119,44 @@ namespace TenderPlanAPI.Controllers
         [HttpPost("AddFileTree")]
         public IActionResult AddFileTree([FromBody] FileTreeParam fileTree)
         {
-            var path = getPathOrNull(fileTree.PathId);
-            if (path == null) return BadRequest("Путь не найден");
+            if (!_pathRepo.Exists(fileTree.PathId.ToString())) return BadRequest("Путь не найден");
 
             var treeRoot = fileTree.TreeRoot;
             //Осторожно!
             //Корень дерева не может содержать родителя. Если у кроня дерева есть родитель то это, из-за дублируемых имен вложенных файлов, сломает всю концепцию индексатора и весь этот кусок надо будет переписать.
-            if (treeRoot.Parent != null && !treeRoot.Parent.Equals(ObjectId.Empty)) return BadRequest("Корень дерева не может содержать родителя");
+            if (!string.IsNullOrWhiteSpace(fileTree.TreeRoot.Parent.ToString())) return BadRequest("Корень дерева не может содержать родителя");
 
             //Осторожно!
-            //Корень дерева не может быть директорией т.к., из-за дублирующих имен вложеных папок, это может сломать всю концепцию индексатора
+            //Корень дерева не может быть директорией из-за дублирующих имен вложеных папок, это может сломать всю концепцию индексатора
             if (treeRoot.IsDirectory || !treeRoot.Name.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase)) return BadRequest("Корень дерева может быть только ZIP архивом");
-
-            var treeRootNameFilter = Builders<FTPEntry>.Filter.Eq("Name", fileTree.TreeRoot.Name);
-            var treeRootNoParentFilter = Builders<FTPEntry>.Filter.Eq("Parent", ObjectId.Empty);
-            var treeRootFilter = Builders<FTPEntry>.Filter.And(treeRootNameFilter, treeRootNoParentFilter);
-
-            var treeRootFromDb = db.FTPEntry.Find(treeRootFilter).FirstOrDefault();
-            if (treeRootFromDb == null)
+            
+            FTPEntry treeRootFromDb;
+            if (!_entryRepo.ExistsByName(fileTree.TreeRoot.Name))
             {
                 treeRootFromDb = new FTPEntry()
                 {
                     Name = treeRoot.Name,
                     Size = treeRoot.Size,
                     Modified = treeRoot.DateModified,
-                    Parent = treeRoot.Parent,
+                    Parent = Guid.Parse(treeRoot.Parent),
                     IsDirectory = treeRoot.IsDirectory,
                     State = StateFile.New,
-                    Path = path.Id
+                    Path = Guid.Parse(fileTree.PathId)
                 };
 
-                db.FTPEntry.InsertOne(treeRootFromDb);
+                _entryRepo.Create(treeRootFromDb);
             }
             else
             {
-                var updates = new List<UpdateDefinition<FTPEntry>>();
-                var isModified = false;
-                if (treeRootFromDb.Size != treeRoot.Size)
+                treeRootFromDb = _entryRepo.GetByName(fileTree.TreeRoot.Name);
+                
+                if (treeRootFromDb.Size != treeRoot.Size || !treeRootFromDb.Modified.Equals(treeRoot.DateModified))
                 {
-                    updates.Add(Builders<FTPEntry>.Update.Set("Size", treeRoot.Size));
-                    isModified = true;
-                }
+                    treeRootFromDb.Size = treeRoot.Size;
+                    treeRootFromDb.Modified = treeRoot.DateModified;
+                    treeRootFromDb.State = StateFile.Modified;
 
-                if (!treeRootFromDb.Modified.Equals(treeRoot.DateModified))
-                {
-                    updates.Add(Builders<FTPEntry>.Update.Set("Modified", treeRoot.DateModified));
-                    isModified = true;
-                }
-
-                if (isModified)
-                {
-                    updates.Add(Builders<FTPEntry>.Update.Set("State", StateFile.Modified));
-                    var updateQuery = Builders<FTPEntry>.Update.Combine(updates);
-                    db.FTPEntry.UpdateOne(treeRootFilter, updateQuery);
-                    treeRootFromDb = db.FTPEntry.Find(treeRootFilter).FirstOrDefault();
+                    _entryRepo.Update(treeRootFromDb);
                 }
                 else
                 {
@@ -185,6 +171,13 @@ namespace TenderPlanAPI.Controllers
             treeLooker.UpdateFiles(treeRootFromDb.Id, fileTree.TreeRoot.Id);
 
             return Ok("");
+        }
+
+        private IEnumerable<FTPEntry> getAllChildren(FTPEntry root)
+        {
+            var tree = _entryRepo.GetByParentId(root.Id.ToString()).SelectMany(getAllChildren).ToHashSet();
+            tree.Add(root);
+            return tree;
         }
 
         /// <summary>
