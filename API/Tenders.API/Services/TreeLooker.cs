@@ -20,7 +20,7 @@ namespace TenderPlanAPI.Services
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
         }
 
-        public void UpdateFiles(string PathId, ISet<FTPEntry> DbFiles, ISet<FTPEntryParam> InputFiles, string DbParentId, string InputParentId)
+        public void UpdateFiles(string PathId, IEnumerable<FTPEntry> DbFiles, IEnumerable<FTPEntryParam> InputFiles, string DbParentId, string InputParentId)
         {
             var pathId = Guid.Parse(PathId);
             var dbParentId = Guid.Parse(DbParentId);

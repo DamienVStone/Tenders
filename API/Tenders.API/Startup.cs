@@ -10,6 +10,7 @@ using TenderPlanAPI.Services;
 using Tenders.API.DAL;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Services;
+using Tenders.API.Services.Interfaces;
 using static Tenders.Core.DI.Container;
 
 namespace TenderPlanAPI
@@ -45,6 +46,7 @@ namespace TenderPlanAPI
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();
             services.AddSingleton<IFTPPathRepo, FTPPathElasticRepo>();
             services.AddSingleton<IFTPEntryRepo, FTPEntryElasticRepo>();
+            services.AddSingleton<ITreeLookerService, TreeLookerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

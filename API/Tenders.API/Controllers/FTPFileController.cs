@@ -11,6 +11,7 @@ using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
 using TenderPlanAPI.Viewmodels;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Services.Interfaces;
 
 namespace TenderPlanAPI.Controllers
 {
@@ -20,11 +21,13 @@ namespace TenderPlanAPI.Controllers
     {
         private readonly IFTPEntryRepo _entryRepo;
         private readonly IFTPPathRepo _pathRepo;
+        private readonly ITreeLookerService _treeLookerService;
 
-        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo)
+        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, ITreeLookerService treeLookerService)
         {
             _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
+            _treeLookerService = treeLookerService ?? throw new ArgumentNullException(nameof(treeLookerService));
         }
 
 
@@ -166,9 +169,8 @@ namespace TenderPlanAPI.Controllers
 
             //Далее получаю все дерево из бд для которого данный файл являтся родителем.
             var treeFromDb = getAllChildren(treeRootFromDb);
-
-            var treeLooker = new TreeLooker(path.Id, treeFromDb, fileTree.Files, db);
-            treeLooker.UpdateFiles(treeRootFromDb.Id, fileTree.TreeRoot.Id);
+            
+            _treeLookerService.UpdateFiles(fileTree.PathId, treeFromDb, fileTree.Files, treeRootFromDb.Id.ToString(), fileTree.TreeRoot.Id);
 
             return Ok("");
         }
