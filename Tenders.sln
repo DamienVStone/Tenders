@@ -47,7 +47,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.Synchronization.Ten
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.API.Integration.JobSeeker.Tests", "API\Tenders.API.Integration.JobSeeker.Tests\Tenders.API.Integration.JobSeeker.Tests.csproj", "{A67F63A5-7A48-4B39-B907-67CC34FE8455}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenders.API.Tests", "Tenders.API.Tests\Tenders.API.Tests.csproj", "{034B8CE7-91FB-4D87-9599-1B4A282DC2CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tenders.API.Tests", "Tenders.API.Tests\Tenders.API.Tests.csproj", "{034B8CE7-91FB-4D87-9599-1B4A282DC2CE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{7E96E8AB-7210-488F-A7A7-9C7A93D2B8FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
