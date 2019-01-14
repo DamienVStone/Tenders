@@ -36,27 +36,25 @@ namespace TenderPlanAPI.Controllers
         /// <param name="file">Массив файлов для добавления</param>
         /// <returns>200OK или ошибку, если что-то пошло не так</returns>
         [HttpPost]
-        public IActionResult Post([FromQuery]string pathId, [FromBody]List<FTPEntryParam> rootInputFiles)
+        public IActionResult Post([FromQuery]string pathId, [FromBody]ISet<FTPEntryParam> rootInputFiles)
         {
-            if (rootInputFiles.Count == 0)
+            if (rootInputFiles.Count == 0) return BadRequest("Нет файлов для добавления");
+            if (string.IsNullOrWhiteSpace(pathId)) return BadRequest("Не указан идентификатор пути");
+            if (!Guid.TryParse(pathId, out Guid g)) return BadRequest("Неверный идентификатор пути");
+            if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
+
+            ISet<FTPEntry> pathFilesWithNoParents = new HashSet<FTPEntry>();
+            // Постранично получаю вообще все файлы из директории
+            var found = 0;
+            var i = 0;
+            do
             {
-                return BadRequest("Нет файлов для добавления");
-            }
+                var foundEntries = _entryRepo.GetByPath(i++ * 1000, 1000, pathId);
+                pathFilesWithNoParents.UnionWith(foundEntries);
+                found = foundEntries.Count();
+            } while (found >= 1000);
 
-            var path = getPathOrNull(ObjectId.Parse(pathId));
-            if (path == null)
-            {
-                return BadRequest("Путь не найден");
-            }
-
-            var pathFilesFilter = Builders<FTPEntry>.Filter.Eq("Path", path.Id);
-            var noParentFilesFilter = Builders<FTPEntry>.Filter.Eq("Parent", ObjectId.Empty);
-
-            var pathAndNoParentFilter = Builders<FTPEntry>.Filter.And(pathFilesFilter, noParentFilesFilter);
-
-            var pathFilesWithNoParents = db.FTPEntry.Find(pathAndNoParentFilter).ToList();
-            pathFilesWithNoParents.ForEach(f => f.State = StateFile.Pending);
-
+            pathFilesWithNoParents.AsParallel().ForAll(p => p.State = StateFile.Pending);
             var dbFiles = pathFilesWithNoParents.ToDictionary(f => f.Name);
             var key = new object();
             rootInputFiles
@@ -67,30 +65,13 @@ namespace TenderPlanAPI.Controllers
                     {
                         //Файл существует в базе
                         var dbFile = dbFiles[f.Name];
-
-                        var updates = new List<UpdateDefinition<FTPEntry>>();
-                        var isFileModified = false;
-
-                        if (dbFile.Size != f.Size)
-                        {
-                            updates.Add(Builders<FTPEntry>.Update.Set("Size", f.Size));
-                            isFileModified = true;
-                        }
-                        if (!dbFile.Modified.Equals(f.DateModified))
-                        {
-                            updates.Add(Builders<FTPEntry>.Update.Set("Modified", f.DateModified));
-                            isFileModified = true;
-                        }
-
-                        var filter = Builders<FTPEntry>.Filter.Eq("_id", dbFile.Id);
-                        if (isFileModified)
+                        if (dbFile.Size != f.Size || !dbFile.Modified.Equals(f.DateModified))
                         {
                             lock (key)
                             {
                                 dbFiles[f.Name].State = StateFile.Modified;
                             }
-                            updates.Add(Builders<FTPEntry>.Update.Set("State", StateFile.Modified));
-                            db.FTPEntry.UpdateOne(filter, Builders<FTPEntry>.Update.Combine(updates));
+                            _entryRepo.Update(dbFile);
                         }
                         else
                         {
@@ -108,21 +89,24 @@ namespace TenderPlanAPI.Controllers
                             Name = f.Name,
                             Modified = f.DateModified,
                             Size = f.Size,
-                            Path = path.Id,
+                            Path = Guid.Parse(pathId),
                             IsDirectory = false, // в корне котолога нет директорий. директории только внутри зипников.
-                            Parent = ObjectId.Empty
+                            Parent = null
                         };
 
-                        db.FTPEntry.InsertOne(newFile);
+                        _entryRepo.Create(newFile);
                     }
                 });
 
             //Удаляю все файлы которых уже нет на FTP сервере
-            var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => Builders<FTPEntry>.Filter.Eq("_id", f.Id)).ToArray();
-            if (forDelete.Length > 0)
-                db.FTPEntry.DeleteMany(Builders<FTPEntry>.Filter.Or(forDelete));
+            var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => f.Id).ToArray();
+            var delFailed = 0;
+            foreach(var entry in forDelete)
+            {
+                if (!_entryRepo.Delete(entry.ToString())) delFailed++;
+            }
 
-            return Ok("");
+            return Ok("Все файлы успешно добавлены."+(delFailed>0?$" Не удалось удалить файлов: {delFailed}":""));
         }
 
         /// <summary>
