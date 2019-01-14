@@ -7,10 +7,11 @@ using TenderPlanAPI.Controllers;
 using TenderPlanAPI.Enums;
 using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
+using Tenders.API.Services.Interfaces;
 
-namespace TenderPlanAPI.Classes
+namespace TenderPlanAPI.Services
 {
-    public class TreeLooker
+    public class TreeLookerService: ITreeLookerService
     {
         private ObjectId _pathId; //идентификатор FTP пути по которому лежит дерево
         private List<FTPEntry> _dbFiles; //список файлов, полученных из базы данных
@@ -23,12 +24,12 @@ namespace TenderPlanAPI.Classes
         /// <param name="PathId">идентификатор FTP пути по которому лежит дерево</param>
         /// <param name="DbFiles">список файлов, полученных из базы данных</param>
         /// <param name="InputFiles">список файлов, полученных из тела запроса</param>
-        public TreeLooker(ObjectId PathId, List<FTPEntry> DbFiles, List<FTPEntryParam> InputFiles, IDBConnectContext DbContext)
+        public TreeLookerService(ObjectId PathId, List<FTPEntry> DbFiles, List<FTPEntryParam> InputFiles, IDBConnectContext DbContext)
         {
             _pathId = PathId;
             _dbFiles = DbFiles;
             _inputFiles = InputFiles;
-            this.dbContext = DbContext ?? throw new ArgumentNullException(nameof(DbContext));
+            dbContext = DbContext ?? throw new ArgumentNullException(nameof(DbContext));
             _dbFiles.AsParallel().ForAll(f => f.State = StateFile.Pending);
         }
 
@@ -37,7 +38,7 @@ namespace TenderPlanAPI.Classes
         /// </summary>
         /// <param name="dbParentId">Идентификатор папки базы данных внутри которой проиндексируются файлы</param>
         /// <param name="inputParentId">Идентификатор папки на входящем дереве с файлами из которой будет происходить сравнение</param>
-        public void UpdateFiles(ObjectId dbParentId, ObjectId inputParentId)
+        public void UpdateFiles(string dbParentId, string inputParentId)
         {
             var key = new object();
             var dbFolderContents = _dbFiles.Where(f => f.Parent.Equals(dbParentId)).ToDictionary(f => f.Name);

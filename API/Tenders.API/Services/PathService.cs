@@ -3,15 +3,10 @@ using System;
 using TenderPlanAPI.Controllers;
 using TenderPlanAPI.Models;
 using Tenders.API.Services;
+using Tenders.API.Services.Interfaces;
 
 namespace TenderPlanAPI.Services
 {
-    public interface IPathService
-    {
-        FTPPath GetNotIndexedPath();
-    }
-
-    // Это синглтон. Смотри конфигурацию в файле Startup
     public class PathService : IPathService
     {
         private readonly object key = new object();
