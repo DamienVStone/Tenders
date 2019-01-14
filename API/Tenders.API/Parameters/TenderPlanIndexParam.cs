@@ -9,7 +9,7 @@ namespace TenderPlanAPI.Parameters
         /// Идентификатор файла с которым связан индекс
         /// </summary>
         [Required]
-        public ObjectId FTPFileId { get; set; }
+        public string FTPFileId { get; set; }
 
         /// <summary>
         /// Идентификатор плана закупок

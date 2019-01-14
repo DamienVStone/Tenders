@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TenderPlanAPI.Classes;
 using TenderPlanAPI.Controllers;
-using TenderPlanAPI.Models;
 using TenderPlanAPI.Services;
 using Tenders.API.DAL;
 using Tenders.API.DAL.Interfaces;
@@ -35,7 +34,7 @@ namespace TenderPlanAPI
         {
             Registration.Register(services);
             services
-                            .AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(opt =>
                 {
                     opt.SerializerSettings.Converters.Add(new ObjectIdConverter());
@@ -47,6 +46,7 @@ namespace TenderPlanAPI
             services.AddSingleton<IFTPPathRepo, FTPPathElasticRepo>();
             services.AddSingleton<IFTPEntryRepo, FTPEntryElasticRepo>();
             services.AddSingleton<ITreeLookerService, TreeLookerService>();
+            services.AddSingleton<ITenderPlanIndexRepo, TenderPlanIndexElasticRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,67 +1,71 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
+using Tenders.API.DAL.Interfaces;
 
 namespace TenderPlanAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TenderPlanIndexController:ControllerBase
+    public class TenderPlanIndexController : ControllerBase
     {
-        private readonly IDBConnectContext db;
+        private readonly ITenderPlanIndexRepo _indexRepo;
 
-        public TenderPlanIndexController(IDBConnectContext Db)
+        public TenderPlanIndexController(ITenderPlanIndexRepo indexRepo)
         {
-            db = Db ?? throw new System.ArgumentNullException(nameof(Db));
+            _indexRepo = indexRepo ?? throw new System.ArgumentNullException(nameof(indexRepo));
         }
 
         /// <summary>
         /// </summary>
         /// <returns>Список всех файлов в индексе</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TenderPlanIndex>>> Get()
+        public ListResponse<TenderPlanIndex> Get([FromQuery] FilterOptions options)
         {
-            return (await db.TenderPlansIndex.FindAsync(Builders<TenderPlanIndex>.Filter.Empty)).ToList();
+            return new ListResponse<TenderPlanIndex>()
+            {
+                Count = _indexRepo.CountAll(),
+                Data = _indexRepo.Get(options.Skip, options.Take).ToArray()
+            };
         }
 
         [HttpPost]
-        public  ActionResult Post([FromBody]IEnumerable<TenderPlanIndexParam> TenderPlanIndexes)
+        public ActionResult Post([FromBody]IEnumerable<TenderPlanIndexParam> TenderPlanIndexes)
         {
             TenderPlanIndexes.AsParallel().ForAll(i =>
             {
-                var filter= Builders<TenderPlanIndex>.Filter.Eq("TenderPlanId", i.TenderPlanId);
-
-                var indexedFile = db.TenderPlansIndex.Find(filter).ToList().FirstOrDefault();
-                if (indexedFile == null)
+                var filter = Builders<TenderPlanIndex>.Filter.Eq("TenderPlanId", i.TenderPlanId);
+                
+                if (_indexRepo.ExistsByExternalId(i.TenderPlanId))
                 {
                     // Файл не был проиндексирован ранее
                     var newIndexedFile = new TenderPlanIndex
                     {
-                        FTPFileId = i.FTPFileId,
+                        FTPFileId = Guid.Parse(i.FTPFileId),
                         TenderPlanId = i.TenderPlanId,
                         RevisionId = i.RevisionId
                     };
-                    db.TenderPlansIndex.InsertOne(newIndexedFile);
+                    _indexRepo.Create(newIndexedFile);
                 }
                 else
                 {
                     // Файл уже есть в индексе
+                    var indexedFile = _indexRepo.GetByExternalId(i.TenderPlanId);
                     if (indexedFile.RevisionId != i.RevisionId)
                     {
-                        var setOutdated = Builders<TenderPlanIndex>.Update.Set("IsOutdated", true);
-                        var setRevisionId = Builders<TenderPlanIndex>.Update.Set("RevisionId", i.RevisionId);
-                        var update = Builders<TenderPlanIndex>.Update.Combine(setOutdated, setRevisionId);
-                        var updateFilter = Builders<TenderPlanIndex>.Filter.Eq("_id", indexedFile.Id);
-                        db.TenderPlansIndex.UpdateOne(updateFilter, update);
+                        indexedFile.IsOutdated = true;
+                        indexedFile.RevisionId = i.RevisionId;
+
+                        _indexRepo.Update(indexedFile);   
                     }
                 }
             });
 
-            return Ok();
+            return Ok("Файлы проиндексированы.");
         }
 
     }
