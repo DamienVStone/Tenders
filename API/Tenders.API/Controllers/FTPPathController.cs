@@ -61,7 +61,7 @@ namespace TenderPlanAPI.Controllers
                     Login = path.Login,
                     Password = path.Password
                 });
-                if (id == Guid.Empty) return StatusCode(500, "Не удалось добавить путь");
+                if (string.IsNullOrEmpty(id)) return StatusCode(500, "Не удалось добавить путь");
                 return Created("/", id);
             }
             else
@@ -76,7 +76,7 @@ namespace TenderPlanAPI.Controllers
         /// <param name="id">Идентификатор пути</param>
         /// <returns>200OK если путь удален успешно</returns>
         [HttpDelete]
-        public IActionResult Delete([FromQuery]Guid id)
+        public IActionResult Delete([FromQuery]string id)
         {
             if (!_repo.Exists(id)) return BadRequest("Путь не найден");
             if (!_repo.Delete(id)) return StatusCode(500, "Не удалось удалить путь");
@@ -86,10 +86,10 @@ namespace TenderPlanAPI.Controllers
         /// <summary>
         /// Метод, меняющий флаг с true на false
         /// </summary>
-        /// <param name="objId">Идентификатор пути</param>
+        /// <param name="id">Идентификатор пути</param>
         /// <returns>200OK если флаг обновлен успешно</returns>
         [HttpPost("ChangeFlagActive")]
-        public IActionResult ChangeFlagActive([FromBody]Guid id)
+        public IActionResult ChangeFlagActive([FromBody]string id)
         {
             if (!_repo.Exists(id)) return NotFound("Элемент не существует");
             if (!_repo.ChangeActiveFlag(id, false)) return StatusCode(500, "Не удалось изменить флаг");
@@ -111,7 +111,7 @@ namespace TenderPlanAPI.Controllers
             var resultCheck = HelperCheckValidPath(path.Path) as ObjectResult;
             if (resultCheck.StatusCode == 200)
             {
-                var oldPath = _repo.GetOne(path.Id);
+                var oldPath = _repo.GetOne(path.Id );
 
                 oldPath.Path = path.Path;
                 oldPath.Login = path.Login;

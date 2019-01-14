@@ -28,8 +28,7 @@ namespace Tenders.API.DAL
         public string Create(T item)
         {
             var res = Client.IndexDocument(item);
-            var id =  res.IsValid?item.Id:Guid.Empty;
-            return id.ToString();
+            return res.IsValid?item.Id.ToString():"";
         }
 
         public bool Delete(string id)
