@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace TenderPlanAPI.Parameters
+﻿namespace TenderPlanAPI.Parameters
 {
     public class ListResponse<T>
     {
-        public int Count { get; set; }
+        public long Count { get; set; }
         public T[] Data { get; set; }
     }
 }

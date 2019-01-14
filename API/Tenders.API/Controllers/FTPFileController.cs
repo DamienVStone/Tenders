@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using TenderPlanAPI.Classes;
 using TenderPlanAPI.Enums;
@@ -207,13 +208,12 @@ namespace TenderPlanAPI.Controllers
         /// </summary>
         /// <returns>Список файлов</returns>
         [HttpGet]
-        public IEnumerable<FTPEntry> Get()
+        public ListResponse<FTPEntry> Get([FromQuery]FilterOptions options)
         {
-            var filter1 = Builders<FTPEntry>.Filter.Eq("State", StateFile.New);
-            var filter2 = Builders<FTPEntry>.Filter.Eq("State", StateFile.Modified);
-            var filterOr = Builders<FTPEntry>.Filter.Or(new List<FilterDefinition<FTPEntry>> { filter1, filter2 });
-            var find = db.FTPEntry.Find(filterOr).ToList();
-            return find;
+            return new ListResponse<FTPEntry>() {
+                Count = _entryRepo.CountAll(),
+                Data = _entryRepo.Get(options.Skip, options.Take).ToArray()
+            };
         }
 
         /// <summary>
@@ -222,60 +222,40 @@ namespace TenderPlanAPI.Controllers
         /// <param name="pathId">Идентификатор FTP пути</param>
         /// <returns></returns>
         [HttpGet("GetByPath")]
-        public ActionResult<IEnumerable<FTPEntry>> GetByPath([FromQuery]string pathId)
+        public ActionResult<ListResponse<FTPEntry>> GetByPath([FromQuery]string pathId, [FromQuery]FilterOptions options)
         {
             if (string.IsNullOrWhiteSpace(pathId))
             {
                 return BadRequest("Необходимо указать идентификатор пути.");
             }
 
-            ObjectId id;
-            if (!ObjectId.TryParse(pathId, out id))
+            Guid id;
+            if (!Guid.TryParse(pathId, out id))
             {
                 return BadRequest("Неверный формат идентификатора пути");
             }
 
-            var pathIdFilter = Builders<FTPEntry>.Filter.Eq("Path", id);
-            var zipFilter = Builders<FTPEntry>.Filter.Regex("Name", @".*\.zip");
-            var notZipFilter = Builders<FTPEntry>.Filter.Not(zipFilter);
-            var filter = Builders<FTPEntry>.Filter.And(pathIdFilter, notZipFilter);
-            return db.FTPEntry.Find(filter).ToList();
+            return new ListResponse<FTPEntry>()
+            {
+                Count = _entryRepo.CountAll(),
+                Data = _entryRepo.GetByPath(options.Skip, options.Take, pathId).ToArray()
+            };
         }
 
         /// <summary>
         /// Возвращает список файлов планов тендеров для индексатора с определенным статусом
         /// </summary>
-        /// <param name="fileState">Статус возвращаемых файлов. По умолчанию возвращаются новые и обновленные файлы</param>
+        /// <param name="state">Статус возвращаемых файлов. По умолчанию возвращаются новые и обновленные файлы</param>
         /// <returns></returns>
         [HttpGet("GetTenderPlansToIndex")]
-        public ActionResult<IEnumerable<TenderPlanFileToIndexViewmodel>> GetTenderPlansToIndexer([FromQuery]StateFile? fileState)
+        public ActionResult<ListResponse<TenderPlanFileToIndexViewmodel>> GetTenderPlansToIndexer([FromQuery]StateFile? state, [FromQuery]FilterOptions options)
         {
-            FilterDefinition<FTPEntry> fileStateFilter;
-            if (fileState.HasValue)
-            {
-                fileStateFilter = Builders<FTPEntry>.Filter.Eq("State", fileState);
-            }
-            else
-            {
-                var newFilter = Builders<FTPEntry>.Filter.Eq("State", StateFile.New);
-                var editFilter = Builders<FTPEntry>.Filter.Eq("State", StateFile.Modified);
-                fileStateFilter = Builders<FTPEntry>.Filter.Or(newFilter, editFilter);
-            }
-
-            var tenderPlansFilter = Builders<FTPEntry>.Filter.Regex("Name", ".*tenderPlan.*");
-            var zipFilter = Builders<FTPEntry>.Filter.Regex("Name", @".*\.zip");
-            var notZipFilter = Builders<FTPEntry>.Filter.Not(zipFilter);
-            var filter = Builders<FTPEntry>.Filter.And(tenderPlansFilter, fileStateFilter, notZipFilter);
-            return db.FTPEntry
-                .Find(filter)
-                .ToEnumerable()
-                .Select(p =>
-                    new TenderPlanFileToIndexViewmodel
-                    {
-                        FTPFileId = p.Id,
-                        Name = p.Name
-                    })
-                .ToList();
+            var states = state.HasValue ? new StateFile[] { state.Value } : new StateFile[] { StateFile.New, StateFile.Modified };
+            var data = _entryRepo.GetByFileState(options.Skip, options.Take, true, states);
+            return new ListResponse<TenderPlanFileToIndexViewmodel>() {
+                Count = _entryRepo.CountAll(),
+                Data = data.Select(e => new TenderPlanFileToIndexViewmodel() { FTPFileId = e.Id.ToString(), Name = e.Name }).ToArray()
+            };
         }
 
         /// <summary>
@@ -285,39 +265,26 @@ namespace TenderPlanAPI.Controllers
         /// <param name="state">Статус файлов</param>
         /// <returns></returns>
         [HttpGet("GetByPathAndState")]
-        public ActionResult<IEnumerable<FTPEntry>> GetByPathAndState([FromQuery] string pathId, [FromQuery]StateFile state)
+        public ActionResult<ListResponse<FTPEntry>> GetByPathAndState([FromQuery] string pathId, [FromQuery]StateFile? state, [FromQuery]FilterOptions options)
         {
             if (string.IsNullOrWhiteSpace(pathId))
             {
                 return BadRequest("Необходимо указать идентификатор пути");
             }
 
-            ObjectId id;
-            if (!ObjectId.TryParse(pathId, out id))
+            Guid id;
+            if (!Guid.TryParse(pathId, out id))
             {
                 return BadRequest("Неверно указан идентификатор пути");
             }
 
-            var pathFilter = Builders<FTPEntry>.Filter.Eq("Path", id);
-            var stateFilter = Builders<FTPEntry>.Filter.Eq("State", state);
-            var pathAndStateFilter = Builders<FTPEntry>.Filter.And(pathFilter, stateFilter);
-
-            return db.FTPEntry.Find(pathAndStateFilter).ToList();
+            var states = state.HasValue ? new StateFile[] { state.Value } : new StateFile[] { StateFile.New, StateFile.Modified };
+            return new ListResponse<FTPEntry>()
+            {
+                Count = _entryRepo.CountAll(),
+                Data = _entryRepo.GetByFileStateAndPath(options.Skip, options.Take, pathId, true, states).ToArray()
+            };
         }
 
-        private FTPPath getPathOrNull(ObjectId pathId)
-        {
-            var pathFilter = Builders<FTPPath>.Filter.Eq("_id", pathId);
-            var path = db.FTPPath.Find(pathFilter).FirstOrDefault();
-            return path;
-        }
-
-        private List<FTPEntry> getAllChildren(FTPEntry root)
-        {
-            var filter = Builders<FTPEntry>.Filter.Eq("Parent", root.Id);
-            var children = db.FTPEntry.Find(filter).ToList().SelectMany(getAllChildren).ToList();
-            children.Add(root);
-            return children;
-        }
     }
 }

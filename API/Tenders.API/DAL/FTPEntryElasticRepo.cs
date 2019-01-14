@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Nest;
+using TenderPlanAPI.Enums;
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
 
@@ -11,8 +12,29 @@ namespace Tenders.API.DAL
     {
 
         public FTPEntryElasticRepo(IElasticDbContext DbContext):base(DbContext) {}
+        public IEnumerable<FTPEntry> GetByFileState(int Skip, int Take, bool HasParents = false, params StateFile[] States)
+        {
+            return Client.Search<FTPEntry>(s => s
+                .Skip(Skip)
+                .Take(Take)
+                .Query(q => q
+                    .Bool(b => 
+                        mustHaveParents(
+                            b.Must(mu => mu
+                                .Term(t => t
+                                    .Field(f => f.IsActive)
+                                    .Value(true)
+                                )
+                            ),
+                            HasParents
+                        )
+                        .Should(fileStateTermCreator(States))
+                    )
+                )
+            ).Documents;
+        }
 
-        public IEnumerable<FTPEntry> GetFilesFromPath(int Skip, int Take, string PathId, bool HasParents = false)
+        public IEnumerable<FTPEntry> GetByPath(int Skip, int Take, string PathId, bool HasParents = false)
         {
             var pathId = Guid.Parse(PathId);
             return Client.Search<FTPEntry>(s => s
@@ -25,7 +47,6 @@ namespace Tenders.API.DAL
                                 .Term(t => t
                                     .Field(f => f.Path)
                                     .Value(pathId)
-
                                 ), mu => mu
                                 .Term(t => t
                                     .Field(f => f.IsActive)
@@ -37,6 +58,49 @@ namespace Tenders.API.DAL
                     )
                 )
             ).Documents.AsEnumerable();
+        }
+
+        public IEnumerable<FTPEntry> GetByFileStateAndPath(int Skip, int Take, string PathId, bool HasParents = false, params StateFile[] States)
+        {
+            var pathId = Guid.Parse(PathId);
+            return Client.Search<FTPEntry>(s => s
+                .Skip(Skip)
+                .Take(Take)
+                .Query(q => q
+                    .Bool(b => 
+                        mustHaveParents(
+                            b.Must(mu => mu
+                                .Term(t => t
+                                    .Field(f => f.Path)
+                                    .Value(pathId)
+                                ), mu => mu
+                                .Term(t => t
+                                    .Field(f => f.IsActive)
+                                    .Value(true)
+                                )
+                            ),
+                            HasParents
+                        )
+                        .Should(fileStateTermCreator(States))
+                    )
+                )
+            ).Documents;
+        }
+
+        private Func<QueryContainerDescriptor<FTPEntry>, QueryContainer>[] fileStateTermCreator(StateFile[] States)
+        {
+            var containers = new List<Func<QueryContainerDescriptor<FTPEntry>, QueryContainer>>();
+            foreach(var state in States)
+            {
+                containers.Add(s => s
+                    .Term(t => t
+                        .Field(f => f.State)
+                        .Value(state)
+                    )
+                );
+            }
+
+            return containers.ToArray();
         }
 
         private BoolQueryDescriptor<FTPEntry> mustHaveParents(BoolQueryDescriptor<FTPEntry> descriptor, bool HaveParents)
@@ -72,5 +136,6 @@ namespace Tenders.API.DAL
                 Parent = fields["parent"]?.As<Guid>()
             };
         }
+
     }
 }

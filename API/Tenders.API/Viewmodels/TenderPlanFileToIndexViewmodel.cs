@@ -10,7 +10,7 @@ namespace TenderPlanAPI.Viewmodels
         /// <summary>
         /// Идентификатор модели FTPFile, которой соответствует это имя
         /// </summary>
-        public ObjectId FTPFileId { get; set; }
+        public string FTPFileId { get; set; }
 
         /// <summary>
         /// Имя файла
