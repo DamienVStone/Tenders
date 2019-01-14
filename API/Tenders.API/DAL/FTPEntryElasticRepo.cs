@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Nest;
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
@@ -9,6 +11,53 @@ namespace Tenders.API.DAL
     {
 
         public FTPEntryElasticRepo(IElasticDbContext DbContext):base(DbContext) {}
+
+        public IEnumerable<FTPEntry> GetFilesFromPath(int Skip, int Take, string PathId, bool HasParents = false)
+        {
+            var pathId = Guid.Parse(PathId);
+            return Client.Search<FTPEntry>(s => s
+                .From(Skip)
+                .Take(Take)
+                .Query(q => q
+                    .Bool(b => 
+                        mustHaveParents(
+                            b.Must(mu => mu
+                                .Term(t => t
+                                    .Field(f => f.Path)
+                                    .Value(pathId)
+
+                                ), mu => mu
+                                .Term(t => t
+                                    .Field(f => f.IsActive)
+                                    .Value(true)
+                                )
+                            ),
+                            HasParents
+                        )
+                    )
+                )
+            ).Documents.AsEnumerable();
+        }
+
+        private BoolQueryDescriptor<FTPEntry> mustHaveParents(BoolQueryDescriptor<FTPEntry> descriptor, bool HaveParents)
+        {
+            if (HaveParents)
+            {
+                return descriptor.Must(m => m
+                            .Exists(e => e
+                                .Field(f => f.Parent)
+                            )
+                        );
+            }
+            else
+            {
+                return descriptor.MustNot(mn => mn
+                            .Exists(e => e
+                                .Field(f => f.Parent)
+                            )
+                        );
+            }
+        }
 
         protected override FTPEntry MapFields(FieldValues fields)
         {
