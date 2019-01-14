@@ -44,6 +44,7 @@ namespace TenderPlanAPI
             services.AddSingleton<IPathService, PathService>();
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();
             services.AddSingleton<IFTPPathRepo, FTPPathElasticRepo>();
+            services.AddSingleton<IFTPEntryRepo, FTPEntryElasticRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

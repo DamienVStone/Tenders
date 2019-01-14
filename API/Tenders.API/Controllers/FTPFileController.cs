@@ -9,6 +9,7 @@ using TenderPlanAPI.Enums;
 using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
 using TenderPlanAPI.Viewmodels;
+using Tenders.API.DAL.Interfaces;
 
 namespace TenderPlanAPI.Controllers
 {
@@ -16,12 +17,16 @@ namespace TenderPlanAPI.Controllers
     [ApiController]
     public class FTPFileController : ControllerBase
     {
-        private readonly IDBConnectContext db;
+        private readonly IFTPEntryRepo _entryRepo;
+        private readonly IFTPPathRepo _pathRepo;
 
-        public FTPFileController(IDBConnectContext DbContext)
+        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo)
         {
-            db = DbContext ?? throw new ArgumentNullException(nameof(DbContext));
+            _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
+            _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
         }
+
+
 
         /// <summary>
         /// Добавление и обновления файлов у которых нет родителей

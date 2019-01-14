@@ -5,7 +5,7 @@ using Tenders.API.DAL.Interfaces;
 
 namespace Tenders.API.DAL
 {
-    public class FTPEntryElasticRepo : BaseElasticRepo<FTPEntry>
+    public class FTPEntryElasticRepo : BaseElasticRepo<FTPEntry>, IFTPEntryRepo
     {
 
         public FTPEntryElasticRepo(IElasticDbContext DbContext):base(DbContext) {}
