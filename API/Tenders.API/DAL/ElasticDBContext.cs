@@ -12,9 +12,9 @@ namespace Tenders.API.DAL
         public ElasticDBContext(IAPIConfigService config)
         {
             var settings = new ConnectionSettings(new Uri(config.DbConnectionString))
-                            .DefaultMappingFor<FTPPath>(m => m.IndexName("ftpPath"))
-                            .DefaultMappingFor<FTPEntry>(m => m.IndexName("ftpEntry"))
-                            .DefaultMappingFor<TenderPlanIndex>(m => m.IndexName("tenderPlanIndex"));
+                            .DefaultMappingFor<FTPPath>(m => m.IndexName("ftp-path"))
+                            .DefaultMappingFor<FTPEntry>(m => m.IndexName("ftp-entry"))
+                            .DefaultMappingFor<TenderPlanIndex>(m => m.IndexName("tender-plan-index"));
 
             Client = new ElasticClient(settings);
         }
