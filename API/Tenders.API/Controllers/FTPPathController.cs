@@ -3,8 +3,8 @@ using System;
 using System.Linq;
 using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
-using TenderPlanAPI.Services;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Services.Interfaces;
 
 namespace TenderPlanAPI.Controllers
 {
@@ -111,7 +111,7 @@ namespace TenderPlanAPI.Controllers
             var resultCheck = HelperCheckValidPath(path.Path) as ObjectResult;
             if (resultCheck.StatusCode == 200)
             {
-                var oldPath = _repo.GetOne(path.Id );
+                var oldPath = _repo.GetOne(path.Id);
 
                 oldPath.Path = path.Path;
                 oldPath.Login = path.Login;

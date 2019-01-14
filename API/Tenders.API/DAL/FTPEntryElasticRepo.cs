@@ -133,7 +133,7 @@ namespace Tenders.API.DAL
             ).Count!=0;
         }
 
-        public IEnumerable<FTPEntry> GetByParent(string ParentId)
+        public IEnumerable<FTPEntry> GetByParentId(string ParentId)
         {
             var id = Guid.Parse(ParentId);
 

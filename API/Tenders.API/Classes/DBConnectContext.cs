@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using TenderPlanAPI.Models;
 using Tenders.API.Services;
+using Tenders.API.Services.Interfaces;
 using Tenders.Core.Abstractions.Services;
 
 namespace TenderPlanAPI.Controllers
