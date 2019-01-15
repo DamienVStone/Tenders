@@ -7,15 +7,18 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MatNativeDateModule } from '@angular/material';
-import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { MaterialModule } from './material-module';
-import { MonitoringComponent } from './components/monitoring/monitoring.component';
+import { SidenavComponent } from './modules/sidenav/sidenav.component';
+import { MonitoringComponent } from './modules/monitoring/monitoring.component';
+import { FTPPathListComponent } from './modules/monitoring/components/ftppath/ftppath-list/ftppath-list.component';
+import { FTPPathService } from './modules/monitoring/components/ftppath/services/ftppath.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     SidenavComponent,
-    MonitoringComponent
+    MonitoringComponent,
+    FTPPathListComponent
   ],
   imports: [
     BrowserModule,
@@ -27,7 +30,7 @@ import { MonitoringComponent } from './components/monitoring/monitoring.componen
     ReactiveFormsModule,
     MaterialModule
   ],
-  providers: [],
+  providers: [FTPPathService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
