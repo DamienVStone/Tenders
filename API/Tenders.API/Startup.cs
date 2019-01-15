@@ -9,6 +9,8 @@ using TenderPlanAPI.Services;
 using Tenders.API.DAL.Elastic;
 using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.DAL.Mongo;
+using Tenders.API.DAL.Mongo.Interfaces;
 using Tenders.API.Services;
 using Tenders.API.Services.Interfaces;
 using static Tenders.Core.DI.Container;
@@ -45,6 +47,7 @@ namespace TenderPlanAPI
             services.AddSingleton<IDBConnectContext, DBConnectContext>();
             services.AddSingleton<IPathService, PathService>();
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();
+            services.AddSingleton<IMongoDbContext, MongoDbContext>();
             services.AddSingleton<IFTPPathRepo, FTPPathElasticRepo>();
             services.AddSingleton<IFTPEntryRepo, FTPEntryElasticRepo>();
             services.AddSingleton<ITreeLookerService, TreeLookerService>();
