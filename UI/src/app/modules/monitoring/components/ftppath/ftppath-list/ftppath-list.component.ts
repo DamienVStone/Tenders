@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FTPPathService } from '../services/ftppath.service';
 import { IFTPPath } from '../models/IFTPPath';
-import { FilterOptions } from 'src/app/models/ifilter-options';
+import { FilterOptions, IFilterOptions } from 'src/app/models/ifilter-options';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-ftppath-list',
@@ -12,10 +13,12 @@ export class FTPPathListComponent implements OnInit {
 
   constructor(private ftppathService: FTPPathService) { }
   list: IFTPPath[] = [];
-  page: number = 0;
-  pageSize: number = 50;
+  filterOptions: IFilterOptions = new FilterOptions(1, 50);
+  
   ngOnInit() {
-    this.ftppathService.get(new FilterOptions(this.page, this.pageSize)).subscribe(result => this.list = result, error => console.log(error))
+    this.ftppathService
+      .get(this.filterOptions)
+      .subscribe(result => this.list = result, error => console.log(error));
   }
 
 }

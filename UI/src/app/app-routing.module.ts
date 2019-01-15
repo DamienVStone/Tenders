@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MonitoringComponent } from './modules/monitoring/monitoring.component';
 
 const routes: Routes = [
-  { path: 'monitoring', component: MonitoringComponent }
+  // { path: 'monitoring', component: MonitoringComponent },
+  { path: '', redirectTo: '/', pathMatch: 'full' },
+  // { path: '**', component: PageNotFoundComponent }
 ];
 
 @NgModule({
