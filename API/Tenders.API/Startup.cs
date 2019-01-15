@@ -30,6 +30,7 @@ namespace TenderPlanAPI
         public void ConfigureServices(IServiceCollection services)
         {
             Registration.Register(services);
+            services.AddCors();
             services
                             .AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddJsonOptions(opt =>
@@ -53,6 +54,9 @@ namespace TenderPlanAPI
                 app.UseHsts();
             }
 
+            app.UseCors(builder =>
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+            );
             app.UseHttpsRedirection();
             app.UseMvc();
         }
