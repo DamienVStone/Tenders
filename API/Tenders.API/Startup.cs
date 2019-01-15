@@ -45,15 +45,16 @@ namespace TenderPlanAPI
                 });
             services.AddSingleton<IAPIConfigService, APIConfigService>();
             services.AddSingleton<IDBConnectContext, DBConnectContext>();
-            services.AddSingleton<IPathService, PathService>();
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();
             services.AddSingleton<IMongoDbContext, MongoDbContext>();
 
             services.AddSingleton<IIdProvider, MongoIdProvider>();
-            services.AddSingleton<IFTPPathRepo, FTPPathElasticRepo>();
+            services.AddSingleton<IFTPPathRepo, FTPPathMongoRepo>();
             services.AddSingleton<IFTPEntryRepo, FTPEntryElasticRepo>();
-            services.AddSingleton<ITreeLookerService, TreeLookerService>();
             services.AddSingleton<ITenderPlanIndexRepo, TenderPlanIndexElasticRepo>();
+
+            services.AddSingleton<IPathService, PathService>();
+            services.AddSingleton<ITreeLookerService, TreeLookerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
