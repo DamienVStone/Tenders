@@ -2,13 +2,14 @@
 using System;
 using System.Linq;
 using TenderPlanAPI.Models;
+using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
 
-namespace Tenders.API.DAL
+namespace Tenders.API.DAL.Elastic
 {
     public class TenderPlanIndexElasticRepo : BaseElasticRepo<TenderPlanIndex>, ITenderPlanIndexRepo
     {
-        public TenderPlanIndexElasticRepo(IElasticDbContext dbContext) : base(dbContext){}
+        public TenderPlanIndexElasticRepo(IElasticDbContext dbContext) : base(dbContext) { }
 
         public TenderPlanIndex GetByExternalId(string Id)
         {
@@ -47,7 +48,7 @@ namespace Tenders.API.DAL
                         )
                     )
                 )
-            ).Count!=0;
+            ).Count != 0;
         }
 
         protected override TenderPlanIndex MapFields(FieldValues fields)

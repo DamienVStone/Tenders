@@ -1,12 +1,12 @@
 ﻿using Nest;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using TenderPlanAPI.Models;
+using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
 
-namespace Tenders.API.DAL
+namespace Tenders.API.DAL.Elastic
 {
     public abstract class BaseElasticRepo<T> : IAPIRepository<T> where T : ModelBase
     {
@@ -28,7 +28,7 @@ namespace Tenders.API.DAL
         public string Create(T item)
         {
             var res = Client.IndexDocument(item);
-            return res.IsValid?item.Id.ToString():"";
+            return res.IsValid ? item.Id.ToString() : "";
         }
 
         public bool Delete(string id)
@@ -79,7 +79,7 @@ namespace Tenders.API.DAL
                 )
             );
 
-            return res.Count!=0;
+            return res.Count != 0;
         }
 
         public long CountAll(bool IsActive = true)

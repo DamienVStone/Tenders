@@ -2,9 +2,10 @@
 using System;
 using System.Linq;
 using TenderPlanAPI.Models;
+using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
 
-namespace Tenders.API.DAL
+namespace Tenders.API.DAL.Elastic
 {
     public class FTPPathElasticRepo : BaseElasticRepo<FTPPath>, IFTPPathRepo
     {

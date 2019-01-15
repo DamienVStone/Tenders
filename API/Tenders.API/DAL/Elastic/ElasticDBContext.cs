@@ -1,10 +1,10 @@
 ﻿using Nest;
 using System;
 using TenderPlanAPI.Models;
-using Tenders.API.DAL.Interfaces;
+using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.Services.Interfaces;
 
-namespace Tenders.API.DAL
+namespace Tenders.API.DAL.Elastic
 {
     public class ElasticDBContext : IElasticDbContext
     {

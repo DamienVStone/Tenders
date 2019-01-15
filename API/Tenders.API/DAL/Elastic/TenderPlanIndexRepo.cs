@@ -1,13 +1,13 @@
 ﻿using Nest;
 using System;
 using TenderPlanAPI.Models;
-using Tenders.API.DAL.Interfaces;
+using Tenders.API.DAL.Elastic.Interfaces;
 
-namespace Tenders.API.DAL
+namespace Tenders.API.DAL.Elastic
 {
     public class TenderPlanIndexRepo : BaseElasticRepo<TenderPlanIndex>
     {
-        public TenderPlanIndexRepo(IElasticDbContext dbContext) : base(dbContext) {}
+        public TenderPlanIndexRepo(IElasticDbContext dbContext) : base(dbContext) { }
 
         protected override TenderPlanIndex MapFields(FieldValues fil)
         {

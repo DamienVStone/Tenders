@@ -1,6 +1,6 @@
 ﻿using Nest;
 
-namespace Tenders.API.DAL.Interfaces
+namespace Tenders.API.DAL.Elastic.Interfaces
 {
     public interface IElasticDbContext
     {
