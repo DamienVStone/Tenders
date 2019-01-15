@@ -55,10 +55,10 @@ namespace Tenders.API.DAL.Elastic
         {
             return new TenderPlanIndex()
             {
-                Id = fields["id"].As<Guid>(),
+                Id = fields["id"].As<Guid>().ToString(),
                 CreatedDate = fields["createdDate"].As<DateTime>(),
                 IsActive = fields["isActive"].As<bool>(),
-                FTPFileId = fields["ftpFileId"].As<Guid>(),
+                FTPFileId = fields["ftpFileId"].As<Guid>().ToString(),
                 TenderPlanId = fields["tenderPlanId"].As<string>(),
                 RevisionId = fields["revisionId"].As<long>(),
                 IsOutdated = fields["isOutdated"].As<bool>()

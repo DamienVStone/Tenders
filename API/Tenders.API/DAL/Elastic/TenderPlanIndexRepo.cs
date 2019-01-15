@@ -13,10 +13,10 @@ namespace Tenders.API.DAL.Elastic
         {
             return new TenderPlanIndex()
             {
-                Id = fil["id"].As<Guid>(),
+                Id = fil["id"].As<Guid>().ToString(),
                 CreatedDate = fil["createdDate"].As<DateTime>(),
                 IsActive = fil["isActive"].As<bool>(),
-                FTPFileId = fil["ftpFileId"].As<Guid>(),
+                FTPFileId = fil["ftpFileId"].As<Guid>().ToString(),
                 TenderPlanId = fil["tednerPlanId"].As<string>(),
                 RevisionId = fil["revisionId"].As<long>(),
                 IsOutdated = fil["isOutdated"].As<bool>()

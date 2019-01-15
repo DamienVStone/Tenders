@@ -45,7 +45,7 @@ namespace TenderPlanAPI.Controllers
                     // Файл не был проиндексирован ранее
                     var newIndexedFile = new TenderPlanIndex
                     {
-                        FTPFileId = Guid.Parse(i.FTPFileId),
+                        FTPFileId = i.FTPFileId,
                         TenderPlanId = i.TenderPlanId,
                         RevisionId = i.RevisionId
                     };

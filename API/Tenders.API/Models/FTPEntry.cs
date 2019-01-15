@@ -24,11 +24,11 @@ namespace TenderPlanAPI.Models
         /// <summary>
         /// Ссылка на путь
         /// </summary>
-        public Guid Path { get; set; }
+        public string Path { get; set; }
         /// <summary>
         /// Ссылка на родителя 
         /// </summary>
-        public Guid? Parent { get; set; }
+        public string Parent { get; set; }
         /// <summary>
         /// Является ли этот элемент дерикторией
         /// </summary>

@@ -13,22 +13,28 @@ namespace TenderPlanAPI.Services
     {
         private readonly IFTPEntryRepo _entryRepo;
         private readonly IFTPPathRepo _pathRepo;
+        private readonly IIdProvider _idProvider;
 
-        public TreeLookerService(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo)
+        public TreeLookerService(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, IIdProvider idProvider)
         {
             _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
+            _idProvider = idProvider ?? throw new ArgumentNullException(nameof(idProvider));
         }
 
         public void UpdateFiles(string PathId, IEnumerable<FTPEntry> DbFiles, IEnumerable<FTPEntryParam> InputFiles, string DbParentId, string InputParentId)
         {
             var pathId = Guid.Parse(PathId);
-            var dbParentId = Guid.Parse(DbParentId);
-            var inputParentId = Guid.Parse(InputParentId);
+
+            if (!_idProvider.IsIdValid(PathId)) throw new ArgumentException($"Неверный формат {nameof(PathId)}: {PathId}");
+            if (!_idProvider.IsIdValid(DbParentId)) throw new ArgumentNullException($"Неверный формат {nameof(DbParentId)}: {DbParentId}");
+            if (!_idProvider.IsIdValid(InputParentId)) throw new ArgumentException($"Неверный формат {nameof(InputParentId)}: {InputParentId}");
+
+            
 
             var key = new object();
-            var dbFolderContents = DbFiles.Where(f => f.Parent.Equals(dbParentId)).ToDictionary(f => f.Name);
-            var inputFolderContents = InputFiles.Where(f => f.Parent.Equals(inputParentId));
+            var dbFolderContents = DbFiles.Where(f => f.Parent == DbParentId).ToDictionary(f => f.Name);
+            var inputFolderContents = InputFiles.Where(f => f.Parent == InputParentId);
 
             inputFolderContents
                 .AsParallel()
@@ -66,11 +72,11 @@ namespace TenderPlanAPI.Services
                             Name = f.Name,
                             Modified = f.DateModified,
                             Size = f.Size,
-                            Path = pathId,
-                            Parent = dbParentId
+                            Path = PathId,
+                            Parent = DbParentId
                         };
 
-                        dbFile.Id = Guid.Parse(_entryRepo.Create(dbFile));
+                        dbFile.Id = _entryRepo.Create(dbFile);
                     }
                     // Вызываю ту же функцию для данного файла, чтобы проиндексироваьт всех детей
                     UpdateFiles(PathId, DbFiles, InputFiles, dbFile.Id.ToString(), f.Id.ToString());

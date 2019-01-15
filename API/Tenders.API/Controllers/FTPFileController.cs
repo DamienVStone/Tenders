@@ -22,12 +22,14 @@ namespace TenderPlanAPI.Controllers
         private readonly IFTPEntryRepo _entryRepo;
         private readonly IFTPPathRepo _pathRepo;
         private readonly ITreeLookerService _treeLookerService;
+        private readonly IIdProvider _idProvider;
 
-        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, ITreeLookerService treeLookerService)
+        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, ITreeLookerService treeLookerService, IIdProvider idProvider)
         {
             _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
             _treeLookerService = treeLookerService ?? throw new ArgumentNullException(nameof(treeLookerService));
+            _idProvider = idProvider ?? throw new ArgumentNullException(nameof(idProvider));
         }
 
 
@@ -43,7 +45,7 @@ namespace TenderPlanAPI.Controllers
         {
             if (rootInputFiles.Count == 0) return BadRequest("Нет файлов для добавления");
             if (string.IsNullOrWhiteSpace(pathId)) return BadRequest("Не указан идентификатор пути");
-            if (!Guid.TryParse(pathId, out Guid g)) return BadRequest("Неверный идентификатор пути");
+            if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
 
             ISet<FTPEntry> pathFilesWithNoParents = new HashSet<FTPEntry>();
@@ -94,7 +96,7 @@ namespace TenderPlanAPI.Controllers
                             Name = f.Name,
                             Modified = f.DateModified,
                             Size = f.Size,
-                            Path = Guid.Parse(pathId),
+                            Path = pathId,
                             IsDirectory = false, // в корне котолога нет директорий. директории только внутри зипников.
                             Parent = null
                         };
@@ -122,15 +124,15 @@ namespace TenderPlanAPI.Controllers
         [HttpPost("AddFileTree")]
         public IActionResult AddFileTree([FromBody] FileTreeParam fileTree)
         {
+            if (!_idProvider.IsIdValid(fileTree.PathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(fileTree.PathId.ToString())) return BadRequest("Путь не найден");
+            
 
             var treeRoot = fileTree.TreeRoot;
             //Осторожно!
             //Корень дерева не может содержать родителя. Если у кроня дерева есть родитель то это, из-за дублируемых имен вложенных файлов, сломает всю концепцию индексатора и весь этот кусок надо будет переписать.
-            if (!string.IsNullOrWhiteSpace(fileTree.TreeRoot.Parent.ToString())) return BadRequest("Корень дерева не может содержать родителя");
-
-            //Осторожно!
             //Корень дерева не может быть директорией из-за дублирующих имен вложеных папок, это может сломать всю концепцию индексатора
+            if (!string.IsNullOrEmpty(fileTree.TreeRoot.Parent.ToString())) return BadRequest("Корень дерева не может содержать родителя");
             if (treeRoot.IsDirectory || !treeRoot.Name.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase)) return BadRequest("Корень дерева может быть только ZIP архивом");
             
             FTPEntry treeRootFromDb;
@@ -141,10 +143,9 @@ namespace TenderPlanAPI.Controllers
                     Name = treeRoot.Name,
                     Size = treeRoot.Size,
                     Modified = treeRoot.DateModified,
-                    Parent = Guid.Parse(treeRoot.Parent),
                     IsDirectory = treeRoot.IsDirectory,
                     State = StateFile.New,
-                    Path = Guid.Parse(fileTree.PathId)
+                    Path = fileTree.PathId
                 };
 
                 _entryRepo.Create(treeRootFromDb);
@@ -203,16 +204,8 @@ namespace TenderPlanAPI.Controllers
         [HttpGet("GetByPath")]
         public ActionResult<ListResponse<FTPEntry>> GetByPath([FromQuery]string pathId, [FromQuery]FilterOptions options)
         {
-            if (string.IsNullOrWhiteSpace(pathId))
-            {
-                return BadRequest("Необходимо указать идентификатор пути.");
-            }
-
-            Guid id;
-            if (!Guid.TryParse(pathId, out id))
-            {
-                return BadRequest("Неверный формат идентификатора пути");
-            }
+            if (string.IsNullOrWhiteSpace(pathId)) return BadRequest("Необходимо указать идентификатор пути.");
+            if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный формат идентификатора пути");
 
             return new ListResponse<FTPEntry>()
             {
@@ -246,16 +239,8 @@ namespace TenderPlanAPI.Controllers
         [HttpGet("GetByPathAndState")]
         public ActionResult<ListResponse<FTPEntry>> GetByPathAndState([FromQuery] string pathId, [FromQuery]StateFile? state, [FromQuery]FilterOptions options)
         {
-            if (string.IsNullOrWhiteSpace(pathId))
-            {
-                return BadRequest("Необходимо указать идентификатор пути");
-            }
-
-            Guid id;
-            if (!Guid.TryParse(pathId, out id))
-            {
-                return BadRequest("Неверно указан идентификатор пути");
-            }
+            if (string.IsNullOrWhiteSpace(pathId)) return BadRequest("Необходимо указать идентификатор пути");
+            if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверно указан идентификатор пути");
 
             var states = state.HasValue ? new StateFile[] { state.Value } : new StateFile[] { StateFile.New, StateFile.Modified };
             return new ListResponse<FTPEntry>()

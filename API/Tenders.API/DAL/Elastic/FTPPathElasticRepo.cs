@@ -58,7 +58,7 @@ namespace Tenders.API.DAL.Elastic
         {
             var path = new FTPPath
             {
-                Id = Fields["id"].As<Guid>(),
+                Id = Fields["id"].As<Guid>().ToString(),
                 Path = Fields["path"].As<string>(),
                 Login = Fields["login"].As<string>(),
                 Password = Fields["password"].As<string>(),

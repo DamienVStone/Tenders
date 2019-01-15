@@ -196,14 +196,14 @@ namespace Tenders.API.DAL.Elastic
         {
             return new FTPEntry()
             {
-                Id = fields["id"].As<Guid>(),
+                Id = fields["id"].As<Guid>().ToString(),
                 CreatedDate = fields["createdDate"].As<DateTime>(),
                 IsActive = fields["isActive"].As<bool>(),
                 Name = fields["name"].As<string>(),
                 Size = fields["size"].As<long>(),
                 IsDirectory = fields["isDirectory"].As<bool>(),
-                Path = fields["path"].As<Guid>(),
-                Parent = fields["parent"]?.As<Guid>()
+                Path = fields["path"].As<Guid>().ToString(),
+                Parent = fields["parent"]?.As<Guid>().ToString()
             };
         }
 

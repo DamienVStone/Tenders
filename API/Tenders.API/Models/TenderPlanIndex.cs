@@ -12,7 +12,7 @@ namespace TenderPlanAPI.Models
         /// <summary>
         /// Идентификатор файла, которому соответствует индекс
         /// </summary>
-        public Guid FTPFileId { get; set; }
+        public string FTPFileId { get; set; }
 
         /// <summary>
         /// Идентификатор плана закупок
