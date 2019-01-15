@@ -17,8 +17,6 @@ namespace Tenders.API.DAL.Mongo
 
         protected abstract IMongoCollection<T> Entities { get; }
 
-        protected abstract UpdateDefinition<T> createUpdateDefinition(T db, T inp);
-
         public bool ChangeActiveFlag(string Id, bool IsActive)
         {
             checkId(Id);
@@ -65,8 +63,8 @@ namespace Tenders.API.DAL.Mongo
         {
             if (Item == null) throw new ArgumentNullException(nameof(Item));
             if (!Exists(Item.Id)) throw new ArgumentException("Объект еще не создан");
-            var update = createUpdateDefinition(GetOne(Item.Id), Item);
-            return Entities.FindOneAndUpdate(f => f.IsActive && f.Id == Item.Id, update)!=null;
+            var res = Entities.ReplaceOne(f => f.IsActive && f.Id == Item.Id, Item);
+            return res.IsModifiedCountAvailable && res.ModifiedCount>0;
         }
 
         protected void checkId(string Id)

@@ -26,18 +26,6 @@ namespace Tenders.API.DAL.Mongo
         {
             return Entities.CountDocuments(f => f.IsActive == IsActive && f.Path == PathName) != 0;
         }
-
-        protected override UpdateDefinition<FTPPath> createUpdateDefinition(FTPPath db, FTPPath inp)
-        {
-            var updates = new HashSet<UpdateDefinition<FTPPath>>();
-            if (db.IsActive != inp.IsActive) updates.Add(Builders<FTPPath>.Update.Set(f => f.IsActive, inp.IsActive));
-            if (db.LastTimeIndexed != inp.LastTimeIndexed) updates.Add(Builders<FTPPath>.Update.Set(f => f.LastTimeIndexed, inp.LastTimeIndexed));
-            if (db.Id != inp.Id) updates.Add(Builders<FTPPath>.Update.Set(f => f.Id, inp.Id));
-            if (db.Path != inp.Path) updates.Add(Builders<FTPPath>.Update.Set(f => f.Path, inp.Path));
-            if (db.Login != inp.Login) updates.Add(Builders<FTPPath>.Update.Set(f => f.Login, inp.Login));
-            if (db.Password != db.Password) updates.Add(Builders<FTPPath>.Update.Set(f => f.Password, inp.Password));
-            
-            return Builders<FTPPath>.Update.Combine(updates);
-        }
+        
     }
 }

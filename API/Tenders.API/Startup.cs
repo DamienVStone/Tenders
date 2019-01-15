@@ -50,8 +50,8 @@ namespace TenderPlanAPI
 
             services.AddSingleton<IIdProvider, MongoIdProvider>();
             services.AddSingleton<IFTPPathRepo, FTPPathMongoRepo>();
-            services.AddSingleton<IFTPEntryRepo, FTPEntryElasticRepo>();
-            services.AddSingleton<ITenderPlanIndexRepo, TenderPlanIndexElasticRepo>();
+            services.AddSingleton<IFTPEntryRepo, FTPEntryMongoRepo>();
+            services.AddSingleton<ITenderPlanIndexRepo, TenderPlanIndexMongoRepo>();
 
             services.AddSingleton<IPathService, PathService>();
             services.AddSingleton<ITreeLookerService, TreeLookerService>();
