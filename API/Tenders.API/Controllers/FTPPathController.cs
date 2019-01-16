@@ -119,7 +119,7 @@ namespace TenderPlanAPI.Controllers
             oldPath.Login = path.Login;
             oldPath.Password = path.Password;
 
-            if (!_repo.Update(oldPath)) return StatusCode(500, "Не удалось обновить путь");
+            if (!_repo.Update(oldPath)) return BadRequest("Данные не были обновлены");
         
             return Ok("");
         }
