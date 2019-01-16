@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FTPPathService } from '../services/ftppath.service';
 import { IFTPPath } from '../models/iftp-path';
 import { FilterOptions, IFilterOptions } from 'src/app/models/ifilter-options';
-import { MatDialog, MatTableDataSource } from '@angular/material';
+import { MatDialog, MatTableDataSource, MatPaginator } from '@angular/material';
 import { FTPPathDetailComponent } from '../ftppath-detail/ftppath-detail.component';
-import { tap, switchMap } from 'rxjs/operators';
+import { tap, switchMap, switchMapTo } from 'rxjs/operators';
 import { IListResponse } from 'src/app/models/ilist-response';
 import { Observable, of } from 'rxjs';
 import { NotificationService } from 'src/app/services/notification.service';
@@ -15,10 +15,13 @@ import { NotificationService } from 'src/app/services/notification.service';
   styleUrls: ['./ftppath-list.component.scss']
 })
 export class FTPPathListComponent implements OnInit {
-  dataSource = new MatTableDataSource<IFTPPath>();
+  dataSource: IFTPPath[];
+  dataLength = 0;
   isListLoading = false;
   filterOptions: IFilterOptions = new FilterOptions(0, 50);
   displayedColumns: string[] = ['id', 'path', 'login', 'password', 'lastTimeIndexed'];
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(
     private ftppathService: FTPPathService,
@@ -27,6 +30,13 @@ export class FTPPathListComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.paginator.page
+      .pipe(tap(c => {
+        this.filterOptions.page = c.pageIndex;
+        this.filterOptions.pageSize = c.pageSize;
+      }))
+      .pipe(switchMap(c => this.refreshList()))
+      .subscribe();
     this.refreshList().subscribe();
   }
 
@@ -36,12 +46,15 @@ export class FTPPathListComponent implements OnInit {
 
   refreshList(): Observable<IListResponse<IFTPPath[]>> {
     this.isListLoading = true;
+    console.log(this.filterOptions);
     return this.ftppathService
       .get(this.filterOptions)
       .pipe(
         tap(
           result => {
-            this.dataSource.data = result.data;
+            // this.dataSource.filteredData = result.data;
+            this.dataSource = result.data;
+            this.dataLength = result.count;
             this.isListLoading = false;
           },
           error => {

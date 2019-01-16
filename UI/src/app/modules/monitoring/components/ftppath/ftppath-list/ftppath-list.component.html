@@ -3,9 +3,11 @@
   <mat-spinner style="margin: auto"></mat-spinner>
 </div>
 <div [hidden]="isListLoading">
-  <mat-form-field  style="width: 100%">
+  <mat-form-field style="width: 100%">
     <input matInput (keyup)="applyFilter($event.target.value)" (mouseup)="applyFilter($event.target.value)" placeholder="Поиск">
   </mat-form-field>
+  <mat-paginator [length]="dataLength" [pageSize]="this.filterOptions.pageSize" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons>
+  </mat-paginator>
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
     <!--- Note that these columns can be defined in any order.
@@ -13,7 +15,7 @@
 
     <!-- id Column -->
     <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef> Key </th>
+      <th mat-header-cell *matHeaderCellDef> Идентификатор </th>
       <td mat-cell *matCellDef="let element"> {{element.id}} </td>
     </ng-container>
 

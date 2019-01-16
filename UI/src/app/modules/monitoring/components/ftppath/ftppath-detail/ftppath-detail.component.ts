@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
 import { IFTPPath } from '../models/iftp-path';
 import { FormGroup, FormControl } from '@angular/forms';
@@ -44,7 +44,6 @@ export class FTPPathDetailComponent {
         success => {
           console.log(success);
           this.dialogRef.close(true);
-          this.isLoading = false;
         },
         error => {
           console.log(error);
@@ -53,4 +52,6 @@ export class FTPPathDetailComponent {
         }
       );
   }
+
+
 }
