@@ -106,8 +106,8 @@ namespace TenderPlanAPI.Controllers
         /// <param name="id"> идентификатор пути </param>
         /// <param name="path"> название пути, который нужно изменить </param>
         /// <returns></returns>
-        [HttpPut]
-        public IActionResult Put([FromBody]FTPPathParam path)
+        [HttpPatch]
+        public IActionResult Patch([FromBody]FTPPathParam path)
         {
             if (!_repo.Exists(path.Id)) return BadRequest("Путь не найден");
 
