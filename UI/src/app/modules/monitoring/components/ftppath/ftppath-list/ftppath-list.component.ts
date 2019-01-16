@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FTPPathService } from '../services/ftppath.service';
-import { IFTPPath } from '../models/IFTPPath';
+import { IFTPPath } from '../models/iftp-path';
 import { FilterOptions, IFilterOptions } from 'src/app/models/ifilter-options';
-import { ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material';
+import { FTPPathDetailComponent } from '../ftppath-detail/ftppath-detail.component';
+import { tap, switchMap } from 'rxjs/operators';
+import { IListResponse } from 'src/app/models/ilist-response';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-ftppath-list',
@@ -10,15 +14,35 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./ftppath-list.component.scss']
 })
 export class FTPPathListComponent implements OnInit {
-
-  constructor(private ftppathService: FTPPathService) { }
   list: IFTPPath[] = [];
-  filterOptions: IFilterOptions = new FilterOptions(1, 50);
-  
+  isListLoading = false;
+  filterOptions: IFilterOptions = new FilterOptions(1, 20);
+  displayedColumns: string[] = ['id', 'path', 'login', 'password', 'lastTimeIndexed'];
+
+  constructor(private ftppathService: FTPPathService, public dialog: MatDialog) { }
+
   ngOnInit() {
-    this.ftppathService
-      .get(this.filterOptions)
-      .subscribe(result => this.list = result, error => console.log(error));
+    this.refreshList().subscribe(c => { }, error => console.log(error));
   }
 
+  refreshList(): Observable<IListResponse<IFTPPath[]>> {
+    this.isListLoading = true;
+    return this.ftppathService
+      .get(this.filterOptions)
+      .pipe(tap(result => {
+        this.list = result.data;
+        this.isListLoading = false;
+      }))
+  }
+
+  openDialog(ftpPath: IFTPPath): void {
+    const dialogRef = this.dialog.open(
+      FTPPathDetailComponent,
+      {
+        // width: '250px',
+        data: ftpPath
+      });
+
+    dialogRef.afterClosed().pipe(switchMap(c => this.refreshList())).subscribe(c => { }, error => console.log(error));
+  }
 }

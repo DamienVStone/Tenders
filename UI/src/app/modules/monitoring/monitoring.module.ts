@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FTPPathDetailComponent } from './components/ftppath/ftppath-detail/ftppath-detail.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MonitoringRoutingModule } from './monitoring-routing-module';
 import { FTPPathListComponent } from './components/ftppath/ftppath-list/ftppath-list.component';
 import { MonitoringComponent } from './components/monitoring/monitoring.component';
@@ -18,6 +18,7 @@ import { MaterialModule } from 'src/app/material-module';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MonitoringRoutingModule,
     MaterialModule
   ]

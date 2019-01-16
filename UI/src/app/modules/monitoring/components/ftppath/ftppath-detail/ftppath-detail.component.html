@@ -1,3 +1,37 @@
-<p>
-  ftppath-detail works!!!!!!!!!!!!!!!!!
-</p>
+<h1 mat-dialog-title>Редактирование пути {{data.id}}</h1>
+<div mat-dialog-content>
+  <form [formGroup]="ftpPathForm" (ngSubmit)="onSubmit()">
+    <label>
+      Идентификатор:
+      <input type="text" formControlName="id" disabled>
+    </label>
+
+    <label>
+      Путь:
+      <textarea type="text" formControlName="path"></textarea>
+    </label>
+
+    <label>
+      Логин:
+      <input type="text" formControlName="login">
+    </label>
+
+    <label>
+      Пароль:
+      <input type="text" formControlName="password">
+    </label>
+
+    <label>
+      Последняя проверка:
+      <input type="datetime-local" formControlName="lastTimeIndexed">
+    </label>
+    
+    <label>
+      Имеет ли ошибки?:
+      <input type="text" formControlName="hasErrors">
+    </label>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button type="submit" [disabled]="!ftpPathForm.valid">Сохранить</button>
+</div>
