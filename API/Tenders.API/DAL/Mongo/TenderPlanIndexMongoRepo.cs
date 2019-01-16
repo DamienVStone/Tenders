@@ -2,13 +2,14 @@
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.DAL.Mongo.Interfaces;
+using Tenders.Core.Abstractions.Services;
 
 namespace Tenders.API.DAL.Mongo
 {
     public class TenderPlanIndexMongoRepo : BaseMongoRepo<TenderPlanIndex>, ITenderPlanIndexRepo
     {
         private IMongoDbContext _db;
-        public TenderPlanIndexMongoRepo(IMongoDbContext dbContext, IIdProvider idProvider) : base(idProvider)
+        public TenderPlanIndexMongoRepo(IMongoDbContext dbContext, IIdProvider idProvider, ILoggerService logger) : base(idProvider, logger)
         {
             _db = dbContext;
         }

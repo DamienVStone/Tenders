@@ -5,6 +5,7 @@ using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Services.Interfaces;
+using Tenders.Core.Abstractions.Services;
 
 namespace TenderPlanAPI.Controllers
 {
@@ -12,13 +13,15 @@ namespace TenderPlanAPI.Controllers
     [ApiController]
     public class FTPPathController : ControllerBase
     {
-        private IPathService _pathService;
-        private IFTPPathRepo _repo;
+        private readonly IPathService _pathService;
+        private readonly IFTPPathRepo _repo;
+        private readonly ILoggerService _logger;
 
-        public FTPPathController(IPathService pathService, IFTPPathRepo Repo) : base()
+        public FTPPathController(IPathService pathService, IFTPPathRepo Repo, ILoggerService Logger) : base()
         {
             _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
             _repo = Repo ?? throw new ArgumentNullException(nameof(Repo));
+            _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
         }
 
         /// <summary>
@@ -132,7 +135,11 @@ namespace TenderPlanAPI.Controllers
         [HttpGet]
         public IActionResult Get([FromQuery]FilterOptions options)
         {
-            if (options.PageSize == 0) options.PageSize = 10;
+            if (options.PageSize <= 0)
+            {
+                _logger.Log($"Размер страницы установлен, как 0, устанавливаю размер страницы 10.");
+                options.PageSize = 10;
+            }
 
             return new JsonResult(new ListResponse<FTPPath>
             {

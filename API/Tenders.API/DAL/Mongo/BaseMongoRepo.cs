@@ -1,18 +1,22 @@
 ﻿using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
+using Tenders.Core.Abstractions.Services;
 
 namespace Tenders.API.DAL.Mongo
 {
     public abstract class BaseMongoRepo<T> : IAPIRepository<T> where T : ModelBase
     {
-        protected IIdProvider IdProvider;
+        protected readonly IIdProvider IdProvider;
+        protected readonly ILoggerService Logger;
 
-        public BaseMongoRepo(IIdProvider idProvider)
+        public BaseMongoRepo(IIdProvider idProvider, ILoggerService Logger)
         {
-            IdProvider = idProvider;
+            IdProvider = idProvider ?? throw new ArgumentNullException(nameof(idProvider));
+            this.Logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
         }
 
         protected abstract IMongoCollection<T> Entities { get; }
@@ -50,7 +54,10 @@ namespace Tenders.API.DAL.Mongo
 
         public IEnumerable<T> Get(int Skip, int Take, bool IsActive = true)
         {
-            return Entities.Find(f => f.IsActive == IsActive).Skip(Skip).Limit(Take).ToEnumerable();
+            Logger.Log($"Возврщаю список объектов типа {typeof(T)} c {Skip} по {Take} где IsActive = {IsActive}");
+            var res = Entities.Find(f => f.IsActive == IsActive).Skip(Skip).Limit(Take).ToEnumerable();
+            Logger.Log($"Успешно выбрал {res.Count()} объектов");
+            return res;
         }
 
         public T GetOne(string Id)

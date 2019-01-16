@@ -5,6 +5,7 @@ using TenderPlanAPI.Enums;
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.DAL.Mongo.Interfaces;
+using Tenders.Core.Abstractions.Services;
 
 namespace Tenders.API.DAL.Mongo
 {
@@ -12,7 +13,7 @@ namespace Tenders.API.DAL.Mongo
     {
         private IMongoDbContext _dbContext;
 
-        public FTPEntryMongoRepo(IMongoDbContext dbContext, IIdProvider idProvider) : base(idProvider)
+        public FTPEntryMongoRepo(IMongoDbContext dbContext, IIdProvider idProvider, ILoggerService logger) : base(idProvider, logger)
         {
             _dbContext = dbContext;
         }
