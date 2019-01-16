@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TenderPlanAPI.Classes;
-using TenderPlanAPI.Controllers;
 using TenderPlanAPI.Services;
 using Tenders.API.DAL.Elastic;
 using Tenders.API.DAL.Elastic.Interfaces;
@@ -37,14 +35,9 @@ namespace TenderPlanAPI
         {
             Registration.Register(services);
             services.AddCors();
-            services
-                .AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                .AddJsonOptions(opt =>
-                {
-                    opt.SerializerSettings.Converters.Add(new ObjectIdConverter());
-                });
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
             services.AddSingleton<IAPIConfigService, APIConfigService>();
-            services.AddSingleton<IDBConnectContext, DBConnectContext>();
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();
             services.AddSingleton<IMongoDbContext, MongoDbContext>();
 

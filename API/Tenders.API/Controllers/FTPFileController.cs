@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using TenderPlanAPI.Classes;
 using TenderPlanAPI.Enums;
 using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
@@ -108,12 +105,12 @@ namespace TenderPlanAPI.Controllers
             //Удаляю все файлы которых уже нет на FTP сервере
             var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => f.Id).ToArray();
             var delFailed = 0;
-            foreach(var entry in forDelete)
+            foreach (var entry in forDelete)
             {
                 if (!_entryRepo.Delete(entry.ToString())) delFailed++;
             }
 
-            return Ok("Все файлы успешно добавлены."+(delFailed>0?$" Не удалось удалить файлов: {delFailed}":""));
+            return Ok("Все файлы успешно добавлены." + (delFailed > 0 ? $" Не удалось удалить файлов: {delFailed}" : ""));
         }
 
         /// <summary>
@@ -126,7 +123,7 @@ namespace TenderPlanAPI.Controllers
         {
             if (!_idProvider.IsIdValid(fileTree.PathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(fileTree.PathId.ToString())) return BadRequest("Путь не найден");
-            
+
 
             var treeRoot = fileTree.TreeRoot;
             //Осторожно!
@@ -134,7 +131,7 @@ namespace TenderPlanAPI.Controllers
             //Корень дерева не может быть директорией из-за дублирующих имен вложеных папок, это может сломать всю концепцию индексатора
             if (!string.IsNullOrEmpty(fileTree.TreeRoot.Parent.ToString())) return BadRequest("Корень дерева не может содержать родителя");
             if (treeRoot.IsDirectory || !treeRoot.Name.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase)) return BadRequest("Корень дерева может быть только ZIP архивом");
-            
+
             FTPEntry treeRootFromDb;
             if (!_entryRepo.ExistsByName(fileTree.TreeRoot.Name))
             {
@@ -153,7 +150,7 @@ namespace TenderPlanAPI.Controllers
             else
             {
                 treeRootFromDb = _entryRepo.GetByName(fileTree.TreeRoot.Name);
-                
+
                 if (treeRootFromDb.Size != treeRoot.Size || !treeRootFromDb.Modified.Equals(treeRoot.DateModified))
                 {
                     treeRootFromDb.Size = treeRoot.Size;
@@ -170,7 +167,7 @@ namespace TenderPlanAPI.Controllers
 
             //Далее получаю все дерево из бд для которого данный файл являтся родителем.
             var treeFromDb = getAllChildren(treeRootFromDb);
-            
+
             _treeLookerService.UpdateFiles(fileTree.PathId, treeFromDb, fileTree.Files, treeRootFromDb.Id.ToString(), fileTree.TreeRoot.Id);
 
             return Ok("");
@@ -190,7 +187,8 @@ namespace TenderPlanAPI.Controllers
         [HttpGet]
         public ListResponse<FTPEntry> Get([FromQuery]FilterOptions options)
         {
-            return new ListResponse<FTPEntry>() {
+            return new ListResponse<FTPEntry>()
+            {
                 Count = _entryRepo.CountAll(),
                 Data = _entryRepo.Get(options.Skip, options.Take).ToArray()
             };
@@ -224,7 +222,8 @@ namespace TenderPlanAPI.Controllers
         {
             var states = state.HasValue ? new StateFile[] { state.Value } : new StateFile[] { StateFile.New, StateFile.Modified };
             var data = _entryRepo.GetByFileState(options.Skip, options.Take, true, states);
-            return new ListResponse<TenderPlanFileToIndexViewmodel>() {
+            return new ListResponse<TenderPlanFileToIndexViewmodel>()
+            {
                 Count = _entryRepo.CountAll(),
                 Data = data.Select(e => new TenderPlanFileToIndexViewmodel() { FTPFileId = e.Id.ToString(), Name = e.Name }).ToArray()
             };
