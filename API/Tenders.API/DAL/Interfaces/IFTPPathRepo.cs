@@ -6,5 +6,6 @@ namespace Tenders.API.DAL.Interfaces
     {
         FTPPath GetSinglePathByName(string PathName, bool IsActive = true);
         bool PathExistsByName(string PathName, bool IsActive = true);
+        FTPPath GetOldestIndexedPath(int Timeout);
     }
 }

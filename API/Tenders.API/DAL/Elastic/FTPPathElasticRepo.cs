@@ -11,6 +11,11 @@ namespace Tenders.API.DAL.Elastic
     {
         public FTPPathElasticRepo(IElasticDbContext DbContext) : base(DbContext) { }
 
+        public FTPPath GetOldestIndexedPath(int Timeout)
+        {
+            throw new NotImplementedException(); //TODO!
+        }
+
         public FTPPath GetSinglePathByName(string PathName, bool IsActive = true)
         {
             return Client.Search<FTPPath>(s => s

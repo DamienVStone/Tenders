@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
@@ -16,6 +17,13 @@ namespace Tenders.API.DAL.Mongo
         }
 
         protected override IMongoCollection<FTPPath> Entities => _db.FTPPaths;
+
+        public FTPPath GetOldestIndexedPath(int Timeout)
+        {
+            var filter = Builders<FTPPath>.Filter.Lte("LastTimeIndexed", DateTimeOffset.Now.AddHours(-Timeout));
+            var update = Builders<FTPPath>.Update.Set("LastTimeIndexed", DateTimeOffset.Now);
+            return Entities.FindOneAndUpdate(filter, update);
+        }
 
         public FTPPath GetSinglePathByName(string PathName, bool IsActive = true)
         {
