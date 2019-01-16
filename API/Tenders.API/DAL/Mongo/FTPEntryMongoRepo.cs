@@ -22,13 +22,13 @@ namespace Tenders.API.DAL.Mongo
 
         public bool ExistsByName(string Name, bool HasParents = false)
         {
-            return Entities.CountDocuments(f => f.IsActive && f.Name == Name && ((HasParents && !string.IsNullOrWhiteSpace(f.Parent)) || (!HasParents && string.IsNullOrWhiteSpace(f.Parent)))) != 0;
+            return Entities.CountDocuments(f => f.IsActive && f.Name == Name && ((HasParents && f.Parent!=null) || (!HasParents && f.Parent == null))) != 0;
         }
 
         public IEnumerable<FTPEntry> GetByFileState(int Skip, int Take, bool HasParents = false, params StateFile[] States)
         {
             return Entities
-                .Find(f => f.IsActive && States.Any(i => i == f.State) && ((HasParents && !string.IsNullOrWhiteSpace(f.Parent)) || (!HasParents && string.IsNullOrWhiteSpace(f.Parent))))
+                .Find(f => f.IsActive && States.Any(i => i == f.State) && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
                 .Skip(Skip)
                 .Limit(Take)
                 .ToEnumerable();
@@ -38,7 +38,7 @@ namespace Tenders.API.DAL.Mongo
         {
             checkId(PathId);
             return Entities
-                .Find(f => f.IsActive && f.Path == PathId && States.Any(i => i == f.State) && ((HasParents && !string.IsNullOrWhiteSpace(f.Parent)) || (!HasParents && string.IsNullOrWhiteSpace(f.Parent))))
+                .Find(f => f.IsActive && f.Path == PathId && States.Any(i => i == f.State) && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
                 .Skip(Skip)
                 .Limit(Take)
                 .ToEnumerable();
@@ -47,7 +47,7 @@ namespace Tenders.API.DAL.Mongo
         public FTPEntry GetByName(string Name, bool HasParents = false)
         {
             return Entities
-                .Find(f => f.IsActive && f.Name == Name && ((HasParents && !string.IsNullOrWhiteSpace(f.Parent)) || (!HasParents && string.IsNullOrWhiteSpace(f.Parent))))
+                .Find(f => f.IsActive && f.Name == Name && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
                 .Limit(1)
                 .First();
         }
@@ -64,7 +64,7 @@ namespace Tenders.API.DAL.Mongo
         {
             checkId(PathId);
             return Entities
-                .Find(f => f.IsActive && f.Path == PathId && ((HasParents && !string.IsNullOrWhiteSpace(f.Parent)) || (!HasParents && string.IsNullOrWhiteSpace(f.Parent))))
+                .Find(f => f.IsActive && f.Path == PathId && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
                 .Skip(Skip)
                 .Limit(Take)
                 .ToEnumerable();

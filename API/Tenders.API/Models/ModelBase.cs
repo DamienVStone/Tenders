@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System;
+using Tenders.API.DAL.Mongo;
 
 namespace TenderPlanAPI.Models
 {
@@ -9,6 +11,8 @@ namespace TenderPlanAPI.Models
             CreatedDate = DateTime.Now;
             IsActive = true;
         }
+
+        [BsonSerializer(typeof(ObjectIdStringSerializer))]
         public string Id { get; set; }
         public virtual bool IsActive { get; set; }
         public virtual DateTime CreatedDate { get; set; }
