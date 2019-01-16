@@ -3,7 +3,10 @@
   <mat-spinner style="margin: auto"></mat-spinner>
 </div>
 <div [hidden]="isListLoading">
-  <table mat-table [dataSource]="list" class="mat-elevation-z8">
+  <mat-form-field  style="width: 100%">
+    <input matInput (keyup)="applyFilter($event.target.value)" (mouseup)="applyFilter($event.target.value)" placeholder="Поиск">
+  </mat-form-field>
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
     <!--- Note that these columns can be defined in any order.
         The actual rendered columns are set as a property on the row definition" -->
@@ -34,7 +37,7 @@
 
     <!-- lastTimeIndexed Column -->
     <ng-container matColumnDef="lastTimeIndexed">
-      <th mat-header-cell *matHeaderCellDef> Проиндексирован </th>
+      <th mat-header-cell *matHeaderCellDef> Последняя проверка </th>
       <td mat-cell *matCellDef="let element"> {{element.lastTimeIndexed.toLocaleString()}} </td>
     </ng-container>
 

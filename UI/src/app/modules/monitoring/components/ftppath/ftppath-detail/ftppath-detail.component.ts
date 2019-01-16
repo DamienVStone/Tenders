@@ -1,7 +1,10 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
 import { IFTPPath } from '../models/iftp-path';
 import { FormGroup, FormControl } from '@angular/forms';
+import * as moment from 'moment/moment';
+import { FTPPathService } from '../services/ftppath.service';
+import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
   selector: 'app-ftppath-detail',
@@ -9,32 +12,45 @@ import { FormGroup, FormControl } from '@angular/forms';
   styleUrls: ['./ftppath-detail.component.scss']
 })
 export class FTPPathDetailComponent {
-  ftpPathForm = new FormGroup({
-    id: new FormControl(''),
-    path: new FormControl(''),
-    login: new FormControl(''),
-    password: new FormControl(''),
-    lastTimeIndexed: new FormControl(''),
-    hasErrors: new FormControl(''),
-  });
-
+  isLoading = false;
+  ftpPathForm: FormGroup;
   constructor(
+    private ftpPathService: FTPPathService,
+    public notificationService: NotificationService,
     public dialogRef: MatDialogRef<FTPPathDetailComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: IFTPPath) {
-    this.ftpPathForm.controls['id'].setValue(data.id);
-    this.ftpPathForm.controls['path'].setValue(data.path);
-    this.ftpPathForm.controls['login'].setValue(data.login);
-    this.ftpPathForm.controls['password'].setValue(data.password);
-    this.ftpPathForm.controls['lastTimeIndexed'].setValue(data.lastTimeIndexed);
-    this.ftpPathForm.controls['hasErrors'].setValue(data.hasErrors);
+    @Inject(MAT_DIALOG_DATA) public data: IFTPPath
+  ) {
+    this.dialogRef.disableClose = true;
+    this.ftpPathForm = new FormGroup({
+      id: new FormControl({ value: data.id, disabled: true }),
+      path: new FormControl(data.path),
+      login: new FormControl(data.login),
+      password: new FormControl(data.password),
+      lastTimeIndexed: new FormControl({ value: moment(data.lastTimeIndexed).format('YYYY-MM-DD[T]HH:mm:ss'), disabled: true })
+    });
   }
 
-  onNoClick(): void {
-    this.dialogRef.close();
+  onClose() {
+    this.dialogRef.close(false);
   }
 
   onSubmit() {
-    console.log(this.ftpPathForm.value);
-    debugger;
+    let v = this.ftpPathForm.value;
+    v.id = this.data.id;
+    this.isLoading = true;
+    this.ftpPathService
+      .patch(v)
+      .subscribe(
+        success => {
+          console.log(success);
+          this.dialogRef.close(true);
+          this.isLoading = false;
+        },
+        error => {
+          console.log(error);
+          this.notificationService.showError(error);
+          this.isLoading = false;
+        }
+      );
   }
 }

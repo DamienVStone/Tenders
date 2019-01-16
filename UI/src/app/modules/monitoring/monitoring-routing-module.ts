@@ -21,7 +21,7 @@ const monitoringRoutes: Routes = [
                 ]
             },
             {
-                path: '',
+                path: 'dashboard',
                 component: MonitoringHomeComponent
             }
         ]

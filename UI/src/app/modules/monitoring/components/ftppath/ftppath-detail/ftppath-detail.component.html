@@ -1,37 +1,31 @@
-<h1 mat-dialog-title>Редактирование пути {{data.id}}</h1>
-<div mat-dialog-content>
-  <form [formGroup]="ftpPathForm" (ngSubmit)="onSubmit()">
-    <label>
-      Идентификатор:
-      <input type="text" formControlName="id" disabled>
-    </label>
+<div [hidden]="!isLoading" style="padding: 20px">
 
-    <label>
-      Путь:
-      <textarea type="text" formControlName="path"></textarea>
-    </label>
-
-    <label>
-      Логин:
-      <input type="text" formControlName="login">
-    </label>
-
-    <label>
-      Пароль:
-      <input type="text" formControlName="password">
-    </label>
-
-    <label>
-      Последняя проверка:
-      <input type="datetime-local" formControlName="lastTimeIndexed">
-    </label>
-    
-    <label>
-      Имеет ли ошибки?:
-      <input type="text" formControlName="hasErrors">
-    </label>
-  </form>
+  <mat-spinner style="margin: auto"></mat-spinner>
 </div>
-<div mat-dialog-actions>
-  <button mat-raised-button type="submit" [disabled]="!ftpPathForm.valid">Сохранить</button>
+<div [hidden]="isLoading">
+  <form [formGroup]="ftpPathForm" (ngSubmit)="onSubmit()">
+    <h1 mat-dialog-title>Редактирование пути</h1>
+    <h3 style="color: red" *ngIf="data.hasErrors">Имеет ошибки</h3>
+    <div mat-dialog-content>
+      <mat-form-field>
+        <input matInput placeholder="Идентификатор" formControlName="id">
+      </mat-form-field>
+      <mat-form-field>
+        <textarea matInput placeholder="Путь" formControlName="path"></textarea>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Логин" formControlName="login">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput placeholder="Пароль" formControlName="password">
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput type="datetime-local" placeholder="Последняя проверка" formControlName="lastTimeIndexed">
+      </mat-form-field>
+    </div>
+    <div mat-dialog-actions>
+      <button mat-raised-button type="submit" [disabled]="!ftpPathForm.valid">Сохранить</button>
+      <button mat-raised-button type="button" (click)="onClose()">Закрыть</button>
+    </div>
+  </form>
 </div>

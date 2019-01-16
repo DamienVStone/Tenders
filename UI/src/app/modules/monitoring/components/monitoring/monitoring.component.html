@@ -1,11 +1,11 @@
-<div style="padding: 1vw">
+<div>
   <h2>Подсистема мониторинга</h2>
-  <a mat-button mat-raised-button routerLink=".">Свод</a>
-  <a mat-button mat-raised-button routerLink="./ftppath">FTP</a>
-  <a mat-button mat-raised-button routerLink="#">Сбербанк</a>
-  <a mat-button mat-raised-button routerLink="#">РТС</a>
-  <a mat-button mat-raised-button routerLink="#">ЕЭТП</a>
-  <div style="padding: 1vw">
+  <a mat-raised-button routerLinkActive="active" routerLink="./dashboard">Сводные данные</a>
+  <a mat-raised-button routerLinkActive="active" routerLink="./ftppath">Мониторинг FTP</a>
+  <a mat-raised-button routerLinkActive="active" routerLink="#">Мониторинг ЭТП Сбербанка</a>
+  <a mat-raised-button routerLinkActive="active" routerLink="#">Мониторинг ЭТП РТС</a>
+  <a mat-raised-button routerLinkActive="active" routerLink="#">Мониторинг ЭТП ЕЭТП</a>
+  <div>
     <router-outlet></router-outlet>
   </div>
 </div>

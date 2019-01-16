@@ -10,6 +10,7 @@ import { MaterialModule } from './material-module';
 import { SidenavComponent } from './modules/sidenav/sidenav.component';
 import { FTPPathService } from './modules/monitoring/components/ftppath/services/ftppath.service';
 import { MonitoringModule } from './modules/monitoring/monitoring.module';
+import { NotificationService } from './services/notification.service';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,7 @@ import { MonitoringModule } from './modules/monitoring/monitoring.module';
     MonitoringModule,
     AppRoutingModule
   ],
-  providers: [FTPPathService],
+  providers: [FTPPathService, NotificationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

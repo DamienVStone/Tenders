@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TenderPlanAPI.Parameters
 {
-    public class FilterOptions : FTPPathParam
+    public class FilterOptions
     {
         public FilterOptions()
         {
