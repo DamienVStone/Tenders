@@ -110,21 +110,17 @@ namespace TenderPlanAPI.Controllers
         public IActionResult Patch([FromBody]FTPPathParam path)
         {
             if (!_repo.Exists(path.Id)) return BadRequest("Путь не найден");
+            if (string.IsNullOrEmpty(path.Path)) return BadRequest("Метод не может обрабатывать пустую строку");
+            if (!Uri.TryCreate(path.Path, UriKind.Absolute, out Uri u)) return BadRequest("Строка не валидна, укажите абслютный путь");
 
-            var resultCheck = HelperCheckValidPath(path.Path) as ObjectResult;
-            if (resultCheck.StatusCode == 200)
-            {
-                var oldPath = _repo.GetOne(path.Id);
+            var oldPath = _repo.GetOne(path.Id);
 
-                oldPath.Path = path.Path;
-                oldPath.Login = path.Login;
-                oldPath.Password = path.Password;
+            oldPath.Path = path.Path;
+            oldPath.Login = path.Login;
+            oldPath.Password = path.Password;
 
-                if (!_repo.Update(oldPath)) return StatusCode(500, "Не удалось обновить путь");
-            }
-            else
-                return BadRequest(resultCheck.Value);
-
+            if (!_repo.Update(oldPath)) return StatusCode(500, "Не удалось обновить путь");
+        
             return Ok("");
         }
 
