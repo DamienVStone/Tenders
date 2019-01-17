@@ -32,20 +32,10 @@ namespace Tenders.API.Controllers
         [HttpGet("Check")]
         public IActionResult HelperCheckValidPath([FromQuery]string path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                return BadRequest("Метод не может обрабатывать пустую строку");
-            }
-            if (!Uri.TryCreate(path, UriKind.Absolute, out Uri u))
-            {
-                return BadRequest("Строка не валидна, укажите абслютный путь");
-            }
-            if (_repo.PathExistsByName(path))
-            {
-                return BadRequest("Путь уже существует");
-            }
-            else
-                return Ok("");
+            if (string.IsNullOrEmpty(path)) return BadRequest("Метод не может обрабатывать пустую строку");
+            if (!Uri.TryCreate(path, UriKind.Absolute, out Uri u)) return BadRequest("Строка не валидна, укажите абслютный путь");
+            if (_repo.PathExistsByName(path)) return BadRequest("Путь уже существует");
+            return Ok("");
         }
 
         /// <summary>
@@ -65,7 +55,7 @@ namespace Tenders.API.Controllers
                     Password = path.Password
                 });
                 if (string.IsNullOrEmpty(id)) return StatusCode(500, "Не удалось добавить путь");
-                return Created("/", id);
+                return Created("/", new { Id = id });
             }
             else
                 return BadRequest(resultCheck.Value);
