@@ -2,7 +2,7 @@
 
 namespace Tenders.API.Parameters
 {
-    public class FilterOptions : FTPPathParam
+    public class FilterOptions
     {
         private int pageSize;
         public int Page { get; set; }

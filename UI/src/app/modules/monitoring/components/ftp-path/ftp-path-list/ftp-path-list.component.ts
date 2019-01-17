@@ -46,7 +46,7 @@ export class FtpPathListComponent implements OnInit {
     this.searchControl.valueChanges
       .pipe(debounceTime(400))
       .pipe(distinctUntilChanged())
-      .pipe(tap(filter => this.filterOptions.globalFilter = filter.trim().toUpperCase()))
+      .pipe(tap(filter => this.filterOptions.quickSearch = filter.trim().toUpperCase()))
       .pipe(switchMap(r => this.refreshList()))
       .subscribe();
 

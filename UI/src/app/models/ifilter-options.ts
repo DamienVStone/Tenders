@@ -3,7 +3,7 @@ import { KeyValuePair } from "./key-value-pair";
 export interface IFilterOptions {
     page: number,
     pageSize: number,
-    globalFilter: string,
+    quickSearch: string,
     filter: KeyValuePair<string, string>[],
     toQueryString(): string
 }
@@ -15,7 +15,7 @@ export class FilterOptions implements IFilterOptions {
     }
     page: number;
     pageSize: number;
-    globalFilter: string;
+    quickSearch: string;
     filter: KeyValuePair<string, string>[];
     toQueryString(): string {
         return "page=" + this.page + "&pageSize=" + this.pageSize;
