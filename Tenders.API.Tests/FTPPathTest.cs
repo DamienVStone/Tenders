@@ -23,6 +23,7 @@ namespace Tenders.API.Tests
             try
             {
                 var result = service.Get(0, 10, "").ToArray()[0];
+                var result1 = service.Get(0, 10, "asdf").ToArray();
             }
             catch (System.Exception e)
             {

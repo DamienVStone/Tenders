@@ -60,9 +60,7 @@ namespace Tenders.API.DAL.Mongo
             Logger.Log($"Возврщаю список объектов типа {typeof(T)} c {skip} по {take} где IsActive = {IsActive} и фильтр = {quickSearch}");
             var res = Entities
                 .Find(f => f.IsActive == IsActive
-                        && (
-                            quickSearch == null || quickSearch == "" || f.QuickSearch == null || f.QuickSearch == "" || f.QuickSearch.Contains(quickSearch)
-                        )
+                        && (quickSearch == null || quickSearch == "" || f.QuickSearch.Contains(quickSearch))
                      )
                 .Skip(skip)
                 .Limit(take)

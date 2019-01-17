@@ -2,13 +2,14 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { IFtpPath } from '../models/iftp-path';
 import { FilterOptions, IFilterOptions } from 'src/app/models/ifilter-options';
 import { MatDialog, MatPaginator } from '@angular/material';
-import { tap, switchMap } from 'rxjs/operators';
+import { tap, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IListResponse } from 'src/app/models/ilist-response';
 import { Observable, of } from 'rxjs';
 import { NotificationService } from 'src/app/services/notification.service';
 import { I18nService } from 'src/app/services/i18n.service';
 import { FtpPathService } from '../services/ftp-path.service';
 import { FtpPathDetailComponent } from '../ftp-path-detail/ftp-path-detail.component';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-ftppath-list',
@@ -21,6 +22,7 @@ export class FtpPathListComponent implements OnInit {
   isListLoading = false;
   filterOptions: IFilterOptions = new FilterOptions(0, 50);
   displayedColumns: string[] = ['id', 'path', 'login', 'password', 'lastTimeIndexed'];
+  searchControl = new FormControl();
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -40,11 +42,15 @@ export class FtpPathListComponent implements OnInit {
       }))
       .pipe(switchMap(c => this.refreshList()))
       .subscribe();
-    this.refreshList().subscribe();
-  }
 
-  applyFilter(filter: string) {
-    this.filterOptions.globalFilter = filter.trim().toLowerCase();
+    this.searchControl.valueChanges
+      .pipe(debounceTime(400))
+      .pipe(distinctUntilChanged())
+      .pipe(tap(filter => this.filterOptions.globalFilter = filter.trim().toUpperCase()))
+      .pipe(switchMap(r => this.refreshList()))
+      .subscribe();
+
+    this.refreshList().subscribe();
   }
 
   refreshList(): Observable<IListResponse<IFtpPath[]>> {
