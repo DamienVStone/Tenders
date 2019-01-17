@@ -1,24 +1,24 @@
-import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
-import { IFTPPath } from '../models/iftp-path';
+import { Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { IFtpPath } from '../models/iftp-path';
 import { FormGroup, FormControl } from '@angular/forms';
 import * as moment from 'moment/moment';
-import { FTPPathService } from '../services/ftppath.service';
+import { FtpPathService } from '../services/ftp-path.service';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
   selector: 'app-ftppath-detail',
-  templateUrl: './ftppath-detail.component.html',
-  styleUrls: ['./ftppath-detail.component.scss']
+  templateUrl: './ftp-path-detail.component.html',
+  styleUrls: ['./ftp-path-detail.component.scss']
 })
-export class FTPPathDetailComponent {
+export class FtpPathDetailComponent {
   isLoading = false;
   ftpPathForm: FormGroup;
   constructor(
-    private ftpPathService: FTPPathService,
+    private ftpPathService: FtpPathService,
     public notificationService: NotificationService,
-    public dialogRef: MatDialogRef<FTPPathDetailComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: IFTPPath
+    public dialogRef: MatDialogRef<FtpPathDetailComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: IFtpPath
   ) {
     this.dialogRef.disableClose = true;
     this.ftpPathForm = new FormGroup({

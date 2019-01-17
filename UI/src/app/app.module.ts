@@ -8,9 +8,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatNativeDateModule } from '@angular/material';
 import { MaterialModule } from './material-module';
 import { SidenavComponent } from './modules/sidenav/sidenav.component';
-import { FTPPathService } from './modules/monitoring/components/ftppath/services/ftppath.service';
 import { MonitoringModule } from './modules/monitoring/monitoring.module';
 import { NotificationService } from './services/notification.service';
+import { FtpPathService } from './modules/monitoring/components/ftp-path/services/ftp-path.service';
+import { FtpEntryService } from './modules/monitoring/components/ftp-file/services/ftp-entry.service';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,7 @@ import { NotificationService } from './services/notification.service';
     MonitoringModule,
     AppRoutingModule
   ],
-  providers: [FTPPathService, NotificationService],
+  providers: [FtpPathService, FtpEntryService, NotificationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

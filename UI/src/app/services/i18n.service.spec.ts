@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { FTPPathService } from './ftppath.service';
+import { I18nService } from './i18n.service';
 
-describe('FTPPathService', () => {
+describe('I18nService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: FTPPathService = TestBed.get(FTPPathService);
+    const service: I18nService = TestBed.get(I18nService);
     expect(service).toBeTruthy();
   });
 });

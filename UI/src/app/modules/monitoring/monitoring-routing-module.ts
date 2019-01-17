@@ -1,9 +1,10 @@
 import { Routes, RouterModule } from "@angular/router";
-import { FTPPathListComponent } from "./components/ftppath/ftppath-list/ftppath-list.component";
 import { NgModule } from "@angular/core";
 import { MonitoringComponent } from "./components/monitoring/monitoring.component";
 import { MonitoringHomeComponent } from "./components/monitoring-home/monitoring-home.component";
-import { FTPPathDetailComponent } from "./components/ftppath/ftppath-detail/ftppath-detail.component";
+import { FtpPathDetailComponent } from "./components/ftp-path/ftp-path-detail/ftp-path-detail.component";
+import { FtpPathListComponent } from "./components/ftp-path/ftp-path-list/ftp-path-list.component";
+import { FtpEntryListComponent } from "./components/ftp-file/ftp-entry-list/ftp-entry-list.component";
 
 const monitoringRoutes: Routes = [
     {
@@ -11,18 +12,22 @@ const monitoringRoutes: Routes = [
         component: MonitoringComponent,
         children: [
             {
+                path: 'dashboard',
+                component: MonitoringHomeComponent
+            },
+            {
                 path: 'ftppath',
-                component: FTPPathListComponent,
+                component: FtpPathListComponent,
                 children: [
                     {
                         path: ':id',
-                        component: FTPPathDetailComponent
+                        component: FtpPathDetailComponent
                     }
                 ]
             },
             {
-                path: 'dashboard',
-                component: MonitoringHomeComponent
+                path: 'ftpentry',
+                component: FtpEntryListComponent
             }
         ]
     }

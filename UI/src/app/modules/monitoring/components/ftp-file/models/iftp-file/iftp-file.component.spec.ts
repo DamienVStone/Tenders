@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FTPPathDetailComponent } from './ftppath-detail.component';
+import { IFtpFileComponent } from './iftp-file.component';
 
-describe('FTPPathDetailComponent', () => {
-  let component: FTPPathDetailComponent;
-  let fixture: ComponentFixture<FTPPathDetailComponent>;
+describe('IFtpFileComponent', () => {
+  let component: IFtpFileComponent;
+  let fixture: ComponentFixture<IFtpFileComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FTPPathDetailComponent ]
+      declarations: [ IFtpFileComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FTPPathDetailComponent);
+    fixture = TestBed.createComponent(IFtpFileComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

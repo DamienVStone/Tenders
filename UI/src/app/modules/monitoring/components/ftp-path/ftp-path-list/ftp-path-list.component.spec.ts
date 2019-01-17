@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FTPPathListComponent } from './ftppath-list.component';
+import { FtpPathListComponent } from './ftp-path-list.component';
 
 describe('FTPPathListComponent', () => {
   // let component: FTPPathListComponent;

@@ -1,6 +1,6 @@
 import { IModelBase } from "src/app/models/imodel-base";
 
-export interface IFTPPath extends IModelBase {
+export interface IFtpPath extends IModelBase {
     path: string,
     login: string,
     password: string,

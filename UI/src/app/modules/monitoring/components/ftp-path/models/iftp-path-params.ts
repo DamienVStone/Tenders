@@ -1,4 +1,4 @@
-export interface IFTPPathParam 
+export interface IFtpPathParam 
 {
     Id: string;
     Path: string;
