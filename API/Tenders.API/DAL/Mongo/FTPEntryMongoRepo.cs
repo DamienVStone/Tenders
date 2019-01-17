@@ -20,9 +20,10 @@ namespace Tenders.API.DAL.Mongo
 
         protected override IMongoCollection<FTPEntry> Entities => _dbContext.FTPEntries;
 
-        public bool ExistsByName(string Name, bool HasParents = false)
+        public bool ExistsByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
         {
-            return Entities.CountDocuments(f => f.IsActive && f.Name == Name && ((HasParents && f.Parent!=null) || (!HasParents && f.Parent == null))) != 0;
+            checkId(PathId);
+            return Entities.CountDocuments(f => f.IsActive && f.Path == PathId && f.Name == Name && f.IsDirectory == IsDirectory && ((HasParents && f.Parent!=null) || (!HasParents && f.Parent == null))) != 0;
         }
 
         public IEnumerable<FTPEntry> GetByFileState(int Skip, int Take, bool HasParents = false, params StateFile[] States)
@@ -44,10 +45,12 @@ namespace Tenders.API.DAL.Mongo
                 .ToEnumerable();
         }
 
-        public FTPEntry GetByName(string Name, bool HasParents = false)
+        public FTPEntry GetByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
         {
+            checkId(PathId);
+
             return Entities
-                .Find(f => f.IsActive && f.Name == Name && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
+                .Find(f => f.IsActive && f.Path == PathId && f.Name == Name && f.IsDirectory==IsDirectory && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
                 .Limit(1)
                 .First();
         }
@@ -69,5 +72,7 @@ namespace Tenders.API.DAL.Mongo
                 .Limit(Take)
                 .ToEnumerable();
         }
+
+        
     }
 }

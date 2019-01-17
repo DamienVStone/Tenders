@@ -88,50 +88,52 @@ namespace Tenders.API.DAL.Elastic
             ).Documents;
         }
 
-        public FTPEntry GetByName(string Name, bool HasParents = false)
+        public FTPEntry GetByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
         {
-            return Client.Search<FTPEntry>(s => s
-                .Query(q => q
-                    .Bool(b =>
-                        mustHaveParents(
-                            b.Must(mu => mu
-                                .Term(t => t
-                                    .Field(f => f.IsActive)
-                                    .Value(true)
-                                ), mu => mu
-                                .Term(t => t
-                                    .Field(f => f.Name)
-                                    .Value(Name)
-                                )
-                            ),
-                            HasParents
-                        )
-                    )
-                )
-            ).Documents.First();
+            throw new NotImplementedException(); //TODO
+            //return Client.Search<FTPEntry>(s => s
+            //    .Query(q => q
+            //        .Bool(b =>
+            //            mustHaveParents(
+            //                b.Must(mu => mu
+            //                    .Term(t => t
+            //                        .Field(f => f.IsActive)
+            //                        .Value(true)
+            //                    ), mu => mu
+            //                    .Term(t => t
+            //                        .Field(f => f.Name)
+            //                        .Value(Name)
+            //                    )
+            //                ),
+            //                HasParents
+            //            )
+            //        )
+            //    )
+            //).Documents.First();
         }
 
-        public bool ExistsByName(string Name, bool HasParents = false)
+        public bool ExistsByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
         {
-            return Client.Count<FTPEntry>(c => c
-                .Query(q => q
-                    .Bool(b =>
-                        mustHaveParents(
-                            b.Must(mu => mu
-                                .Term(t => t
-                                    .Field(f => f.IsActive)
-                                    .Value(true)
-                                ), mu => mu
-                                .Term(t => t
-                                    .Field(f => f.Name)
-                                    .Value(Name)
-                                )
-                            ),
-                            HasParents
-                        )
-                    )
-                )
-            ).Count != 0;
+            throw new NotImplementedException(); //TODO
+            //return Client.Count<FTPEntry>(c => c
+            //    .Query(q => q
+            //        .Bool(b =>
+            //            mustHaveParents(
+            //                b.Must(mu => mu
+            //                    .Term(t => t
+            //                        .Field(f => f.IsActive)
+            //                        .Value(true)
+            //                    ), mu => mu
+            //                    .Term(t => t
+            //                        .Field(f => f.Name)
+            //                        .Value(Name)
+            //                    )
+            //                ),
+            //                HasParents
+            //            )
+            //        )
+            //    )
+            //).Count != 0;
         }
 
         public IEnumerable<FTPEntry> GetByParentId(string ParentId)
@@ -207,5 +209,6 @@ namespace Tenders.API.DAL.Elastic
             };
         }
 
+       
     }
 }

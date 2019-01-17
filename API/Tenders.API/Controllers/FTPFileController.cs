@@ -8,6 +8,7 @@ using TenderPlanAPI.Models;
 using TenderPlanAPI.Parameters;
 using TenderPlanAPI.Viewmodels;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Parameters;
 using Tenders.API.Services.Interfaces;
 
 namespace TenderPlanAPI.Controllers
@@ -119,58 +120,62 @@ namespace TenderPlanAPI.Controllers
         /// <param name="fileTree">Объект, хранящий дерево файлов и корень</param>
         /// <returns>200OK если индексация файлов прошла без ошибок</returns>
         [HttpPost("AddFileTree")]
-        public IActionResult AddFileTree([FromBody] FileTreeParam fileTree)
+        public IActionResult AddFileTree([FromQuery]string pathId, [FromBody]FTPEntriesTreeParam entries)
         {
-            if (!_idProvider.IsIdValid(fileTree.PathId)) return BadRequest("Неверный идентификатор пути");
-            if (!_pathRepo.Exists(fileTree.PathId.ToString())) return BadRequest("Путь не найден");
+            if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
+            if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
 
+            var entry = _entryRepo.ExistsByNameAndPathAndIsDirectory(entries.Name, pathId, entries.IsDirectory) ? _entryRepo.GetByNameAndPathAndIsDirectory(entries.Name, pathId, entries.IsDirectory) : null;
+            _putEntry(entry, entries, null, pathId);
 
-            var treeRoot = fileTree.TreeRoot;
-            //Осторожно!
-            //Корень дерева не может содержать родителя. Если у кроня дерева есть родитель то это, из-за дублируемых имен вложенных файлов, сломает всю концепцию индексатора и весь этот кусок надо будет переписать.
-            //Корень дерева не может быть директорией из-за дублирующих имен вложеных папок, это может сломать всю концепцию индексатора
-            if (!string.IsNullOrEmpty(fileTree.TreeRoot.Parent.ToString())) return BadRequest("Корень дерева не может содержать родителя");
-            if (treeRoot.IsDirectory || !treeRoot.Name.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase)) return BadRequest("Корень дерева может быть только ZIP архивом");
+            return Ok("");
+        }
 
-            FTPEntry treeRootFromDb;
-            if (!_entryRepo.ExistsByName(fileTree.TreeRoot.Name))
+        private void SaveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId)
+        {
+            if (inputChildren == null) return;
+            Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}");
+            inputChildren.AsParallel().ForAll(c =>
             {
-                treeRootFromDb = new FTPEntry()
-                {
-                    Name = treeRoot.Name,
-                    Size = treeRoot.Size,
-                    Modified = treeRoot.DateModified,
-                    IsDirectory = treeRoot.IsDirectory,
-                    State = StateFile.New,
-                    Path = fileTree.PathId
-                };
+                var key = $"{c.Name}_{c.IsDirectory}";
+                var res = _putEntry(dbChildren.ContainsKey(key)?dbChildren[key]:null, c, parentId, pathId);
+                SaveTree(res, c.Children, pathId);
+            });
+        }
 
-                _entryRepo.Create(treeRootFromDb);
+        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId)
+        {
+            string res;
+            if (o == null)
+            {
+                var entry = new FTPEntry()
+                {
+                    Name = n.Name,
+                    IsDirectory = n.IsDirectory,
+                    Size = n.Size,
+                    Modified = n.Modified,
+                    Path = pathId,
+                    Parent = parent,
+                    State = StateFile.New
+                };
+                res = _entryRepo.Create(entry);
             }
             else
             {
-                treeRootFromDb = _entryRepo.GetByName(fileTree.TreeRoot.Name);
-
-                if (treeRootFromDb.Size != treeRoot.Size || !treeRootFromDb.Modified.Equals(treeRoot.DateModified))
+                var modified = n.Size != o.Size || n.Modified != o.Modified;
+                if (modified)
                 {
-                    treeRootFromDb.Size = treeRoot.Size;
-                    treeRootFromDb.Modified = treeRoot.DateModified;
-                    treeRootFromDb.State = StateFile.Modified;
+                    o.Size = n.Size;
+                    o.Modified = n.Modified;
+                    o.State = StateFile.Modified;
 
-                    _entryRepo.Update(treeRootFromDb);
+                    _entryRepo.Update(o);
                 }
-                else
-                {
-                    treeRootFromDb.State = StateFile.Indexed;
-                }
+                res =  o.Id;
             }
 
-            //Далее получаю все дерево из бд для которого данный файл являтся родителем.
-            var treeFromDb = getAllChildren(treeRootFromDb);
-
-            _treeLookerService.UpdateFiles(fileTree.PathId, treeFromDb, fileTree.Files, treeRootFromDb.Id.ToString(), fileTree.TreeRoot.Id);
-
-            return Ok("");
+            
+            return res??throw new InvalidOperationException($"Ошибка при сохранении пути {n.Name}. Идентификатор сохраненного объекта оказался null");
         }
 
         private IEnumerable<FTPEntry> getAllChildren(FTPEntry root)
