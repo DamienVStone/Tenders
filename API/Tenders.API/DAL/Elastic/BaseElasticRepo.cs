@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TenderPlanAPI.Models;
 using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Models;
 
 namespace Tenders.API.DAL.Elastic
 {

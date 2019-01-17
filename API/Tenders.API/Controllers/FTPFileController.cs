@@ -3,14 +3,14 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TenderPlanAPI.Enums;
-using TenderPlanAPI.Models;
-using TenderPlanAPI.Parameters;
-using TenderPlanAPI.Viewmodels;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Enums;
+using Tenders.API.Models;
+using Tenders.API.Parameters;
 using Tenders.API.Services.Interfaces;
+using Tenders.API.Viewmodels;
 
-namespace TenderPlanAPI.Controllers
+namespace Tenders.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

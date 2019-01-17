@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using TenderPlanAPI.Models;
+using Tenders.API.Models;
 
 namespace Tenders.API.DAL.Interfaces
 {

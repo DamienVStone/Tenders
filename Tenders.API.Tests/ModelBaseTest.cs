@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TenderPlanAPI.Models;
+using Tenders.API.Models;
 
 namespace Tenders.API.Tests
 {
@@ -7,7 +7,8 @@ namespace Tenders.API.Tests
     public class ModelBaseTest
     {
         [TestMethod]
-        public void QuickSearchGenerated() {
+        public void QuickSearchGenerated()
+        {
             var tp = new TenderPlanPosition();
             tp.GenerateQuickSearchString();
         }

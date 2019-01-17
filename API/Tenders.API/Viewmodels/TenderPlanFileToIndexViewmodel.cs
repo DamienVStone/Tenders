@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson;
-
-namespace TenderPlanAPI.Viewmodels
+﻿namespace Tenders.API.Viewmodels
 {
     /// <summary>
     /// Модель файла тендер плана для индексатора.

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace TenderPlanAPI.Enums
+namespace Tenders.API.Enums
 {
+    /// <summary>
+    /// Подразделение для процедуры
+    /// </summary>
     [Serializable]
     public enum DivisionProcedure
     {

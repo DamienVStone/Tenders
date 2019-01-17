@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TenderPlanAPI.Services;
 using Tenders.API.DAL.Elastic;
 using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
@@ -13,7 +12,7 @@ using Tenders.API.Services;
 using Tenders.API.Services.Interfaces;
 using static Tenders.Core.DI.Container;
 
-namespace TenderPlanAPI
+namespace Tenders.API
 {
     public static class TestEnvHelper
     {
@@ -34,8 +33,8 @@ namespace TenderPlanAPI
         public void ConfigureServices(IServiceCollection services)
         {
             Registration.Register(services);
-            services.AddCors();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            //services.AddCors();
+            //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSingleton<IAPIConfigService, APIConfigService>();
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();

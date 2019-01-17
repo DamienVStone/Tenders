@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TenderPlanAPI.Enums;
-using TenderPlanAPI.Models;
-using TenderPlanAPI.Parameters;
+using Tenders.API.Enums;
+using Tenders.API.Models;
+using Tenders.API.Parameters;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Services.Interfaces;
 
-namespace TenderPlanAPI.Services
+namespace Tenders.API.Services
 {
     public class TreeLookerService : ITreeLookerService
     {

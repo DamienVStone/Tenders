@@ -1,5 +1,5 @@
 ﻿using MongoDB.Driver;
-using TenderPlanAPI.Models;
+using Tenders.API.Models;
 
 namespace Tenders.API.DAL.Mongo.Interfaces
 {

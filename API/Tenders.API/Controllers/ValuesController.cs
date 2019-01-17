@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
-namespace TenderPlanAPI.Controllers
+namespace Tenders.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

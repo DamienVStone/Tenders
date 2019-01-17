@@ -1,9 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace TenderPlanAPI.Enums
+namespace Tenders.API.Enums
 {
-    [SerializableAttribute]
+    /// <summary>
+    /// Состояние лота
+    /// </summary>
+    [Serializable]
     public enum LotState
     {
 

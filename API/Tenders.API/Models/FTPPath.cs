@@ -1,7 +1,7 @@
 ﻿using System;
 using Tenders.API.Attributes;
 
-namespace TenderPlanAPI.Models
+namespace Tenders.API.Models
 {
     public class FTPPath : ModelBase
     {

@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
-using TenderPlanAPI.Models;
 using Tenders.API.DAL.Mongo.Interfaces;
+using Tenders.API.Models;
 using Tenders.API.Services.Interfaces;
 using Tenders.Core.Abstractions.Services;
 

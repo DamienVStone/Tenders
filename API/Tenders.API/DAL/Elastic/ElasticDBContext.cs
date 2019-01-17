@@ -1,7 +1,7 @@
 ﻿using Nest;
 using System;
-using TenderPlanAPI.Models;
 using Tenders.API.DAL.Elastic.Interfaces;
+using Tenders.API.Models;
 using Tenders.API.Services.Interfaces;
 
 namespace Tenders.API.DAL.Elastic

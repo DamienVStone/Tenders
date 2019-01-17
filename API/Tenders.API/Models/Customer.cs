@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TenderPlanAPI.Models
+namespace Tenders.API.Models
 {
     public class Customer : ModelBase
     {

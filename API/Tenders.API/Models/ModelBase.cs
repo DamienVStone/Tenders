@@ -1,12 +1,11 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Tenders.API.Attributes;
 using Tenders.API.DAL.Mongo;
 using Tenders.Core.Helpers;
 
-namespace TenderPlanAPI.Models
+namespace Tenders.API.Models
 {
     public class ModelBase
     {
@@ -38,8 +37,9 @@ namespace TenderPlanAPI.Models
                 else
                     result = property.GetValue(this)?.ToString();
 
-                if (!string.IsNullOrEmpty(result?.Trim()))
-                    QuickSearch += $"{result.ToSearchString()}|";
+                result = result.ToSearchString();
+                if (!string.IsNullOrEmpty(result))
+                    QuickSearch += $"{result}|";
             });
         }
 

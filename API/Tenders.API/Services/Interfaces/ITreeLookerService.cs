@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using TenderPlanAPI.Models;
-using TenderPlanAPI.Parameters;
+using Tenders.API.Models;
+using Tenders.API.Parameters;
 
 namespace Tenders.API.Services.Interfaces
 {

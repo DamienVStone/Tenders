@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using TenderPlanAPI.Models;
-using TenderPlanAPI.Parameters;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Models;
+using Tenders.API.Parameters;
 
-namespace TenderPlanAPI.Controllers
+namespace Tenders.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
