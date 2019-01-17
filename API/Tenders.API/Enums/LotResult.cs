@@ -1,9 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace TenderPlanAPI.Enums
+namespace Tenders.API.Enums
 {
-    [SerializableAttribute]
+    /// <summary>
+    /// Результат подачи заявки на участие
+    /// </summary>
+    [Serializable]
     public enum LotResult
     {
         /// <summary>

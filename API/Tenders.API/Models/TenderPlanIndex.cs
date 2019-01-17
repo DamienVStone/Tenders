@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TenderPlanAPI.Models
+﻿namespace Tenders.API.Models
 {
     public class TenderPlanIndex : ModelBase
     {

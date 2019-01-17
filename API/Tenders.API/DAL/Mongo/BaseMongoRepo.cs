@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Models;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Core.Helpers;
 
@@ -56,17 +56,19 @@ namespace Tenders.API.DAL.Mongo
 
         public IEnumerable<T> Get(int skip, int take, string quickSearch, bool IsActive = true)
         {
-            quickSearch = quickSearch.ToSearchString();
-            Logger.Log($"Возврщаю список объектов типа {typeof(T)} c {skip} по {take} где IsActive = {IsActive}");
+            quickSearch = quickSearch.ToSearchString() ?? string.Empty;
+            Logger.Log($"Возврщаю список объектов типа {typeof(T)} c {skip} по {take} где IsActive = {IsActive} и фильтр = {quickSearch}");
             var res = Entities
-                .Find(f => f.IsActive == IsActive &&
-                    (
-                        quickSearch == null || quickSearch == "" || f.QuickSearch == null || f.QuickSearch == "" || f.QuickSearch.Contains(quickSearch))
-                    )
+                .Find(f => f.IsActive == IsActive
+                        && (
+                            quickSearch == null || quickSearch == "" || f.QuickSearch == null || f.QuickSearch == "" || f.QuickSearch.Contains(quickSearch)
+                        )
+                     )
                 .Skip(skip)
                 .Limit(take)
                 .ToEnumerable();
-            Logger.Log($"Успешно выбрал {res.Count()} объектов");
+            var count = res.Count();
+            Logger.Log($"Успешно выбрал {count} объектов");
             return res;
         }
 

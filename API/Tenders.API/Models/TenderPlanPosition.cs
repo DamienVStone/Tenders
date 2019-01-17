@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using TenderPlanAPI.Enums;
 using Tenders.API.Attributes;
+using Tenders.API.Enums;
 
-namespace TenderPlanAPI.Models
+namespace Tenders.API.Models
 {
     /// <summary>
     /// Позиция плана-графика

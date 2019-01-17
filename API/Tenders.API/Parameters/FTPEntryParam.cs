@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TenderPlanAPI.Parameters
+namespace Tenders.API.Parameters
 {
     public class FTPEntryParam
     {

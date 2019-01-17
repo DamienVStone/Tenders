@@ -1,12 +1,11 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Tenders.API.Attributes;
 using Tenders.API.DAL.Mongo;
 using Tenders.Core.Helpers;
 
-namespace TenderPlanAPI.Models
+namespace Tenders.API.Models
 {
     public class ModelBase
     {

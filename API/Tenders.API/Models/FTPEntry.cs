@@ -1,10 +1,10 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using System;
-using TenderPlanAPI.Enums;
 using Tenders.API.Attributes;
 using Tenders.API.DAL.Mongo;
+using Tenders.API.Enums;
 
-namespace TenderPlanAPI.Models
+namespace Tenders.API.Models
 {
     /// <summary>
     /// Элемент FTP

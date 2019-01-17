@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TenderPlanAPI.Parameters
+namespace Tenders.API.Parameters
 {
     public class FilterOptions : FTPPathParam
     {

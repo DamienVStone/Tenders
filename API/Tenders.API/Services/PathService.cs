@@ -1,11 +1,9 @@
-﻿using MongoDB.Driver;
-using System;
-using TenderPlanAPI.Controllers;
-using TenderPlanAPI.Models;
+﻿using System;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Models;
 using Tenders.API.Services.Interfaces;
 
-namespace TenderPlanAPI.Services
+namespace Tenders.API.Services
 {
     public class PathService : IPathService
     {
