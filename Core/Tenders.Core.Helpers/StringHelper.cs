@@ -12,7 +12,7 @@
         /// <returns>Преобразованная строка</returns>
         public static string ToSearchString(this string source)
         {
-            var result = source?.ToUpperInvariant();
+            var result = source?.Trim()?.ToUpperInvariant();
             return result;
         }
     }

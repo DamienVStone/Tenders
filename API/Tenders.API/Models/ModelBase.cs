@@ -37,8 +37,9 @@ namespace Tenders.API.Models
                 else
                     result = property.GetValue(this)?.ToString();
 
-                if (!string.IsNullOrEmpty(result?.Trim()))
-                    QuickSearch += $"{result.ToSearchString()}|";
+                result = result.ToSearchString();
+                if (!string.IsNullOrEmpty(result))
+                    QuickSearch += $"{result}|";
             });
         }
 
