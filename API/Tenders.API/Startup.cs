@@ -47,7 +47,7 @@ namespace TenderPlanAPI
             services.AddSingleton<ITenderPlanIndexRepo, TenderPlanIndexMongoRepo>();
 
             services.AddSingleton<IPathService, PathService>();
-            services.AddSingleton<ITreeLookerService, TreeLookerService>();
+            services.AddSingleton<IEntrySaverService, EntrySaverService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

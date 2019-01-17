@@ -19,14 +19,14 @@ namespace TenderPlanAPI.Controllers
     {
         private readonly IFTPEntryRepo _entryRepo;
         private readonly IFTPPathRepo _pathRepo;
-        private readonly ITreeLookerService _treeLookerService;
+        private readonly IEntrySaverService _treeSaverService;
         private readonly IIdProvider _idProvider;
 
-        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, ITreeLookerService treeLookerService, IIdProvider idProvider)
+        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, IEntrySaverService treeLookerService, IIdProvider idProvider)
         {
             _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
-            _treeLookerService = treeLookerService ?? throw new ArgumentNullException(nameof(treeLookerService));
+            _treeSaverService = treeLookerService ?? throw new ArgumentNullException(nameof(treeLookerService));
             _idProvider = idProvider ?? throw new ArgumentNullException(nameof(idProvider));
         }
 
@@ -39,77 +39,14 @@ namespace TenderPlanAPI.Controllers
         /// <param name="file">Массив файлов для добавления</param>
         /// <returns>200OK или ошибку, если что-то пошло не так</returns>
         [HttpPost]
-        public IActionResult Post([FromQuery]string pathId, [FromBody]ISet<FTPEntryParam> rootInputFiles)
+        public IActionResult Post([FromQuery]string pathId, [FromBody]IEnumerable<FTPEntryParam> rootInputFiles)
         {
-            if (rootInputFiles.Count == 0) return BadRequest("Нет файлов для добавления");
+            if (rootInputFiles.Count() == 0) return BadRequest("Нет файлов для добавления");
             if (string.IsNullOrWhiteSpace(pathId)) return BadRequest("Не указан идентификатор пути");
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
 
-            ISet<FTPEntry> pathFilesWithNoParents = new HashSet<FTPEntry>();
-            // Постранично получаю вообще все файлы из директории
-            var found = 0;
-            var i = 0;
-            do
-            {
-                var foundEntries = _entryRepo.GetByPath(i++ * 1000, 1000, pathId);
-                pathFilesWithNoParents.UnionWith(foundEntries);
-                found = foundEntries.Count();
-            } while (found >= 1000);
-
-            pathFilesWithNoParents.AsParallel().ForAll(p => p.State = StateFile.Pending);
-            var dbFiles = pathFilesWithNoParents.ToDictionary(f => f.Name);
-            var key = new object();
-            rootInputFiles
-                .AsParallel()
-                .ForAll(f =>
-                {
-                    if (dbFiles.Keys.Contains(f.Name))
-                    {
-                        //Файл существует в базе
-                        var dbFile = dbFiles[f.Name];
-                        if (dbFile.Size != f.Size || !dbFile.Modified.Equals(f.DateModified))
-                        {
-                            lock (key)
-                            {
-                                dbFile.Name = f.Name;
-                                dbFile.Size = f.Size;
-                                dbFile.State = StateFile.Modified;
-                            }
-                            _entryRepo.Update(dbFile);
-                        }
-                        else
-                        {
-                            lock (key)
-                            {
-                                dbFile.State = StateFile.Indexed;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //Файл не существует в базе
-                        var newFile = new FTPEntry
-                        {
-                            Name = f.Name,
-                            Modified = f.DateModified,
-                            Size = f.Size,
-                            Path = pathId,
-                            IsDirectory = false, // в корне котолога нет директорий. директории только внутри зипников.
-                            Parent = null
-                        };
-
-                        _entryRepo.Create(newFile);
-                    }
-                });
-
-            //Удаляю все файлы которых уже нет на FTP сервере
-            var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => f.Id).ToArray();
-            var delFailed = 0;
-            foreach (var entry in forDelete)
-            {
-                if (!_entryRepo.Delete(entry.ToString())) delFailed++;
-            }
+            var delFailed = _treeSaverService.SaveRootEntriesWithoutChildren(pathId, rootInputFiles);
 
             return Ok("Все файлы успешно добавлены." + (delFailed > 0 ? $" Не удалось удалить файлов: {delFailed}" : ""));
         }
@@ -125,65 +62,11 @@ namespace TenderPlanAPI.Controllers
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
 
-            var entry = _entryRepo.ExistsByNameAndPathAndIsDirectory(entries.Name, pathId, entries.IsDirectory) ? _entryRepo.GetByNameAndPathAndIsDirectory(entries.Name, pathId, entries.IsDirectory) : null;
-            _putEntry(entry, entries, null, pathId);
+            _treeSaverService.SaveFTPEntriesTree(pathId, entries);
 
             return Ok("");
         }
-
-        private void SaveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId)
-        {
-            if (inputChildren == null) return;
-            Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}");
-            inputChildren.AsParallel().ForAll(c =>
-            {
-                var key = $"{c.Name}_{c.IsDirectory}";
-                var res = _putEntry(dbChildren.ContainsKey(key)?dbChildren[key]:null, c, parentId, pathId);
-                SaveTree(res, c.Children, pathId);
-            });
-        }
-
-        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId)
-        {
-            string res;
-            if (o == null)
-            {
-                var entry = new FTPEntry()
-                {
-                    Name = n.Name,
-                    IsDirectory = n.IsDirectory,
-                    Size = n.Size,
-                    Modified = n.Modified,
-                    Path = pathId,
-                    Parent = parent,
-                    State = StateFile.New
-                };
-                res = _entryRepo.Create(entry);
-            }
-            else
-            {
-                var modified = n.Size != o.Size || n.Modified != o.Modified;
-                if (modified)
-                {
-                    o.Size = n.Size;
-                    o.Modified = n.Modified;
-                    o.State = StateFile.Modified;
-
-                    _entryRepo.Update(o);
-                }
-                res =  o.Id;
-            }
-
-            
-            return res??throw new InvalidOperationException($"Ошибка при сохранении пути {n.Name}. Идентификатор сохраненного объекта оказался null");
-        }
-
-        private IEnumerable<FTPEntry> getAllChildren(FTPEntry root)
-        {
-            var tree = _entryRepo.GetByParentId(root.Id.ToString()).SelectMany(getAllChildren).ToHashSet();
-            tree.Add(root);
-            return tree;
-        }
+        
 
         /// <summary>
         /// Возвращает все вновь созданные или измененные файлы
