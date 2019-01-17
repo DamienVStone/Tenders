@@ -51,7 +51,8 @@ namespace TenderPlanAPI.Services
                     if (dbFiles.Keys.Contains(f.Name))
                     {
                         //Файл существует в базе
-                        var dbFile = dbFiles[f.Name];
+                        FTPEntry dbFile;
+                        lock(key)dbFile = dbFiles[f.Name];
                         if (dbFile.Size != f.Size || !dbFile.Modified.Equals(f.DateModified))
                         {
                             lock (key)
@@ -64,10 +65,8 @@ namespace TenderPlanAPI.Services
                         }
                         else
                         {
-                            lock (key)
-                            {
-                                dbFile.State = StateFile.Indexed;
-                            }
+                            lock (key) dbFile.State = StateFile.Indexed;
+                            
                         }
                     }
                     else
