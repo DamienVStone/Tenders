@@ -33,8 +33,8 @@ namespace Tenders.API
         public void ConfigureServices(IServiceCollection services)
         {
             Registration.Register(services);
-            //services.AddCors();
-            //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddCors();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSingleton<IAPIConfigService, APIConfigService>();
             services.AddSingleton<IElasticDbContext, ElasticDBContext>();
