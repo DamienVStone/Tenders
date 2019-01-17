@@ -1,17 +1,9 @@
 ﻿using System.Collections.Generic;
+using Tenders.API.Services.Interfaces;
 using Tenders.Core.Abstractions.Services;
 
 namespace Tenders.API.Services
 {
-    public interface IAPIConfigService
-    {
-        string DbConnectionString { get; }
-        string DbName { get; }
-        /// <summary>
-        /// Количество часов через которое путь на FTP должен быть автоматически проиндексирован. Используется в PathService
-        /// </summary>
-        int FTPIndexingTimeout { get; }
-    }
     public class APIConfigService : IAPIConfigService
     {
 

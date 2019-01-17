@@ -1,8 +1,6 @@
-﻿using MongoDB.Bson;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Tenders.API.DAL.Mongo;
 
 namespace TenderPlanAPI.Models
 {
@@ -11,10 +9,11 @@ namespace TenderPlanAPI.Models
         public ModelBase()
         {
             CreatedDate = DateTime.Now;
-            Id = ObjectId.GenerateNewId();
             IsActive = true;
         }
-        public ObjectId Id { get; set; }
+
+        [BsonSerializer(typeof(ObjectIdStringSerializer))]
+        public string Id { get; set; }
         public virtual bool IsActive { get; set; }
         public virtual DateTime CreatedDate { get; set; }
     }

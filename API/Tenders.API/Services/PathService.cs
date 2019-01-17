@@ -2,36 +2,28 @@
 using System;
 using TenderPlanAPI.Controllers;
 using TenderPlanAPI.Models;
-using Tenders.API.Services;
+using Tenders.API.DAL.Interfaces;
+using Tenders.API.Services.Interfaces;
 
 namespace TenderPlanAPI.Services
 {
-    public interface IPathService
-    {
-        FTPPath GetNotIndexedPath();
-    }
-
-    // Это синглтон. Смотри конфигурацию в файле Startup
     public class PathService : IPathService
     {
         private readonly object key = new object();
         private readonly IAPIConfigService config;
-        private readonly IDBConnectContext dbContext;
+        private readonly IFTPPathRepo ftpPathRepo;
 
-        public PathService(IAPIConfigService config, IDBConnectContext dbContext) : base()
+        public PathService(IAPIConfigService Config, IFTPPathRepo FtpPathRepo)
         {
-            this.config = config ?? throw new ArgumentNullException(nameof(config));
-            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            config = Config ?? throw new ArgumentNullException(nameof(Config));
+            ftpPathRepo = FtpPathRepo ?? throw new ArgumentNullException(nameof(FtpPathRepo));
         }
 
         public FTPPath GetNotIndexedPath()
         {
             lock (key)
             {
-                var timeout = config.FTPIndexingTimeout;
-                var filter = Builders<FTPPath>.Filter.Lte("LastTimeIndexed", DateTimeOffset.Now.AddHours(-timeout));
-                var update = Builders<FTPPath>.Update.Set("LastTimeIndexed", DateTimeOffset.Now);
-                return dbContext.FTPPath.FindOneAndUpdate(filter, update);
+                return ftpPathRepo.GetOldestIndexedPath(config.FTPIndexingTimeout);
             }
         }
     }

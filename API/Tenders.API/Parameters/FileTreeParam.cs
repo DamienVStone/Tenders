@@ -13,7 +13,7 @@ namespace TenderPlanAPI.Parameters
         /// Идентификатор объекта FTPPath в котором должно быть проиндексированно это дерево
         /// </summary>
         [Required]
-        public ObjectId PathId { get; set; }
+        public string PathId { get; set; }
 
         /// <summary>
         /// Файл, который является корнем дерева индексации
@@ -25,7 +25,7 @@ namespace TenderPlanAPI.Parameters
         /// Файлы, составляющие дерево
         /// </summary>
         [Required]
-        public List<FTPEntryParam> Files { get; set; }
+        public ISet<FTPEntryParam> Files { get; set; }
 
     }
 }

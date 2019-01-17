@@ -5,7 +5,7 @@ namespace TenderPlanAPI.Parameters
 {
     public class FTPEntryParam
     {
-        public ObjectId Id { get; set; }
+        public string Id { get; set; }
         /// <summary>
         /// Размер
         /// </summary>
@@ -25,6 +25,6 @@ namespace TenderPlanAPI.Parameters
         /// <summary>
         /// Ссылка на путь
         /// </summary>
-        public ObjectId Parent { get; set; }
+        public string Parent { get; set; }
     }
 }

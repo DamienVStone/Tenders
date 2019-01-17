@@ -1,8 +1,8 @@
-﻿using MongoDB.Bson;
+﻿using System;
 
 namespace TenderPlanAPI.Models
 {
-    public class TenderPlanIndex: ModelBase
+    public class TenderPlanIndex : ModelBase
     {
         public TenderPlanIndex()
         {
@@ -12,7 +12,7 @@ namespace TenderPlanAPI.Models
         /// <summary>
         /// Идентификатор файла, которому соответствует индекс
         /// </summary>
-        public ObjectId FTPFileId { get; set; }
+        public string FTPFileId { get; set; }
 
         /// <summary>
         /// Идентификатор плана закупок

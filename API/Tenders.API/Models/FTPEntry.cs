@@ -1,9 +1,7 @@
-﻿using MongoDB.Bson;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TenderPlanAPI.Enums;
+using Tenders.API.DAL.Mongo;
 
 namespace TenderPlanAPI.Models
 {
@@ -28,11 +26,13 @@ namespace TenderPlanAPI.Models
         /// <summary>
         /// Ссылка на путь
         /// </summary>
-        public ObjectId Path { get; set; }
+        [BsonSerializer(typeof(ObjectIdStringSerializer))]
+        public string Path { get; set; }
         /// <summary>
         /// Ссылка на родителя 
         /// </summary>
-        public ObjectId? Parent { get; set; }
+        [BsonSerializer(typeof(ObjectIdStringSerializer))]
+        public string Parent { get; set; }
         /// <summary>
         /// Является ли этот элемент дерикторией
         /// </summary>

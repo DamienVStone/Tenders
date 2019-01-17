@@ -3,10 +3,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TenderPlanAPI.Classes;
-using TenderPlanAPI.Controllers;
 using TenderPlanAPI.Services;
+using Tenders.API.DAL.Elastic;
+using Tenders.API.DAL.Elastic.Interfaces;
+using Tenders.API.DAL.Interfaces;
+using Tenders.API.DAL.Mongo;
+using Tenders.API.DAL.Mongo.Interfaces;
 using Tenders.API.Services;
+using Tenders.API.Services.Interfaces;
 using static Tenders.Core.DI.Container;
 
 namespace TenderPlanAPI
@@ -31,15 +35,19 @@ namespace TenderPlanAPI
         {
             Registration.Register(services);
             services.AddCors();
-            services
-                            .AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                .AddJsonOptions(opt =>
-                {
-                    opt.SerializerSettings.Converters.Add(new ObjectIdConverter());
-                });
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
             services.AddSingleton<IAPIConfigService, APIConfigService>();
-            services.AddSingleton<IDBConnectContext, DBConnectContext>();
+            services.AddSingleton<IElasticDbContext, ElasticDBContext>();
+            services.AddSingleton<IMongoDbContext, MongoDbContext>();
+
+            services.AddSingleton<IIdProvider, MongoIdProvider>();
+            services.AddSingleton<IFTPPathRepo, FTPPathMongoRepo>();
+            services.AddSingleton<IFTPEntryRepo, FTPEntryMongoRepo>();
+            services.AddSingleton<ITenderPlanIndexRepo, TenderPlanIndexMongoRepo>();
+
             services.AddSingleton<IPathService, PathService>();
+            services.AddSingleton<ITreeLookerService, TreeLookerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
