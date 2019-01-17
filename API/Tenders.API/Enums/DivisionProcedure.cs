@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TenderPlanAPI.Enums
 {
-    [SerializableAttribute]
+    [Serializable]
     public enum DivisionProcedure
     {
         /// <summary>

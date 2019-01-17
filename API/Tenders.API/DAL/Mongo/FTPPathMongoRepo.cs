@@ -1,6 +1,5 @@
 ﻿using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using TenderPlanAPI.Models;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.DAL.Mongo.Interfaces;
