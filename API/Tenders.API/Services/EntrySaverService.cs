@@ -23,7 +23,7 @@ namespace TenderPlanAPI.Services
 
         public void SaveFTPEntriesTree(string PathId, FTPEntriesTreeParam rootEntry)
         {
-            var entry = _entryRepo.ExistsByNameAndPathAndIsDirectory(rootEntry.Name, PathId, rootEntry.IsDirectory) ? _entryRepo.GetByNameAndPathAndIsDirectory(rootEntry.Name, pathId, rootEntry.IsDirectory) : null;
+            var entry = _entryRepo.ExistsByNameAndPathAndIsDirectory(rootEntry.Name, PathId, rootEntry.IsDirectory) ? _entryRepo.GetByNameAndPathAndIsDirectory(rootEntry.Name, PathId, rootEntry.IsDirectory) : null;
             var res = _putEntry(entry, rootEntry, null, PathId);
             _saveTree(res, rootEntry.Children, PathId);
         }
