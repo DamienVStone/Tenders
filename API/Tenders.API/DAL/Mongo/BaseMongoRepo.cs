@@ -62,19 +62,16 @@ namespace Tenders.API.DAL.Mongo
 
         public IEnumerable<T> Get(int skip, int take, string quickSearch, bool isActive = true)
         {
-            Logger.Log($"Возвращаю список объектов типа {typeof(T)} c {skip} по {take} где IsActive = {isActive} и фильтр = {quickSearch}");
-            quickSearch = quickSearch.ToSearchString() ?? string.Empty;
             var filter = _filter(quickSearch, isActive);
             var res = filter.Skip(skip)
                 .Limit(take)
                 .ToEnumerable();
-            var count = res.Count();
-            Logger.Log($"Успешно выбрал {count} объектов");
             return res;
         }
 
         private IFindFluent<T, T> _filter(string quickSearch, bool IsActive)
         {
+            quickSearch = quickSearch.ToSearchString() ?? string.Empty;
             return Entities
                 .Find(f =>
                     f.IsActive == IsActive
