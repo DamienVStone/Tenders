@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Tenders.API.Services;
 using Tenders.API.DAL.Elastic;
 using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;

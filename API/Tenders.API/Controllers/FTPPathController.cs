@@ -133,7 +133,7 @@ namespace Tenders.API.Controllers
         {
             return new JsonResult(new ListResponse<FTPPath>
             {
-                Count = (int)_repo.CountAll(),
+                Count = (int)_repo.Count(options.Skip, options.Take, options.QuickSearch),
                 Data = _repo.Get(options.Skip, options.Take, options.QuickSearch).ToArray()
             });
         }

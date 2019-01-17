@@ -36,7 +36,7 @@ namespace Tenders.API.DAL.Mongo
 
         public IEnumerable<FTPEntry> GetByFileStateAndPath(int Skip, int Take, string PathId, bool HasParents = false, params StateFile[] States)
         {
-            checkId(PathId);
+            CheckId(PathId);
             return Entities
                 .Find(f => f.IsActive && f.Path == PathId && States.Any(i => i == f.State) && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
                 .Skip(Skip)
@@ -54,7 +54,7 @@ namespace Tenders.API.DAL.Mongo
 
         public IEnumerable<FTPEntry> GetByParentId(string ParentId)
         {
-            checkId(ParentId);
+            CheckId(ParentId);
             return Entities
                 .Find(f => f.IsActive && f.Parent == ParentId)
                 .ToEnumerable();
@@ -62,7 +62,7 @@ namespace Tenders.API.DAL.Mongo
 
         public IEnumerable<FTPEntry> GetByPath(int Skip, int Take, string PathId, bool HasParents = false)
         {
-            checkId(PathId);
+            CheckId(PathId);
             return Entities
                 .Find(f => f.IsActive && f.Path == PathId && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
                 .Skip(Skip)

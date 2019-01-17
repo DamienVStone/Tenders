@@ -8,7 +8,7 @@ namespace Tenders.API.Tests
     [TestClass]
     public class FTPPathTest
     {
-        private void registerServices()
+        private void _registerServices()
         {
             Container.Init(
                 new Startup(null).ConfigureServices
@@ -18,14 +18,14 @@ namespace Tenders.API.Tests
         [TestMethod]
         public void PathCanBeFiltered()
         {
-            registerServices();
+            _registerServices();
             var service = Container.GetService<IFTPPathRepo>();
             try
             {
                 var result = service.Get(0, 10, "").ToArray()[0];
                 var result1 = service.Get(0, 10, "asdf").ToArray();
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
 
                 throw;

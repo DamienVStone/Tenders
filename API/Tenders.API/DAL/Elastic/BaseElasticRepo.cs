@@ -93,5 +93,10 @@ namespace Tenders.API.DAL.Elastic
                 )
             ).Count;
         }
+
+        public long Count(int skip, int take, string quickSearch = "", bool isActive = true)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace Tenders.API.DAL.Elastic
                 .Take(Take)
                 .Query(q => q
                     .Bool(b =>
-                        mustHaveParents(
+                        _mustHaveParents(
                             b.Must(mu => mu
                                 .Term(t => t
                                     .Field(f => f.IsActive)
@@ -29,7 +29,7 @@ namespace Tenders.API.DAL.Elastic
                             ),
                             HasParents
                         )
-                        .Should(fileStateTermCreator(States))
+                        .Should(_fileStateTermCreator(States))
                     )
                 )
             ).Documents;
@@ -43,7 +43,7 @@ namespace Tenders.API.DAL.Elastic
                 .Take(Take)
                 .Query(q => q
                     .Bool(b =>
-                        mustHaveParents(
+                        _mustHaveParents(
                             b.Must(mu => mu
                                 .Term(t => t
                                     .Field(f => f.Path)
@@ -69,7 +69,7 @@ namespace Tenders.API.DAL.Elastic
                 .Take(Take)
                 .Query(q => q
                     .Bool(b =>
-                        mustHaveParents(
+                        _mustHaveParents(
                             b.Must(mu => mu
                                 .Term(t => t
                                     .Field(f => f.Path)
@@ -82,7 +82,7 @@ namespace Tenders.API.DAL.Elastic
                             ),
                             HasParents
                         )
-                        .Should(fileStateTermCreator(States))
+                        .Should(_fileStateTermCreator(States))
                     )
                 )
             ).Documents;
@@ -93,7 +93,7 @@ namespace Tenders.API.DAL.Elastic
             return Client.Search<FTPEntry>(s => s
                 .Query(q => q
                     .Bool(b =>
-                        mustHaveParents(
+                        _mustHaveParents(
                             b.Must(mu => mu
                                 .Term(t => t
                                     .Field(f => f.IsActive)
@@ -116,7 +116,7 @@ namespace Tenders.API.DAL.Elastic
             return Client.Count<FTPEntry>(c => c
                 .Query(q => q
                     .Bool(b =>
-                        mustHaveParents(
+                        _mustHaveParents(
                             b.Must(mu => mu
                                 .Term(t => t
                                     .Field(f => f.IsActive)
@@ -156,7 +156,7 @@ namespace Tenders.API.DAL.Elastic
             ).Documents;
         }
 
-        private Func<QueryContainerDescriptor<FTPEntry>, QueryContainer>[] fileStateTermCreator(StateFile[] States)
+        private Func<QueryContainerDescriptor<FTPEntry>, QueryContainer>[] _fileStateTermCreator(StateFile[] States)
         {
             var containers = new List<Func<QueryContainerDescriptor<FTPEntry>, QueryContainer>>();
             foreach (var state in States)
@@ -172,7 +172,7 @@ namespace Tenders.API.DAL.Elastic
             return containers.ToArray();
         }
 
-        private BoolQueryDescriptor<FTPEntry> mustHaveParents(BoolQueryDescriptor<FTPEntry> descriptor, bool HaveParents)
+        private BoolQueryDescriptor<FTPEntry> _mustHaveParents(BoolQueryDescriptor<FTPEntry> descriptor, bool HaveParents)
         {
             if (HaveParents)
             {
