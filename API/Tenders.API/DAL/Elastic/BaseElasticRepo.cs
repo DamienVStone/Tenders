@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TenderPlanAPI.Models;
 using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Models;
 
 namespace Tenders.API.DAL.Elastic
 {
@@ -36,7 +36,7 @@ namespace Tenders.API.DAL.Elastic
             return Client.Delete<T>(Guid.Parse(id)).IsValid;
         }
 
-        public IEnumerable<T> Get(int Skip, int Take, bool IsActive = true)
+        public IEnumerable<T> Get(int Skip, int Take, string quickSearch, bool IsActive = true)
         {
             return Client.Search<T>(s => s
                 .From(Skip)

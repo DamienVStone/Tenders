@@ -1,4 +1,4 @@
-﻿namespace TenderPlanAPI.Parameters
+﻿namespace Tenders.API.Parameters
 {
     public class FTPPathParam
     {

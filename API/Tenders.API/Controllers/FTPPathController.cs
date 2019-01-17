@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
-using TenderPlanAPI.Models;
-using TenderPlanAPI.Parameters;
 using Tenders.API.DAL.Interfaces;
+using Tenders.API.Models;
+using Tenders.API.Parameters;
 using Tenders.API.Services.Interfaces;
 using Tenders.Core.Abstractions.Services;
 
-namespace TenderPlanAPI.Controllers
+namespace Tenders.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -120,7 +120,7 @@ namespace TenderPlanAPI.Controllers
             oldPath.Password = path.Password;
 
             if (!_repo.Update(oldPath)) return BadRequest("Данные не были обновлены");
-        
+
             return Ok("");
         }
 
@@ -131,16 +131,10 @@ namespace TenderPlanAPI.Controllers
         [HttpGet]
         public IActionResult Get([FromQuery]FilterOptions options)
         {
-            if (options.PageSize <= 0)
-            {
-                _logger.Log($"Размер страницы установлен, как 0, устанавливаю размер страницы 10.");
-                options.PageSize = 10;
-            }
-
             return new JsonResult(new ListResponse<FTPPath>
             {
                 Count = (int)_repo.CountAll(),
-                Data = _repo.Get(options.Skip, options.Take).ToArray()
+                Data = _repo.Get(options.Skip, options.Take, options.QuickSearch).ToArray()
             });
         }
 

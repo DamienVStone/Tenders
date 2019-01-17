@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using TenderPlanAPI.Enums;
-using TenderPlanAPI.Models;
+using Tenders.API.Enums;
+using Tenders.API.Models;
 
 namespace Tenders.API.DAL.Interfaces
 {

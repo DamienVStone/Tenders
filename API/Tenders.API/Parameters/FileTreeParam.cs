@@ -1,8 +1,7 @@
-﻿using MongoDB.Bson;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace TenderPlanAPI.Parameters
+namespace Tenders.API.Parameters
 {
     /// <summary>
     /// Модель содержащая в себе дерево проиндексированных ботом файлов для записи в бд.

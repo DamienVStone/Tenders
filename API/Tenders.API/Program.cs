@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace TenderPlanAPI
+namespace Tenders.API
 {
     public class Program
     {

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using TenderPlanAPI.Models;
+using Tenders.API.Models;
 
 namespace Tenders.API.DAL.Interfaces
 {
     public interface IAPIRepository<T> where T : ModelBase
     {
-        IEnumerable<T> Get(int Skip, int Take, bool IsActive = true);
+        IEnumerable<T> Get(int skip, int take, string quickSearch = "", bool isActive = true);
         T GetOne(string Id);
         string Create(T Item);
         bool CreateMany(IEnumerable<T> Items);

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using TenderPlanAPI.Parameters;
 using Tenders.API.Parameters;
 
 namespace Tenders.API.Services.Interfaces

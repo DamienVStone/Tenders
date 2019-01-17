@@ -14,7 +14,7 @@ export class NotificationService {
     let message = 'Сообщение об ошибке не получено';
     if (error) {
       message = "Ошибка: ";
-      if (error.error) {
+      if (error.error && typeof(error.error) == typeof('string')) {
         message += error.error;
       } else if (error.message) {
         message += error.message;
@@ -22,6 +22,8 @@ export class NotificationService {
         message += error;
       }
     }
+
+    console.log(error);
 
     this.snackBar.open(message, null, { duration: 3000, panelClass: ['background-red'] });
   }

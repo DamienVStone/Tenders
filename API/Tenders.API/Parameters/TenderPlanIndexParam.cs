@@ -1,7 +1,6 @@
-﻿using MongoDB.Bson;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace TenderPlanAPI.Parameters
+namespace Tenders.API.Parameters
 {
     public class TenderPlanIndexParam
     {
