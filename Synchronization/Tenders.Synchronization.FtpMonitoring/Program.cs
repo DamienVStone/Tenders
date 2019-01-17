@@ -43,8 +43,7 @@ namespace FtpMonitoringService
                 await logger.Log("Нечего обрабатывать.");
                 return false;
             }
-
-            List<FtpFile> allEntries = new List<FtpFile>();
+            
 #if DEBUG
             var creds = File.ReadAllLines("creds.txt");
             p.Login = creds[0];
@@ -54,30 +53,38 @@ namespace FtpMonitoringService
             var files = FtpClient.Get(logger).ListDirectoryFields(p.Path, p.Login, p.Password);
             var filesCount = files.Count();
             await logger.Log($"Найдено {filesCount}");
+            var key = new object();
             var i = 0;
-            var notZipFilesToSend = files.Where(f => !f.Name.EndsWith(".zip__")).ToList(); // пока обрабатываем все файлы без погружения
-            if (notZipFilesToSend.Count != 0)
+            var notZippedTask = Task.Run(() =>
             {
-                var content = new StringContent(JsonConvert.SerializeObject(notZipFilesToSend), Encoding.UTF8, MediaTypeNames.Application.Json);
-                apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
-                i += notZipFilesToSend.Count;
-                await logger.Log($"Обработано {i} файлов из {filesCount}");
-            }
+                var notZipFilesToSend = files.Where(f => !f.Name.EndsWith(".zip")); // пока обрабатываем все файлы без погружения
+                if (notZipFilesToSend.Count() != 0)
+                {
+                    var content = new StringContent(JsonConvert.SerializeObject(notZipFilesToSend), Encoding.UTF8, MediaTypeNames.Application.Json);
+                    apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
+                    lock(key) i += notZipFilesToSend.Count();
+                    logger.Log($"Обработано {i} файлов из {filesCount}").Wait();
+                }
+            });
 
             files
-                .Where(f => f.Name.EndsWith(".zip__"))
+                .Where(f => f.Name.EndsWith(".zip"))
                 .AsParallel()
                 .ForAll(f =>
                 {
-                    var fs = ZipHelper.Get().ParseArchve(FtpClient.Get(logger).GetArchiveEntries(p.Path + f.Name, p.Login, p.Password));
-                    fs.ForEach(file => file.Parent = f.Id);
-                    var res = apiDataProvider.SendFileTreeAsync(new StringContent(JsonConvert.SerializeObject(new { PathId = p.Id, TreeRoot = f, Files = fs }), Encoding.UTF8, MediaTypeNames.Application.Json), ct).Result;
+                    logger.Log($"Обрабатываю архив {f.Name} по пути {p.Path}");
+                    var allEntriesInArchive = FtpClient.Get(logger).GetArchiveEntries(p.Path + f.Name, p.Login, p.Password);
+                    new ZipHelper().ParseArchve(f, allEntriesInArchive);
+                    var data = JsonConvert.SerializeObject(f);
+                    var res = apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, ct).Result;
+                    lock (key) i++;
                     logger.Log($"Обработано {i} файлов из {filesCount}").Wait();
-                    //logger.Log(res);
                 });
 
+            notZippedTask.Wait();
+
             sw.Stop();
-            await logger.Log($"Обработка пути {p.Path} завершена.");
+            await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             return true;
         }
 

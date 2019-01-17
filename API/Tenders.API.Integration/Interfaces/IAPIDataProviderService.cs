@@ -18,7 +18,7 @@ namespace Tenders.Integration.API.Interfaces
         Task<bool> SetFutureAuctionServicedState(IAuctionInfo auction, CancellationToken ct);
         Task<T> GetNextPathForIndexing<T>(CancellationToken ct);
         Task<string> SendFilesAsync(StringContent files, string pathId, CancellationToken ct);
-        Task<string> SendFileTreeAsync(StringContent files, CancellationToken ct);
+        Task<string> SendFileTreeAsync(StringContent files, string pathId, CancellationToken ct);
         Task<bool> SendNewIndexedFiles(StringContent index, CancellationToken ct);
         Task<IEnumerable<T>> GetCurrentIndexAsync<T>(CancellationToken ct);
         Task<IEnumerable<T>> GetUpdatedTenderPlansAsync<T>(CancellationToken ct);

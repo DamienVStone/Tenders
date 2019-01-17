@@ -7,17 +7,42 @@ namespace FtpMonitoringService.Models
     public class FtpFile
     {
 
-        public FtpFile()
+        private IDictionary<string, FtpFile> _children = new Dictionary<string, FtpFile>();
+
+        public readonly DateTimeOffset Modified;
+        public readonly bool IsDirectory;
+        public readonly string Name;
+        public readonly long Size;
+        public IEnumerable<FtpFile> Children => _children.Values;
+
+        public FtpFile(string name)
         {
-            Id = ObjectId.GenerateNewId();
+            Name = name;
+            IsDirectory = true;
+        }
+
+        public FtpFile(string name, long size, DateTimeOffset modified)
+        {
+            Modified = modified;
+            Name = name;
+            Size = size;
             IsDirectory = false;
         }
 
-        public ObjectId Id {get; private set;}
-        public bool IsDirectory { get; set; }
-        public string Name { get; set; }
-        public long Size { get; set; }
-        public DateTime? DateModified { get; set; }
-        public ObjectId Parent { get; set; }
+        public FtpFile AddChild(string name)
+        {
+            var key = $"{name}_dir";
+            if (!_children.ContainsKey(key))
+                _children[key] = new FtpFile(name);
+            return _children[key];
+        }
+
+        public FtpFile AddChild(string name, long size, DateTimeOffset modified)
+        {
+            if (!_children.ContainsKey(name))
+                _children[name] = new FtpFile(name, size, modified);
+
+            return _children[name];
+        }
     }
 }

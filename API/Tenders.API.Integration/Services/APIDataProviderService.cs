@@ -123,9 +123,9 @@ namespace Tenders.Integration.API.Services
             return result.Text;
         }
 
-        public async Task<string> SendFileTreeAsync(StringContent files, CancellationToken ct)
+        public async Task<string> SendFileTreeAsync(StringContent files, string pathId, CancellationToken ct)
         {
-            var result = await httpClientService.PostAsync(configService.SendFileTreeUrl, files, ct);
+            var result = await httpClientService.PostAsync(configService.SendFileTreeUrl(pathId), files, ct);
             return result.Text;
         }
 

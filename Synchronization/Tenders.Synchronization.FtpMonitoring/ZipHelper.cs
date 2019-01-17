@@ -1,75 +1,33 @@
 ﻿using FtpMonitoringService.Models;
 using MongoDB.Bson;
-using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 
 namespace FtpMonitoringService
 {
     public class ZipHelper
     {
-        private Dictionary<string, FtpFile> _folders;
-
-        private Dictionary<string, FtpFile> Folders
+        public void ParseArchve(FtpFile root, IEnumerable<ZipArchiveEntry> entries)
         {
-            get
+            var files = entries.ToDictionary(e => e.FullName.Split(@"\"));
+            foreach(var pair in files)
             {
-                if (_folders == null) _folders = new Dictionary<string, FtpFile>();
-                return _folders;
+                a(root, pair.Key, pair.Value, 0);
             }
         }
 
-        public static ZipHelper Get()
+        private void a(FtpFile parent, string[] nameParts, ZipArchiveEntry file, int i)
         {
-            return new ZipHelper();
-        }
-
-        private ZipHelper() { }
-
-        public List<FtpFile> ParseArchve(ZipArchiveEntry[] entries)
-        {
-            var ftpEntries = entries.Where(e => !e.FullName.EndsWith("/")).Select(_parseEntry).ToList();
-            if (_folders != null && Folders.Values.Count > 0) ftpEntries.AddRange(Folders.Values);
-            return ftpEntries;
-        }
-
-        private FtpFile _parseEntry(ZipArchiveEntry entry)
-        {
-            var nameParts = entry.FullName.Split("/");
-            ObjectId parentId = ObjectId.Empty;
-            for(var i =0; i<nameParts.Length-1; i++)
+            if (i >= nameParts.Length || string.IsNullOrWhiteSpace(nameParts[i])) return;
+            if (i == nameParts.Length - 1)
             {
-                var folderName = nameParts[i];
-                if ((parentId.Equals(ObjectId.Empty)&&!Folders.ContainsKey(folderName))||(!parentId.Equals(ObjectId.Empty)&&!Folders.ContainsKey(folderName+"_"+parentId)))
-                {
-                    var newFolder = new FtpFile()
-                    {
-                        Name = folderName,
-                        IsDirectory = true
-                    };
-
-                    if (parentId != null) newFolder.Parent = parentId;
-                    Folders[!parentId.Equals(ObjectId.Empty) ? folderName + "_" + parentId : folderName] = newFolder;
-                }
-
-                parentId = Folders[!parentId.Equals(ObjectId.Empty) ? folderName + "_" + parentId : folderName].Id;
+                parent.AddChild(nameParts[i], file.Length, file.LastWriteTime);
             }
-
-            var file =  new FtpFile()
+            else
             {
-                Name = entry.Name,
-                Size = entry.Length,
-                DateModified = entry.LastWriteTime.DateTime,
-            };
-            if (parentId != null)
-            {
-                file.Parent = parentId;
+                a(parent.AddChild(nameParts[i]), nameParts, file, i + 1);
             }
-
-            return file;
         }
-
     }
 }

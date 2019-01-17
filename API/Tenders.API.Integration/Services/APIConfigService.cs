@@ -25,7 +25,7 @@ namespace Tenders.Integration.API.Services
             GetUpdatedTenderPlansUrl = new Uri(configService["api.GetUpdatedTenderPlansUrl"]);
             GetNextPathForIndexingUrl = new Uri(configService["api.GetNextPathForIndexingUrl"]);
             _sendFilesUrl = configService["api.SendFilesUrl"];
-            SendFileTreeUrl = new Uri(configService["api.SendFileTreeUrl"]);
+            _sendFileTreeUrl = configService["api.SendFileTreeUrl"];
 
             SecurityToken = configService["api.SecurityToken"];
             Username = configService["api.Username"];//
@@ -54,7 +54,12 @@ namespace Tenders.Integration.API.Services
             return new Uri(_sendFilesUrl + $"?pathId={pathId}");
         }
 
-        public Uri SendFileTreeUrl { get; }
+        private string _sendFileTreeUrl;
+
+        public Uri SendFileTreeUrl(string pathId)
+        {
+            return new Uri(_sendFileTreeUrl + $"?pathId={pathId}");
+        }
 
         public string SecurityToken { get; }
         public string Username { get; }
