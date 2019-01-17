@@ -69,8 +69,6 @@ namespace Tenders.API.Controllers
             }
             else
                 return BadRequest(resultCheck.Value);
-
-
         }
 
         /// <summary>
@@ -82,8 +80,8 @@ namespace Tenders.API.Controllers
         public IActionResult Delete([FromQuery]string id)
         {
             if (!_repo.Exists(id)) return BadRequest("Путь не найден");
-            if (!_repo.Delete(id)) return StatusCode(500, "Не удалось удалить путь");
-            return Ok("Путь удален");
+            if (!_repo.ChangeActiveFlag(id, false)) return BadRequest("Не удалось удалить путь");
+            return Ok();
         }
 
         /// <summary>

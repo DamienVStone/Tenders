@@ -79,7 +79,6 @@ namespace Tenders.API.DAL.Mongo
                 );
         }
 
-
         public T GetOne(string Id)
         {
             CheckId(Id);
