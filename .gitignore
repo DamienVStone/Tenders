@@ -11,3 +11,4 @@
 **/*.zip
 **/*.user
 **/packages
+/sh.exe.stackdump
