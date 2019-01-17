@@ -1,6 +1,7 @@
 ﻿using FtpMonitoringService.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -31,7 +32,7 @@ namespace FtpMonitoringService
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public IEnumerable<FtpFile> ListDirectoryFields(string dirPath, string username, string password)
+        public IEnumerable<FtpFile> ListDirectoryFiels(string dirPath, string username, string password)
         {
             FtpWebRequest request = (FtpWebRequest)WebRequest.Create(dirPath);
             request.Credentials = new NetworkCredential(username, password);
@@ -57,15 +58,22 @@ namespace FtpMonitoringService
             request.Method = WebRequestMethods.Ftp.DownloadFile;
 
             ISet<ZipArchiveEntry> entries;
+            var sw = new Stopwatch();
+            sw.Start();
             using (var response = (FtpWebResponse)request.GetResponse())
             using (var responseBody = new MemoryStream())
             {
                 response.GetResponseStream().CopyTo(responseBody);
+                logger.Log($"Получаю архив {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+                sw.Restart();
                 var archive = new ZipArchive(responseBody, ZipArchiveMode.Read);
+                logger.Log($"Распаковываю архив {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+                sw.Restart();
                 entries = new HashSet<ZipArchiveEntry>();
                 entries.UnionWith(archive.Entries);
+                logger.Log($"Кладу в выходную коллекцию {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             }
-
+            sw.Stop();
             return entries;
         }
 

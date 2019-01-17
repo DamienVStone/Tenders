@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using TenderPlanAPI.Enums;
@@ -14,18 +15,23 @@ namespace TenderPlanAPI.Services
     {
         private readonly IFTPEntryRepo _entryRepo;
         private readonly IFTPPathRepo _pathRepo;
+        private readonly IIdProvider _idProvider;
 
-        public EntrySaverService(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo)
+        public EntrySaverService(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, IIdProvider idProvider)
         {
             _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
+            _idProvider = idProvider ?? throw new ArgumentNullException(nameof(idProvider));
         }
 
         public void SaveFTPEntriesTree(string PathId, FTPEntriesTreeParam rootEntry)
         {
+            var entriesToAdd = new ConcurrentBag<FTPEntry>();
             var entry = _entryRepo.ExistsByNameAndPathAndIsDirectory(rootEntry.Name, PathId, rootEntry.IsDirectory) ? _entryRepo.GetByNameAndPathAndIsDirectory(rootEntry.Name, PathId, rootEntry.IsDirectory) : null;
-            var res = _putEntry(entry, rootEntry, null, PathId);
-            _saveTree(res, rootEntry.Children, PathId);
+            
+            var res = _putEntry(entry, rootEntry, null, PathId, entriesToAdd);
+            _saveTree(res, rootEntry.Children, PathId, entriesToAdd);
+            _entryRepo.CreateMany(entriesToAdd);
         }
 
         public int SaveRootEntriesWithoutChildren(string PathId, IEnumerable<FTPEntryParam> Entries)
@@ -97,25 +103,28 @@ namespace TenderPlanAPI.Services
             return delFailed;
         }
 
-        private void _saveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId)
+        private void _saveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId, ConcurrentBag<FTPEntry> entriesToAdd)
         {
+            
             if (inputChildren == null) return;
             Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}");
             inputChildren.AsParallel().ForAll(c =>
             {
                 var key = $"{c.Name}_{c.IsDirectory}";
-                var res = _putEntry(dbChildren.ContainsKey(key) ? dbChildren[key] : null, c, parentId, pathId);
-                _saveTree(res, c.Children, pathId);
+                var res = _putEntry(dbChildren.ContainsKey(key) ? dbChildren[key] : null, c, parentId, pathId, entriesToAdd);
+                _saveTree(res, c.Children, pathId, entriesToAdd);
             });
         }
 
-        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId)
+        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId, ConcurrentBag<FTPEntry> entriesToAdd)
         {
             string res;
             if (o == null)
             {
+                res = _idProvider.GenerateId();
                 var entry = new FTPEntry()
                 {
+                    Id = res,
                     Name = n.Name,
                     IsDirectory = n.IsDirectory,
                     Size = n.Size,
@@ -124,7 +133,7 @@ namespace TenderPlanAPI.Services
                     Parent = parent,
                     State = StateFile.New
                 };
-                res = _entryRepo.Create(entry);
+                entriesToAdd.Add(entry);
             }
             else
             {

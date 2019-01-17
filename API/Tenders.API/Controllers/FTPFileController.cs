@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using TenderPlanAPI.Enums;
 using TenderPlanAPI.Models;
@@ -10,6 +11,7 @@ using TenderPlanAPI.Viewmodels;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Parameters;
 using Tenders.API.Services.Interfaces;
+using Tenders.Core.Abstractions.Services;
 
 namespace TenderPlanAPI.Controllers
 {
@@ -21,17 +23,17 @@ namespace TenderPlanAPI.Controllers
         private readonly IFTPPathRepo _pathRepo;
         private readonly IEntrySaverService _treeSaverService;
         private readonly IIdProvider _idProvider;
+        private readonly ILoggerService _logger;
 
-        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, IEntrySaverService treeLookerService, IIdProvider idProvider)
+        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, IEntrySaverService treeLookerService, IIdProvider idProvider, ILoggerService logger)
         {
             _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
             _treeSaverService = treeLookerService ?? throw new ArgumentNullException(nameof(treeLookerService));
             _idProvider = idProvider ?? throw new ArgumentNullException(nameof(idProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
-
-
+        
         /// <summary>
         /// Добавление и обновления файлов у которых нет родителей
         /// </summary>
@@ -61,9 +63,10 @@ namespace TenderPlanAPI.Controllers
         {
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
-
+            var sw = new Stopwatch();
             _treeSaverService.SaveFTPEntriesTree(pathId, entries);
-
+            _logger.Log($"Сохранил дерево файлов {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            sw.Stop();
             return Ok("");
         }
         

@@ -8,6 +8,7 @@ namespace Tenders.API.DAL.Interfaces
         IEnumerable<T> Get(int Skip, int Take, bool IsActive = true);
         T GetOne(string Id);
         string Create(T Item);
+        bool CreateMany(IEnumerable<T> Items);
         bool Update(T Item);
         bool Delete(string Id);
         bool ChangeActiveFlag(string Id, bool IsActive);

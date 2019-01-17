@@ -40,6 +40,12 @@ namespace Tenders.API.DAL.Mongo
             return Item.Id;
         }
 
+        public bool CreateMany(IEnumerable<T> Items)
+        {
+            Entities.InsertMany(Items);
+            return true;
+        }
+
         public bool Delete(string Id)
         {
             checkId(Id);

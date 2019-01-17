@@ -93,5 +93,10 @@ namespace Tenders.API.DAL.Elastic
                 )
             ).Count;
         }
+
+        public bool CreateMany(IEnumerable<T> Items)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
