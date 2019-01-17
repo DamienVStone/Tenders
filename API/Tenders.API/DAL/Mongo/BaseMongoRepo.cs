@@ -24,9 +24,15 @@ namespace Tenders.API.DAL.Mongo
 
         public bool ChangeActiveFlag(string Id, bool IsActive)
         {
-            checkId(Id);
+            CheckId(Id);
             var update = Builders<T>.Update.Set(f => f.IsActive, IsActive);
             return Entities.FindOneAndUpdate(f => f.Id == Id, update) != null;
+        }
+
+        public long Count(int skip, int take, string quickSearch = "", bool isActive = true)
+        {
+            var filter = _filter(quickSearch, isActive);
+            return filter.CountDocuments();
         }
 
         public long CountAll(bool IsActive = true)
@@ -50,37 +56,39 @@ namespace Tenders.API.DAL.Mongo
 
         public bool Delete(string Id)
         {
-            checkId(Id);
+            CheckId(Id);
             return Entities.DeleteOne(f => f.Id == Id).DeletedCount > 0;
         }
 
         public bool Exists(string Id, bool IsActive = true)
         {
-            checkId(Id);
+            CheckId(Id);
             return Entities.CountDocuments(e => e.Id == Id && e.IsActive == IsActive) != 0;
         }
 
-        public IEnumerable<T> Get(int skip, int take, string quickSearch, bool IsActive = true)
+        public IEnumerable<T> Get(int skip, int take, string quickSearch, bool isActive = true)
         {
-            quickSearch = quickSearch.ToSearchString() ?? string.Empty;
-            Logger.Log($"Возврщаю список объектов типа {typeof(T)} c {skip} по {take} где IsActive = {IsActive} и фильтр = {quickSearch}");
-            var res = Entities
-                .Find(f => f.IsActive == IsActive
-                        && (
-                            quickSearch == null || quickSearch == "" || f.QuickSearch == null || f.QuickSearch == "" || f.QuickSearch.Contains(quickSearch)
-                        )
-                     )
-                .Skip(skip)
+            var filter = _filter(quickSearch, isActive);
+            var res = filter.Skip(skip)
                 .Limit(take)
                 .ToEnumerable();
-            var count = res.Count();
-            Logger.Log($"Успешно выбрал {count} объектов");
             return res;
         }
 
+        private IFindFluent<T, T> _filter(string quickSearch, bool IsActive)
+        {
+            quickSearch = quickSearch.ToSearchString() ?? string.Empty;
+            return Entities
+                .Find(f =>
+                    f.IsActive == IsActive
+                    && (quickSearch == null || quickSearch == "" || f.QuickSearch.Contains(quickSearch))
+                );
+        }
+
+
         public T GetOne(string Id)
         {
-            checkId(Id);
+            CheckId(Id);
             return Entities.Find(f => f.Id == Id).FirstOrDefault();
         }
 
@@ -93,7 +101,7 @@ namespace Tenders.API.DAL.Mongo
             return res.IsModifiedCountAvailable && res.ModifiedCount > 0;
         }
 
-        protected void checkId(string Id)
+        protected void CheckId(string Id)
         {
             if (!IdProvider.IsIdValid(Id)) throw new ArgumentException("Некорректный идентификатор");
         }

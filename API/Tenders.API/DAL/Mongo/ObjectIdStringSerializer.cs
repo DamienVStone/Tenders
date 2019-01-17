@@ -33,8 +33,7 @@ namespace Tenders.API.DAL.Mongo
                 context.Writer.WriteNull();
                 return;
             }
-            ObjectId r;
-            if (!ObjectId.TryParse(value, out r))
+            if (!ObjectId.TryParse(value, out ObjectId r))
                 throw new ArgumentException($"Значение {value} не является корректным значением типа ObjectId");
 
             context.Writer.WriteObjectId(r);
