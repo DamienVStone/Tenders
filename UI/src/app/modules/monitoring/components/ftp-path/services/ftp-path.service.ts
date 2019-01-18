@@ -12,15 +12,25 @@ import { IFtpPathParam } from '../models/iftp-path-params';
   providedIn: 'root'
 })
 export class FtpPathService {
+
   constructor(private http: HttpClient) { }
+  url = `${environment.host}FTPPath/`;
+
+  create(data: IFtpPathParam): Observable<Object> {
+    return this.http.post(this.url, data);
+  }
+
+  delete(id: string): Observable<Object> {
+    return this.http.delete(`${this.url}?id=${id}`);
+  }
 
   patch(data: IFtpPathParam): Observable<Object> {
-    return this.http.patch(environment.host + "FTPPath/", data);
+    return this.http.patch(this.url, data);
   }
 
   get(filter: IFilterOptions): Observable<IListResponse<IFtpPath[]>> {
     return this.http
-      .get<IListResponse<IFtpPath[]>>(environment.host + "FTPPath/", { params: new HttpParams({ fromString: filter.toQueryString() }) })
+      .get<IListResponse<IFtpPath[]>>(this.url, { params: new HttpParams({ fromString: filter.toQueryString() }) })
       .pipe(map(this.parseDateTimeOffset));
   }
 

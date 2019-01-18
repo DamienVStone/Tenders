@@ -53,6 +53,19 @@ export class FtpPathListComponent implements OnInit {
     this.refreshList().subscribe();
   }
 
+  onCreate() {
+    this.openDialog({
+      createdDate: new Date(),
+      hasErrors: false,
+      id: null,
+      isActive: true,
+      lastTimeIndexed: new Date(),
+      login: '',
+      password: '',
+      path: ''
+    });
+  }
+
   refreshList(): Observable<IListResponse<IFtpPath[]>> {
     this.isListLoading = true;
     console.log(this.filterOptions);

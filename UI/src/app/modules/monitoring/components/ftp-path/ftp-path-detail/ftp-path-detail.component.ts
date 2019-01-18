@@ -34,24 +34,28 @@ export class FtpPathDetailComponent {
     this.dialogRef.close(false);
   }
 
-  onSubmit() {
-    let v = this.ftpPathForm.value;
-    v.id = this.data.id;
+  onDelete() {
     this.isLoading = true;
     this.ftpPathService
-      .patch(v)
-      .subscribe(
-        success => {
-          console.log(success);
-          this.dialogRef.close(true);
-        },
+      .delete(this.data.id)
+      .subscribe(this.dialogRef.close,
         error => {
-          console.log(error);
           this.notificationService.showError(error);
           this.isLoading = false;
         }
       );
   }
 
-
+  onSubmit() {
+    let v = this.ftpPathForm.value;
+    v.id = this.data.id;
+    this.isLoading = true;
+    (this.data.id ? this.ftpPathService.patch(v) : this.ftpPathService.create(v))
+      .subscribe(this.dialogRef.close,
+        error => {
+          this.notificationService.showError(error);
+          this.isLoading = false;
+        }
+      );
+  }
 }
