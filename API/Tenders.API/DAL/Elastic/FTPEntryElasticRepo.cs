@@ -88,7 +88,7 @@ namespace Tenders.API.DAL.Elastic
             ).Documents;
         }
 
-        public FTPEntry GetByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
+        public FTPEntry GetByNameAndPathAndIsDirectoryAndIsArchive(string Name, string PathId, bool IsDirectory, bool HasParents = false, bool IsArchive = true)
         {
             throw new NotImplementedException(); //TODO
             //return Client.Search<FTPEntry>(s => s
@@ -112,7 +112,7 @@ namespace Tenders.API.DAL.Elastic
             //).Documents.First();
         }
 
-        public bool ExistsByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
+        public bool ExistsByNameAndPathAndIsDirectoryAndIsArchive(string Name, string PathId, bool IsDirectory, bool HasParents = false, bool IsArchive = true)
         {
             throw new NotImplementedException(); //TODO
             //return Client.Count<FTPEntry>(c => c
@@ -209,6 +209,9 @@ namespace Tenders.API.DAL.Elastic
             };
         }
 
-       
+        public FTPEntry GetRandomNewOrModifiedArchive()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -20,10 +20,17 @@ namespace Tenders.API.DAL.Mongo
 
         protected override IMongoCollection<FTPEntry> Entities => _dbContext.FTPEntries;
 
-        public bool ExistsByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
+        public bool ExistsByNameAndPathAndIsDirectoryAndIsArchive(string Name, string PathId, bool IsDirectory, bool HasParents = false, bool IsArchive = true)
         {
             CheckId(PathId);
-            return Entities.CountDocuments(f => f.IsActive && f.Path == PathId && f.Name == Name && f.IsDirectory == IsDirectory && ((HasParents && f.Parent!=null) || (!HasParents && f.Parent == null))) != 0;
+            return Entities
+                .CountDocuments(f => 
+                    f.IsActive && 
+                    f.Path == PathId && 
+                    f.Name == Name && 
+                    f.IsDirectory == IsDirectory && 
+                    ((HasParents && f.Parent!=null) || (!HasParents && f.Parent == null)) &&
+                    f.IsArchive == IsArchive) != 0;
         }
 
         public IEnumerable<FTPEntry> GetByFileState(int Skip, int Take, bool HasParents = false, params StateFile[] States)
@@ -45,12 +52,19 @@ namespace Tenders.API.DAL.Mongo
                 .ToEnumerable();
         }
 
-        public FTPEntry GetByNameAndPathAndIsDirectory(string Name, string PathId, bool IsDirectory, bool HasParents = false)
+        public FTPEntry GetByNameAndPathAndIsDirectoryAndIsArchive(string Name, string PathId, bool IsDirectory, bool HasParents = false, bool IsArchive = true)
         {
             CheckId(PathId);
 
             return Entities
-                .Find(f => f.IsActive && f.Path == PathId && f.Name == Name && f.IsDirectory==IsDirectory && ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)))
+                .Find(f => 
+                    f.IsActive && 
+                    f.Path == PathId && 
+                    f.Name == Name && 
+                    f.IsDirectory==IsDirectory && 
+                    ((HasParents && f.Parent != null) || (!HasParents && f.Parent == null)) &&
+                    f.IsArchive == IsArchive    
+                )
                 .Limit(1)
                 .First();
         }
@@ -73,6 +87,12 @@ namespace Tenders.API.DAL.Mongo
                 .ToEnumerable();
         }
 
-        
+        public FTPEntry GetRandomNewOrModifiedArchive()
+        {
+            return Entities
+                .Find(f => f.IsActive && (f.State == StateFile.New || f.State == StateFile.Modified))
+                .Limit(1)
+                .FirstOrDefault();
+        }
     }
 }

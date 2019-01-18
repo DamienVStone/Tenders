@@ -18,5 +18,6 @@ namespace Tenders.API.Models
         public string Password { get; set; }
         [QuickSearch]
         public DateTimeOffset LastTimeIndexed { get; set; }
+        public bool HasErrors { get; set; }
     }
 }

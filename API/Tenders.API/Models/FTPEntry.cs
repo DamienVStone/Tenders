@@ -47,5 +47,9 @@ namespace Tenders.API.Models
         /// Является ли этот элемент дерикторией
         /// </summary>
         public bool IsDirectory { get; set; }
+        /// <summary>
+        /// Является ли элемент архивом
+        /// </summary>
+        public bool IsArchive { get; set; }
     }
 }

@@ -10,6 +10,7 @@ namespace Tenders.API.Parameters
         public readonly string Name;
         public readonly long Size;
         public readonly IEnumerable<FTPEntriesTreeParam> Children;
+        public readonly bool IsArchive;
 
         public FTPEntriesTreeParam(DateTimeOffset modified, bool isDirectory, string name, long size, IEnumerable<FTPEntriesTreeParam> children)
         {

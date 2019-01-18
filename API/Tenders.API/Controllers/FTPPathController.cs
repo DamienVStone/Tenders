@@ -16,12 +16,14 @@ namespace Tenders.API.Controllers
         private readonly IPathService _pathService;
         private readonly IFTPPathRepo _repo;
         private readonly ILoggerService _logger;
+        private readonly IIdProvider _idProvider;
 
-        public FTPPathController(IPathService pathService, IFTPPathRepo Repo, ILoggerService Logger) : base()
+        public FTPPathController(IPathService pathService, IFTPPathRepo Repo, ILoggerService Logger, IIdProvider IdProvider) : base()
         {
             _pathService = pathService ?? throw new ArgumentNullException(nameof(pathService));
             _repo = Repo ?? throw new ArgumentNullException(nameof(Repo));
             _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
+            _idProvider = IdProvider ?? throw new ArgumentNullException(nameof(IdProvider));
         }
 
         /// <summary>
@@ -59,6 +61,17 @@ namespace Tenders.API.Controllers
             }
             else
                 return BadRequest(resultCheck.Value);
+        }
+
+        [HttpPost("Failed")]
+        public IActionResult MonitoringFailed(string id)
+        {
+            if (!_idProvider.IsIdValid(id)) return BadRequest("Неверный идентификатор");
+            if (!_repo.Exists(id)) return BadRequest("Путь не существует");
+            var path = _repo.GetOne(id);
+            path.HasErrors = true;
+            _repo.Update(path);
+            return Ok("Сообщение об ошибке сохранено");
         }
 
         /// <summary>

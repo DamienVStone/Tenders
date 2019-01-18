@@ -32,7 +32,9 @@ namespace Tenders.API.Services
             var entriesToAdd = new ConcurrentBag<FTPEntry>();
             var sw = new Stopwatch();
             sw.Start();
-            var entry = _entryRepo.ExistsByNameAndPathAndIsDirectory(rootEntry.Name, PathId, rootEntry.IsDirectory) ? _entryRepo.GetByNameAndPathAndIsDirectory(rootEntry.Name, PathId, rootEntry.IsDirectory) : null;
+            var entry = 
+                _entryRepo.ExistsByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive)? 
+                _entryRepo.GetByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive) : null;
             var res = _putEntry(entry, rootEntry, null, PathId, entriesToAdd);
             _logger.Log($"Сохранил корень: {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
@@ -118,13 +120,13 @@ namespace Tenders.API.Services
             if (inputChildren == null || inputChildren.Count() == 0) return;
             var sw = new Stopwatch();
             sw.Start();
-            Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}");
+            Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}_{dc.IsArchive}");
             _logger.Log($"Получил все элементы по идентификатору родителя {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
             var i = 0;
             foreach(var c in inputChildren)
             {
-                var key = $"{c.Name}_{c.IsDirectory}";
+                var key = $"{c.Name}_{c.IsDirectory}_{c.IsArchive}";
                 var res = _putEntry(dbChildren.ContainsKey(key) ? dbChildren[key] : null, c, parentId, pathId, entriesToAdd);
                 if (c.Children == null || c.Children.Count() == 0) continue;
                 _saveTree(res, c.Children, pathId, entriesToAdd);
@@ -147,6 +149,7 @@ namespace Tenders.API.Services
                     Id = res,
                     Name = n.Name,
                     IsDirectory = n.IsDirectory,
+                    IsArchive = n.IsArchive,
                     Size = n.Size,
                     Modified = n.Modified,
                     Path = pathId,
