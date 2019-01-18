@@ -213,5 +213,10 @@ namespace Tenders.API.DAL.Elastic
         {
             throw new NotImplementedException();
         }
+
+        public bool ExistsArchive(string Id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

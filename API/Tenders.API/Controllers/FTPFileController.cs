@@ -23,14 +23,16 @@ namespace Tenders.API.Controllers
         private readonly IEntrySaverService _treeSaverService;
         private readonly IIdProvider _idProvider;
         private readonly ILoggerService _logger;
+        private readonly IArchiveService _archiveService;
 
-        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, IEntrySaverService treeLookerService, IIdProvider idProvider, ILoggerService logger)
+        public FTPFileController(IFTPEntryRepo entryRepo, IFTPPathRepo pathRepo, IEntrySaverService treeLookerService, IIdProvider idProvider, ILoggerService logger, IArchiveService archiveService)
         {
             _entryRepo = entryRepo ?? throw new ArgumentNullException(nameof(entryRepo));
             _pathRepo = pathRepo ?? throw new ArgumentNullException(nameof(pathRepo));
             _treeSaverService = treeLookerService ?? throw new ArgumentNullException(nameof(treeLookerService));
             _idProvider = idProvider ?? throw new ArgumentNullException(nameof(idProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _archiveService = archiveService ?? throw new ArgumentNullException(nameof(archiveService));
         }
         
         /// <summary>
@@ -69,6 +71,24 @@ namespace Tenders.API.Controllers
             return Ok("");
         }
         
+        [HttpGet("Archive")]
+        public IActionResult GetArchiveForMonitoring()
+        {
+            var entry = _archiveService.GetNextArchiveForMonitoring();
+            if (entry == null) return Ok("Нет архивов для мониторинга");
+
+            return new JsonResult(entry);
+        }
+
+        [HttpPost("Archive")]
+        public IActionResult ArchiveMonitoringFailed(string Id)
+        {
+            if (!_idProvider.IsIdValid(Id)) return BadRequest("Неверный идентификатор пути");
+            if (!_entryRepo.ExistsArchive(Id)) return BadRequest("Архив не найден");
+
+            if (!_archiveService.ArchiveMonitoringFailed(Id)) return BadRequest("Не удалось записать сообщение об ошибке!");
+            return Ok("Сообщение об ошибке записано!");
+        }
 
         /// <summary>
         /// Возвращает все вновь созданные или измененные файлы

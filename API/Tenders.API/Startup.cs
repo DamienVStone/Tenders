@@ -47,6 +47,7 @@ namespace Tenders.API
 
             services.AddSingleton<IPathService, PathService>();
             services.AddSingleton<IEntrySaverService, EntrySaverService>();
+            services.AddSingleton<IArchiveService, ArchiveService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

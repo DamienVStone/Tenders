@@ -20,6 +20,11 @@ namespace Tenders.API.DAL.Mongo
 
         protected override IMongoCollection<FTPEntry> Entities => _dbContext.FTPEntries;
 
+        public bool ExistsArchive(string Id)
+        {
+            return Entities.CountDocuments(f => f.IsActive && f.IsArchive && f.Id == Id)!=0;
+        }
+
         public bool ExistsByNameAndPathAndIsDirectoryAndIsArchive(string Name, string PathId, bool IsDirectory, bool HasParents = false, bool IsArchive = true)
         {
             CheckId(PathId);

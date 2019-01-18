@@ -13,5 +13,6 @@ namespace Tenders.API.DAL.Interfaces
         bool ExistsByNameAndPathAndIsDirectoryAndIsArchive(string Name, string PathId, bool IsDirectory, bool HasParents = false, bool IsArchive = true);
         IEnumerable<FTPEntry> GetByParentId(string ParentId);
         FTPEntry GetRandomNewOrModifiedArchive();
+        bool ExistsArchive(string Id);
     }
 }
