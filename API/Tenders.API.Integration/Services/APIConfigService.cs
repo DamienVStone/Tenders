@@ -24,6 +24,9 @@ namespace Tenders.Integration.API.Services
             GetCurrentIndexUrl = new Uri(configService["api.GetCurrentIndexUrl"]);
             GetUpdatedTenderPlansUrl = new Uri(configService["api.GetUpdatedTenderPlansUrl"]);
             GetNextPathForIndexingUrl = new Uri(configService["api.GetNextPathForIndexingUrl"]);
+            GetNextArchiveForMonitoring = new Uri(configService["api.GetNextArchiveForMonitoring"]);
+            SendFailedPathNotice = new Uri(configService["api.SendFailedPathNoticeUrl"]);
+            SendFailedArchiveNotice = new Uri(configService["api.SendFailedArchiveNoticeUrl"]);
             _sendFilesUrl = configService["api.SendFilesUrl"];
             _sendFileTreeUrl = configService["api.SendFileTreeUrl"];
 
@@ -46,6 +49,9 @@ namespace Tenders.Integration.API.Services
         public Uri GetCurrentIndexUrl { get; }
         public Uri GetUpdatedTenderPlansUrl { get; }
         public Uri GetNextPathForIndexingUrl { get; }
+        public Uri GetNextArchiveForMonitoring { get; }
+        public Uri SendFailedPathNotice { get; }
+        public Uri SendFailedArchiveNotice { get; }
 
         private string _sendFilesUrl;
 
@@ -65,5 +71,6 @@ namespace Tenders.Integration.API.Services
         public string Username { get; }
         public string Password { get; }
         public bool UseProxy { get; }
+        
     }
 }

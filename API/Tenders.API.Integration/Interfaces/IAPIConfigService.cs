@@ -55,6 +55,9 @@ namespace Tenders.Integration.API.Interfaces
         /// Url получения следующего пути для индексации
         /// </summary>
         Uri GetNextPathForIndexingUrl { get; }
+        Uri GetNextArchiveForMonitoring { get; }
+        Uri SendFailedPathNotice { get; }
+        Uri SendFailedArchiveNotice { get; }
         /// <summary>
         /// Url для отправки файлов
         /// </summary>

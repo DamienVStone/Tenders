@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Mime;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tenders.Core.Abstractions.Services;
@@ -113,8 +115,27 @@ namespace Tenders.Integration.API.Services
         public async Task<T> GetNextPathForIndexing<T>(CancellationToken ct)
         {
             var result = await httpClientService.GetAsync(configService.GetNextPathForIndexingUrl, ct);
-            var path = JsonConvert.DeserializeObject<T>(result.Text);
-            return path;
+            return JsonConvert.DeserializeObject<T>(result.Text);
+        }
+
+        public async Task<T> GetNextArchiveForIndexing<T>(CancellationToken ct)
+        {
+            var result = await httpClientService.GetAsync(configService.GetNextArchiveForMonitoring, ct);
+            return JsonConvert.DeserializeObject<T>(result.Text);
+        }
+
+        public async Task<bool> SendPathFailedNotice(string Id, CancellationToken ct)
+        {
+            var content = new StringContent(Id, Encoding.Unicode, MediaTypeNames.Application.Json);
+            var result = await httpClientService.PostAsync(configService.SendFailedPathNotice.AbsolutePath, content, ct);
+            return true;
+        }
+
+        public async Task<bool> SendArchiveFailedNotice(string Id, CancellationToken ct)
+        {
+            var content = new StringContent(Id, Encoding.Unicode, MediaTypeNames.Application.Json);
+            var result = await httpClientService.PostAsync(configService.SendFailedArchiveNotice, content, ct);
+            return true;
         }
 
         public async Task<string> SendFilesAsync(StringContent files, string pathId, CancellationToken ct)
@@ -146,5 +167,6 @@ namespace Tenders.Integration.API.Services
             var result = await httpClientService.GetAsync(configService.GetUpdatedTenderPlansUrl, ct);
             return JsonConvert.DeserializeObject<List<T>>(result.Text);
         }
+        
     }
 }
