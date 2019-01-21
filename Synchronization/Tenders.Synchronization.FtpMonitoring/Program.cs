@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,12 +18,12 @@ using Tenders.Integration.API.Services;
 
 namespace FtpMonitoringService
 {
-    class Program
+    internal class Program
     {
         private static IAPIDataProviderService apiDataProvider;
         private static ILoggerService logger;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             _initContainer();
             logger.Log("Запуск обработки путей.").Wait();
@@ -41,13 +40,14 @@ namespace FtpMonitoringService
             try
             {
                 p = await apiDataProvider.GetNextPathForIndexing<FtpPath>(ct);
-            }catch(Exception exp)
+            }
+            catch (Exception exp)
             {
                 await logger.Log("Произошла ошика в момент получения пути для обработки. Прерываю выполнение.");
                 await logger.Log(exp.Message);
                 return false;
             }
-            
+
             if (p == null)
             {
                 await logger.Log("Нет путей для обаботки, начинаю обработку архивов");
@@ -75,50 +75,92 @@ namespace FtpMonitoringService
                 sw.Stop();
                 await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
 
-            } catch (Exception exp) {
+            }
+            catch (Exception exp)
+            {
                 await logger.Log($"Произошла ошибка в момент обработки пути {p.Id}");
                 await logger.Log(exp.Message);
                 await logger.Log($"Отправляю уведомление об ошибке");
                 try
                 {
                     await apiDataProvider.SendPathFailedNotice(p.Id, ct);
-                }catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     await logger.Log($"Произошла ошибка при отправке уведомления об ошибке. Продолжаю без уведомления");
+                    await logger.Log(e.Message);
                 }
             }
-            
+
             return true;
         }
 
-        private async static Task _startMonitoringArchives(CancellationToken ct)
+        private static async Task _startMonitoringArchives(CancellationToken ct)
         {
             await logger.Log($"Начинаю обработку архивов");
 
 #if DEBUG
             var creds = File.ReadAllLines("creds.txt");
 #endif
-
-            var archive = await apiDataProvider.GetNextArchiveForIndexing<FTPEntry>(ct);
-            while(archive != null)
+            FTPEntry archive;
+            try
             {
-                await logger.Log($"Получил архив {archive.Id}");
-                var pathid = archive.Path;
-                await logger.Log($"Идентификатор пути {archive.Id}");
-                var path = await apiDataProvider.GetPathById<FtpPath>(pathid, ct);
-                await logger.Log($"Получил путь {path.Id}");
-#if DEBUG
-                path.Login = creds[0];
-                path.Password = creds[1];
-#endif
-                var file = new FtpFile(archive.Name, archive.Size, archive.Modified);
-                await _monitorArchive(file, path, ct);
                 archive = await apiDataProvider.GetNextArchiveForIndexing<FTPEntry>(ct);
+            }
+            catch (Exception exp)
+            {
+                await logger.Log("Не удалось получить архив для обработки. Прерываю работу.");
+                await logger.Log(exp.Message);
+                return;
+            }
+
+            while (archive != null)
+            {
+                try
+                {
+                    await logger.Log($"Получил архив {archive.Id}");
+                    var pathid = archive.Path;
+                    await logger.Log($"Идентификатор пути {archive.Id}");
+                    var path = await apiDataProvider.GetPathById<FtpPath>(pathid, ct);
+                    await logger.Log($"Получил путь {path.Id}");
+#if DEBUG
+                    path.Login = creds[0];
+                    path.Password = creds[1];
+#endif
+                    var file = new FtpFile(archive.Name, archive.Size, archive.Modified);
+                    await _monitorArchive(file, path, ct);
+                }
+                catch (Exception exp)
+                {
+                    await logger.Log($"Произошла ошибка в момент обработки архива {archive.Id}");
+                    await logger.Log(exp.Message);
+                    await logger.Log($"Отправляю уведомление об ошибке");
+                    try
+                    {
+                        await apiDataProvider.SendArchiveFailedNotice(archive.Id, ct);
+                    }
+                    catch (Exception e)
+                    {
+                        await logger.Log($"Произошла ошибка при отправке уведомления об ошибке. Продолжаю без уведомления");
+                        await logger.Log(e.Message);
+                    }
+                }
+
+                try
+                {
+                    archive = await apiDataProvider.GetNextArchiveForIndexing<FTPEntry>(ct);
+                }
+                catch (Exception exp)
+                {
+                    await logger.Log("Не удалось получить архив для обработки. Прерываю работу.");
+                    await logger.Log(exp.Message);
+                    return;
+                }
             }
             await logger.Log($"Все архивы обработаны");
         }
 
-        private async static Task _monitorArchive(FtpFile f, FtpPath p, CancellationToken ct)
+        private static async Task _monitorArchive(FtpFile f, FtpPath p, CancellationToken ct)
         {
             var sw = new Stopwatch();
             sw.Start();
