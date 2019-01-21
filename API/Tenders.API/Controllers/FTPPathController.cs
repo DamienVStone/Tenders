@@ -64,7 +64,7 @@ namespace Tenders.API.Controllers
         }
 
         [HttpPost("Failed")]
-        public IActionResult MonitoringFailed(string id)
+        public IActionResult MonitoringFailed([FromQuery]string id)
         {
             if (!_idProvider.IsIdValid(id)) return BadRequest("Неверный идентификатор");
             if (!_repo.Exists(id)) return BadRequest("Путь не существует");

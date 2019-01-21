@@ -126,15 +126,15 @@ namespace Tenders.Integration.API.Services
 
         public async Task<bool> SendPathFailedNotice(string Id, CancellationToken ct)
         {
-            var content = new StringContent(Id, Encoding.Unicode, MediaTypeNames.Application.Json);
-            var result = await httpClientService.PostAsync(configService.SendFailedPathNotice.AbsolutePath, content, ct);
+            var content = new StringContent("", Encoding.Unicode, MediaTypeNames.Application.Json);
+            var result = await httpClientService.PostAsync(configService.SendFailedPathNotice.AbsoluteUri+$"?id={Id}", content, ct);
             return true;
         }
 
         public async Task<bool> SendArchiveFailedNotice(string Id, CancellationToken ct)
         {
-            var content = new StringContent(Id, Encoding.Unicode, MediaTypeNames.Application.Json);
-            var result = await httpClientService.PostAsync(configService.SendFailedArchiveNotice, content, ct);
+            var content = new StringContent("", Encoding.Unicode, MediaTypeNames.Application.Json);
+            var result = await httpClientService.PostAsync(configService.SendFailedArchiveNotice.AbsoluteUri+$"?Id={Id}", content, ct);
             return true;
         }
 
