@@ -41,7 +41,7 @@ namespace Tenders.API.Services
             _saveTree(res, rootEntry.Children, PathId, entriesToAdd);
             _logger.Log($"Обошел дерево {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
-            _entryRepo.CreateMany(entriesToAdd);
+            if(entriesToAdd.Count > 0) _entryRepo.CreateMany(entriesToAdd);
             _logger.Log($"Записал новые файлы в базу {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Stop();
         }

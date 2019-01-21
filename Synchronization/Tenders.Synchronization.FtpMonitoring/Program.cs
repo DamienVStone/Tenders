@@ -40,7 +40,7 @@ namespace FtpMonitoringService
             if (p == null)
             {
                 await logger.Log("Нет путей для обаботки, начинаю обработку архивов");
-                _startMonitoringArchives(ct);
+                await _startMonitoringArchives(ct);
                 return false;
             }
 
@@ -64,13 +64,26 @@ namespace FtpMonitoringService
             return true;
         }
 
-        private async static void _startMonitoringArchives(CancellationToken ct)
+        private async static Task _startMonitoringArchives(CancellationToken ct)
         {
+            await logger.Log($"Начинаю обработку архивов");
+
+#if DEBUG
+            var creds = File.ReadAllLines("creds.txt");
+#endif
+
             var archive = await apiDataProvider.GetNextArchiveForIndexing<FTPEntry>(ct);
             while(archive != null)
             {
+                await logger.Log($"Получил архив {archive.Id}");
                 var pathid = archive.Path;
+                await logger.Log($"Идентификатор пути {archive.Id}");
                 var path = await apiDataProvider.GetPathById<FtpPath>(pathid, ct);
+                await logger.Log($"Получил путь {path.Id}");
+#if DEBUG
+                path.Login = creds[0];
+                path.Password = creds[1];
+#endif
                 var file = new FtpFile(archive.Name, archive.Size, archive.Modified);
                 await _monitorArchive(file, path, ct);
                 archive = await apiDataProvider.GetNextArchiveForIndexing<FTPEntry>(ct);
@@ -83,6 +96,7 @@ namespace FtpMonitoringService
             var sw = new Stopwatch();
             sw.Start();
             await logger.Log("Обрабатываю архив {f.Name} по пути {p.Path}");
+
             var allEntriesInArchive = FtpClient.Get(logger).GetArchiveEntries(p.Path + f.Name, p.Login, p.Password);
             new ZipHelper().ParseArchve(f, allEntriesInArchive);
             var data = JsonConvert.SerializeObject(f);
