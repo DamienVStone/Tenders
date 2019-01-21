@@ -75,7 +75,7 @@ namespace Tenders.API.Controllers
         public IActionResult GetArchiveForMonitoring()
         {
             var entry = _archiveService.GetNextArchiveForMonitoring();
-            if (entry == null) return Ok("Нет архивов для мониторинга");
+            if (entry == null) return NoContent();
 
             return new JsonResult(entry);
         }

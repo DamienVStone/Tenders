@@ -139,6 +139,15 @@ namespace Tenders.API.Controllers
             });
         }
 
+        [HttpGet("GetOne")]
+        public IActionResult GetOne(string Id)
+        {
+            if (!_idProvider.IsIdValid(Id)) return BadRequest("Неверный формат идентификатора");
+            if (!_repo.Exists(Id)) return BadRequest("Путь не существует");
+
+            return new JsonResult(_repo.GetOne(Id));
+        }
+
         /// <summary>
         /// Возращает боту очередной путь, который нужно индексировать
         /// </summary>

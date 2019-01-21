@@ -85,5 +85,6 @@ namespace Tenders.Integration.API.Interfaces
         /// Флаг использования прокси
         /// </summary>
         bool UseProxy { get; }
+        Uri GetPathById(string Id);
     }
 }

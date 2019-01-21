@@ -40,7 +40,7 @@ namespace FtpMonitoringService
             if (p == null)
             {
                 await logger.Log("Нет путей для обаботки, начинаю обработку архивов");
-                _startMonitoringArchives();
+                _startMonitoringArchives(ct);
                 return false;
             }
 
@@ -64,21 +64,31 @@ namespace FtpMonitoringService
             return true;
         }
 
-        private static void _startMonitoringArchives()
+        private async static void _startMonitoringArchives(CancellationToken ct)
         {
-            
+            var archive = await apiDataProvider.GetNextArchiveForIndexing<FTPEntry>(ct);
+            while(archive != null)
+            {
+                var pathid = archive.Path;
+                var path = await apiDataProvider.GetPathById<FtpPath>(pathid, ct);
+                var file = new FtpFile(archive.Name, archive.Size, archive.Modified);
+                await _monitorArchive(file, path, ct);
+                archive = await apiDataProvider.GetNextArchiveForIndexing<FTPEntry>(ct);
+            }
+            await logger.Log($"Все архивы обработаны");
         }
 
-        private static void _monitorArchive(FtpFile f, FtpPath p)
+        private async static Task _monitorArchive(FtpFile f, FtpPath p, CancellationToken ct)
         {
-            
-            logger.Log($"Обрабатываю архив {f.Name} по пути {p.Path}");
+            var sw = new Stopwatch();
+            sw.Start();
+            await logger.Log("Обрабатываю архив {f.Name} по пути {p.Path}");
             var allEntriesInArchive = FtpClient.Get(logger).GetArchiveEntries(p.Path + f.Name, p.Login, p.Password);
             new ZipHelper().ParseArchve(f, allEntriesInArchive);
             var data = JsonConvert.SerializeObject(f);
             var res = apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, ct).Result;
-            
-            
+            await logger.Log($"Архив {f.Name} обработан {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            sw.Stop();
         }
 
         private static void _initContainer()

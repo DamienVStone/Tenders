@@ -167,6 +167,10 @@ namespace Tenders.Integration.API.Services
             var result = await httpClientService.GetAsync(configService.GetUpdatedTenderPlansUrl, ct);
             return JsonConvert.DeserializeObject<List<T>>(result.Text);
         }
-        
+
+        public Task<T> GetPathById<T>(string id, CancellationToken ct)
+        {
+            
+        }
     }
 }
