@@ -1,6 +1,7 @@
 ﻿using FtpMonitoringService.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -36,7 +37,17 @@ namespace FtpMonitoringService
         private static async Task<bool> _doMonitoring(CancellationToken ct)
         {
             await logger.Log("Получение пути для обработки");
-            var p = await apiDataProvider.GetNextPathForIndexing<FtpPath>(ct);
+            FtpPath p;
+            try
+            {
+                p = await apiDataProvider.GetNextPathForIndexing<FtpPath>(ct);
+            }catch(Exception exp)
+            {
+                await logger.Log("Произошла ошика в момент получения пути для обработки. Прерываю выполнение.");
+                await logger.Log(exp.Message);
+                return false;
+            }
+            
             if (p == null)
             {
                 await logger.Log("Нет путей для обаботки, начинаю обработку архивов");
@@ -44,23 +55,39 @@ namespace FtpMonitoringService
                 return false;
             }
 
-            var sw = new Stopwatch();
-            sw.Start();
+            try
+            {
+                var sw = new Stopwatch();
+                sw.Start();
 #if DEBUG
-            var creds = File.ReadAllLines("creds.txt");
-            p.Login = creds[0];
-            p.Password = creds[1];
+                var creds = File.ReadAllLines("creds.txt");
+                p.Login = creds[0];
+                p.Password = creds[1];
 #endif
-            await logger.Log($"Обработка пути {p.Path}.");
-            var files = FtpClient.Get(logger).ListDirectoryFiels(p.Path, p.Login, p.Password);
-            await logger.Log($"Найдено {files.Count()}. Отправляю на сервер");
+                await logger.Log($"Обработка пути {p.Path}.");
+                var files = FtpClient.Get(logger).ListDirectoryFiels(p.Path, p.Login, p.Password);
+                await logger.Log($"Найдено {files.Count()}. Отправляю на сервер");
+
+                var content = new StringContent(JsonConvert.SerializeObject(files), Encoding.UTF8, MediaTypeNames.Application.Json);
+                apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
+                await logger.Log("Файлы успешно отправлены");
+
+                sw.Stop();
+                await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+
+            } catch (Exception exp) {
+                await logger.Log($"Произошла ошибка в момент обработки пути {p.Id}");
+                await logger.Log(exp.Message);
+                await logger.Log($"Отправляю уведомление об ошибке");
+                try
+                {
+                    await apiDataProvider.SendPathFailedNotice(p.Id, ct);
+                }catch(Exception e)
+                {
+                    await logger.Log($"Произошла ошибка при отправке уведомления об ошибке. Продолжаю без уведомления");
+                }
+            }
             
-            var content = new StringContent(JsonConvert.SerializeObject(files), Encoding.UTF8, MediaTypeNames.Application.Json);
-            apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
-            await logger.Log("Файлы успешно отправлены");
-            
-            sw.Stop();
-            await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             return true;
         }
 
