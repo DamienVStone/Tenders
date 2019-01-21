@@ -60,17 +60,18 @@ namespace Tenders.API.Services
             } while (found >= 1000);
 
             pathFilesWithNoParents.AsParallel().ForAll(p => p.State = StateFile.Pending);
-            var dbFiles = pathFilesWithNoParents.ToDictionary(f => f.Name);
+            var dbFiles = pathFilesWithNoParents.ToDictionary(f => $"{f.Name}_{f.IsDirectory}_{f.IsArchive}");
             var key = new object();
             Entries
                 .AsParallel()
                 .ForAll(f =>
                 {
-                    if (dbFiles.Keys.Contains(f.Name))
+                    var k = $"{f.Name}_{f.IsDirectory}_{f.IsArchive}";
+                    if (dbFiles.Keys.Contains(k))
                     {
                         //Файл существует в базе
                         FTPEntry dbFile;
-                        lock(key)dbFile = dbFiles[f.Name];
+                        lock(key)dbFile = dbFiles[k];
                         if (dbFile.Size != f.Size || !dbFile.Modified.Equals(f.DateModified))
                         {
                             lock (key)
@@ -97,7 +98,8 @@ namespace Tenders.API.Services
                             Size = f.Size,
                             Path = PathId,
                             IsDirectory = false, // в корне котолога нет директорий. директории только внутри зипников.
-                            Parent = null
+                            Parent = null,
+                            IsArchive = f.IsArchive
                         };
 
                         _entryRepo.Create(newFile);

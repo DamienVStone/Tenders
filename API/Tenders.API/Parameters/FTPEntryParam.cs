@@ -25,5 +25,9 @@ namespace Tenders.API.Parameters
         /// Ссылка на путь
         /// </summary>
         public string Parent { get; set; }
+        /// <summary>
+        /// Является ли данный файл архивом
+        /// </summary>
+        public bool IsArchive { get; set; }
     }
 }

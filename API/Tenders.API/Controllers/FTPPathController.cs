@@ -140,7 +140,7 @@ namespace Tenders.API.Controllers
         }
 
         [HttpGet("GetOne")]
-        public IActionResult GetOne(string Id)
+        public IActionResult GetOne([FromQuery]string Id)
         {
             if (!_idProvider.IsIdValid(Id)) return BadRequest("Неверный формат идентификатора");
             if (!_repo.Exists(Id)) return BadRequest("Путь не существует");

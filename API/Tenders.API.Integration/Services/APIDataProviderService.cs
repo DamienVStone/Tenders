@@ -168,9 +168,10 @@ namespace Tenders.Integration.API.Services
             return JsonConvert.DeserializeObject<List<T>>(result.Text);
         }
 
-        public Task<T> GetPathById<T>(string id, CancellationToken ct)
+        public async Task<T> GetPathById<T>(string id, CancellationToken ct)
         {
-            
+            var res = await httpClientService.GetAsync(configService.GetPathById(id), ct);
+            return JsonConvert.DeserializeObject<T>(res.Text);
         }
     }
 }

@@ -29,6 +29,7 @@ namespace Tenders.Integration.API.Services
             SendFailedArchiveNotice = new Uri(configService["api.SendFailedArchiveNoticeUrl"]);
             _sendFilesUrl = configService["api.SendFilesUrl"];
             _sendFileTreeUrl = configService["api.SendFileTreeUrl"];
+            _getPathByIdUrl = configService["api.GetPathByIdUrl"];
 
             SecurityToken = configService["api.SecurityToken"];
             Username = configService["api.Username"];//
@@ -65,6 +66,13 @@ namespace Tenders.Integration.API.Services
         public Uri SendFileTreeUrl(string pathId)
         {
             return new Uri(_sendFileTreeUrl + $"?pathId={pathId}");
+        }
+
+        private string _getPathByIdUrl;
+
+        public Uri GetPathById(string Id)
+        {
+            return new Uri(_getPathByIdUrl + $"?pathId={Id}");
         }
 
         public string SecurityToken { get; }
