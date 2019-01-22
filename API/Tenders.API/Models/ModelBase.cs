@@ -17,30 +17,40 @@ namespace Tenders.API.Models
 
         public void GenerateQuickSearchString()
         {
-            GetType()
-            .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
-            .Where(property => property.GetCustomAttributes(typeof(QuickSearchAttribute), true).Any())
-            .ToList()
-            .ForEach(property =>
+            var lastValue = QuickSearch;
+            try
             {
-                var result = string.Empty;
-                if (property.PropertyType.IsEnum)
+                QuickSearch = string.Empty;
+                GetType()
+                .GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                .Where(property => property.GetCustomAttributes(typeof(QuickSearchAttribute), true).Any())
+                .ToList()
+                .ForEach(property =>
                 {
-                    var e = (Enum)property.GetValue(this);
-                    result = e?.GetDisplayValue();
-                }
-                else if (property.PropertyType.IsClass && property.PropertyType.IsAssignableFrom(typeof(ModelBase)))
-                {
-                    var mb = (ModelBase)property.GetValue(this);
-                    result = mb?.QuickSearch;
-                }
-                else
-                    result = property.GetValue(this)?.ToString();
+                    var result = string.Empty;
+                    if (property.PropertyType.IsEnum)
+                    {
+                        var e = (Enum)property.GetValue(this);
+                        result = e?.GetDisplayValue();
+                    }
+                    else if (property.PropertyType.IsClass && property.PropertyType.IsAssignableFrom(typeof(ModelBase)))
+                    {
+                        var mb = (ModelBase)property.GetValue(this);
+                        result = mb?.QuickSearch;
+                    }
+                    else
+                        result = property.GetValue(this)?.ToString();
 
-                result = result.ToSearchString();
-                if (!string.IsNullOrEmpty(result))
-                    QuickSearch += $"{result}|";
-            });
+                    result = result.ToSearchString();
+                    if (!string.IsNullOrEmpty(result))
+                        QuickSearch += $"{result}|";
+                });
+            }
+            catch (Exception)
+            {
+                QuickSearch = lastValue;
+                throw;
+            }
         }
 
         [BsonSerializer(typeof(ObjectIdStringSerializer))]
