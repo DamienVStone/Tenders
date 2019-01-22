@@ -66,14 +66,14 @@ namespace FtpMonitoringService
 #endif
                 await logger.Log($"Обработка пути {p.Path}.");
                 var files = FtpClient.Get(logger).ListDirectoryFiels(p.Path, p.Login, p.Password);
-                await logger.Log($"Найдено {files.Count()}. Отправляю на сервер");
+                await logger.Log($"Найдено {files.Count()} корневых файлов. Отправляю на сервер");
 
                 var content = new StringContent(JsonConvert.SerializeObject(files), Encoding.UTF8, MediaTypeNames.Application.Json);
                 apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
                 await logger.Log("Файлы успешно отправлены");
 
                 sw.Stop();
-                await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+                await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed}");
 
             }
             catch (Exception exp)
@@ -164,13 +164,20 @@ namespace FtpMonitoringService
         {
             var sw = new Stopwatch();
             sw.Start();
-            await logger.Log("Обрабатываю архив {f.Name} по пути {p.Path}");
-
+            await logger.Log($"Обрабатываю архив {f.Name} по пути {p.Path}");
+            var sw1 = new Stopwatch();
+            sw1.Start();
             var allEntriesInArchive = FtpClient.Get(logger).GetArchiveEntries(p.Path + f.Name, p.Login, p.Password);
+            await logger.Log($"Архив получен {sw1.Elapsed}");
+            sw1.Restart();
             new ZipHelper().ParseArchve(f, allEntriesInArchive);
+            await logger.Log($"Дерево файлов построено {sw1.Elapsed}");
+            sw1.Restart();
             var data = JsonConvert.SerializeObject(f);
             var res = apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, ct).Result;
-            await logger.Log($"Архив {f.Name} обработан {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            await logger.Log($"Дерево файлов сериализовано и архив отправлен на сервер {sw1.Elapsed}");
+            sw1.Stop();
+            await logger.Log($"Архив {f.Name} обработан построено {sw.Elapsed}");
             sw.Stop();
         }
 

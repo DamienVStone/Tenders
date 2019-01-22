@@ -64,14 +64,14 @@ namespace FtpMonitoringService
             using (var responseBody = new MemoryStream())
             {
                 response.GetResponseStream().CopyTo(responseBody);
-                logger.Log($"Получаю архив {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+                logger.Log($"Получаю архив {sw.Elapsed}");
                 sw.Restart();
                 var archive = new ZipArchive(responseBody, ZipArchiveMode.Read);
-                logger.Log($"Распаковываю архив {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+                logger.Log($"Распаковываю архив {sw.Elapsed}");
                 sw.Restart();
                 entries = new HashSet<ZipArchiveEntry>();
                 entries.UnionWith(archive.Entries);
-                logger.Log($"Кладу в выходную коллекцию {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+                logger.Log($"Кладу в выходную коллекцию {sw.Elapsed}");
             }
             sw.Stop();
             return entries;
