@@ -62,7 +62,6 @@ namespace Tenders.API.Controllers
         [HttpPost("AddFileTree")]
         public IActionResult AddFileTree([FromQuery]string pathId, [FromBody]FTPEntriesTreeParam entries)
         {
-            return BadRequest();
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
             var sw = new Stopwatch();
