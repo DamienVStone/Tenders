@@ -29,6 +29,11 @@ namespace Tenders.Sberbank.Abstractions.Services
         /// </summary>
         string PurchaseRequestListUrl { get; }
         /// <summary>
+        /// Ссылка на метод загрузки файлов
+        /// </summary>
+        string UploadFileUrl { get; }
+
+        /// <summary>
         /// Флаг работы под отладкой
         /// </summary>
         bool IsDebug { get; }
