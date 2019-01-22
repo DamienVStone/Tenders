@@ -43,7 +43,7 @@ namespace FtpMonitoringService
             }
             catch (Exception exp)
             {
-                await logger.Log("Произошла ошика в момент получения пути для обработки. Прерываю выполнение.");
+                await logger.Log("Произошла ошибка в момент получения пути для обработки. Прерываю выполнение.");
                 await logger.Log(exp.Message);
                 return false;
             }
@@ -66,15 +66,21 @@ namespace FtpMonitoringService
 #endif
                 await logger.Log($"Обработка пути {p.Path}.");
                 var files = FtpClient.Get(logger).ListDirectoryFiels(p.Path, p.Login, p.Password);
-                await logger.Log($"Найдено {files.Count()} корневых файлов. Отправляю на сервер");
+                var cnt = files.Count();
+                await logger.Log($"Найдено {cnt} корневых файлов. Отправляю на сервер");
+                if(cnt > 0)
+                {
+                    var content = new StringContent(JsonConvert.SerializeObject(files), Encoding.UTF8, MediaTypeNames.Application.Json);
+                    apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
+                    await logger.Log("Файлы успешно отправлены");
 
-                var content = new StringContent(JsonConvert.SerializeObject(files), Encoding.UTF8, MediaTypeNames.Application.Json);
-                apiDataProvider.SendFilesAsync(content, p.Id, ct).Wait();
-                await logger.Log("Файлы успешно отправлены");
-
-                sw.Stop();
-                await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed}");
-
+                    sw.Stop();
+                    await logger.Log($"Обработка пути {p.Path} завершена. За {sw.Elapsed}");
+                }
+                else
+                {
+                    await logger.Log($"Нет файлов для отправки");
+                }
             }
             catch (Exception exp)
             {

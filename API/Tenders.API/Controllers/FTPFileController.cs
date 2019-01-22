@@ -44,7 +44,7 @@ namespace Tenders.API.Controllers
         [HttpPost]
         public IActionResult Post([FromQuery]string pathId, [FromBody]IEnumerable<FTPEntryParam> rootInputFiles)
         {
-            if (rootInputFiles.Count() == 0) return BadRequest("Нет файлов для добавления");
+            if (rootInputFiles.Count() == 0) return Ok("Нет файлов для добавления");
             if (string.IsNullOrWhiteSpace(pathId)) return BadRequest("Не указан идентификатор пути");
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
