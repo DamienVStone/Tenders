@@ -27,6 +27,7 @@ namespace Tenders.Sberbank.Tests
             var service = Container.GetService<ISberbankConfigService>();
             Assert.NotNull(service.AuctionInfo);
 
+            Assert.False(string.IsNullOrEmpty(service.UploadFileUrl));
             Assert.False(string.IsNullOrEmpty(service.AuthStep1Url));
             Assert.False(string.IsNullOrEmpty(service.AuthStep2Url));
             Assert.False(string.IsNullOrEmpty(service.AuthStep3Url));

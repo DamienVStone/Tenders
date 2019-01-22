@@ -14,6 +14,7 @@ namespace Tenders.Sberbank.Services
         public string PurchaseRequestListUrl { get; private set; }
         public bool IsDebug { get; private set; }
         public IAuctionInfo AuctionInfo { get; private set; }
+        public string UploadFileUrl { get; private set; }
 
         private string _logonRegisterDataTemplate;
         private string _searchXmlTemplate;
@@ -34,6 +35,7 @@ namespace Tenders.Sberbank.Services
             AuthStep1Url = configService["sberbank.AuthStep1Url"];
             AuthStep2Url = configService["sberbank.AuthStep2Url"];
             AuthStep3Url = configService["sberbank.AuthStep3Url"];
+            UploadFileUrl = configService["sberbank.UploadFileUrl"];
             PurchaseRequestListUrl = configService["sberbank.PurchaseRequestListUrl"];
             _logonRegisterDataTemplate = configService["sberbank.LogonRegisterDataTemplate"];
             _searchXmlTemplate = configService["sberbank.SearchXmlTemplate"];

@@ -50,8 +50,9 @@ namespace Tenders.Sberbank.Services
             var step1GetResult = await httpClientService.GetAsync(configService.AuthStep1Url, ct);
             _throwIfDocumentError(step1GetResult);
             var step1PostResult = await httpClientService.PostAsync(configService.AuthStep1Url, await _getAuthStep2Form(step1GetResult, ct), ct);
+            _throwIfDocumentError(step1PostResult);
             var step2GetResult = await httpClientService.GetAsync(configService.AuthStep2Url, ct);
-            _throwIfDocumentError(step1GetResult);
+            _throwIfDocumentError(step2GetResult);
             var step3PostResult = await httpClientService.PostAsync(configService.AuthStep3Url, _getAuthStep3Form(step2GetResult), ct);
             _throwIfDocumentError(step3PostResult);
 
@@ -149,6 +150,8 @@ namespace Tenders.Sberbank.Services
         {
             var error = doc.GetTextById("ctl00_phWorkZone_lblErrorMsg", true)?.Trim();
             if (string.IsNullOrEmpty(error))
+                error = string.Join("; ", doc.GetValuesByRegexp("<span class=\"errormessage\">(.*?)</span>", true));
+            if (string.IsNullOrEmpty(error))
                 return;
 
             throw new Exception(error);
@@ -164,17 +167,22 @@ namespace Tenders.Sberbank.Services
             ct.ThrowIfCancellationRequested();
             var form1Action = doc.GetElementbyId("form1").GetAttributeValue("action", string.Empty).Replace("./", "https://login.sberbank-ast.ru/");
             var mainContent_xmlData = configService.GetLogonRegisterData(doc.GetTextById("hiddenNow"), doc.GetTextById("hiddenTicket"));
-            return new FormUrlEncodedContent(new Dictionary<string, string>
+            var result = new Dictionary<string, string>
             {
+                { "__EVENTTARGET", string.Empty },
+                { "__EVENTARGUMENT", string.Empty },
                 { "__VIEWSTATE", doc.GetValueById("__VIEWSTATE") },
                 { "__VIEWSTATEGENERATOR", doc.GetValueById("__VIEWSTATEGENERATOR") },
                 { "ctl00$mainContent$RadioButtonList2", doc.GetValueById("mainContent_RadioButtonList2_0") },
                 { "ctl00$mainContent$txtLoginName", doc.GetValueById("mainContent_txtLoginName") },
                 { "ctl00$mainContent$txtPassword", doc.GetValueById("mainContent_txtPassword") },
                 { "ctl00$mainContent$DDL1", await apiDataProvider.GetFingerprintAsync(ct) },
+                { "ctl00$mainContent$btnSubmit", doc.GetValueById("mainContent_btnSubmit") },
                 { "ctl00$mainContent$xmlData", mainContent_xmlData },
                 { "ctl00$mainContent$signValue", await apiDataProvider.SignAsync(mainContent_xmlData, ct) }
-            });
+            };
+
+            return new FormUrlEncodedContent(result);
         }
 
         private FormUrlEncodedContent _getAuthStep3Form(HtmlDocument doc)
