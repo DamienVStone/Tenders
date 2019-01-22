@@ -38,7 +38,7 @@ export class FtpPathDetailComponent {
     this.isLoading = true;
     this.ftpPathService
       .delete(this.data.id)
-      .subscribe(this.dialogRef.close,
+      .subscribe(success => { this.dialogRef.close(true) },
         error => {
           this.notificationService.showError(error);
           this.isLoading = false;
@@ -51,7 +51,7 @@ export class FtpPathDetailComponent {
     v.id = this.data.id;
     this.isLoading = true;
     (this.data.id ? this.ftpPathService.patch(v) : this.ftpPathService.create(v))
-      .subscribe(this.dialogRef.close,
+      .subscribe(success => { this.dialogRef.close(true) },
         error => {
           this.notificationService.showError(error);
           this.isLoading = false;
