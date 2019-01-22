@@ -177,7 +177,7 @@ namespace FtpMonitoringService
             var res = apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, ct).Result;
             await logger.Log($"Дерево файлов сериализовано и архив отправлен на сервер {sw1.Elapsed}");
             sw1.Stop();
-            await logger.Log($"Архив {f.Name} обработан построено {sw.Elapsed}");
+            await logger.Log($"Архив {f.Name} обработан ОБЩЕЕ ВРЕМЯ АРХИВА: {sw.Elapsed}");
             sw.Stop();
         }
 
