@@ -29,7 +29,7 @@ namespace Tenders.API.Services
 
         public void SaveFTPEntriesTree(string PathId, FTPEntriesTreeParam rootEntry)
         {
-            var entriesToAdd = new ConcurrentBag<FTPEntry>();
+            var entriesToAdd = new HashSet<FTPEntry>();
             var sw = new Stopwatch();
             sw.Start();
             var entry = 
@@ -59,9 +59,13 @@ namespace Tenders.API.Services
                 found = foundEntries.Count();
             } while (found >= 1000);
 
+
+            var entriesToCreate = new HashSet<FTPEntry>();
+
             pathFilesWithNoParents.AsParallel().ForAll(p => p.State = StateFile.Pending);
             var dbFiles = pathFilesWithNoParents.ToDictionary(f => $"{f.Name}_{f.IsDirectory}_{f.IsArchive}");
-            var key = new object();
+            var updateKey = new object();
+            var createKey = new object();
             Entries
                 .AsParallel()
                 .ForAll(f =>
@@ -71,10 +75,10 @@ namespace Tenders.API.Services
                     {
                         //Файл существует в базе
                         FTPEntry dbFile;
-                        lock(key)dbFile = dbFiles[k];
+                        lock(updateKey)dbFile = dbFiles[k];
                         if (dbFile.Size != f.Size || !dbFile.Modified.Equals(f.DateModified))
                         {
-                            lock (key)
+                            lock (updateKey)
                             {
                                 dbFile.Name = f.Name;
                                 dbFile.Size = f.Size;
@@ -84,8 +88,8 @@ namespace Tenders.API.Services
                         }
                         else
                         {
-                            lock (key) dbFile.State = StateFile.Indexed;
-                            
+                            lock (updateKey) dbFile.State = StateFile.Indexed;
+                            //не обновляю в базе сознтельно!
                         }
                     }
                     else
@@ -102,9 +106,12 @@ namespace Tenders.API.Services
                             IsArchive = f.IsArchive
                         };
 
-                        _entryRepo.Create(newFile);
+                        lock(createKey) entriesToCreate.Add(newFile);
                     }
                 });
+
+            if(entriesToCreate.Count>0)
+                _entryRepo.CreateMany(entriesToCreate);
 
             //Удаляю все файлы которых уже нет на FTP сервере
             var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => f.Id).ToArray();
@@ -117,11 +124,12 @@ namespace Tenders.API.Services
             return delFailed;
         }
 
-        private void _saveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId, ConcurrentBag<FTPEntry> entriesToAdd)
+        private void _saveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId, ISet<FTPEntry> entriesToAdd)
         {   
             if (inputChildren == null || inputChildren.Count() == 0) return;
             var sw = new Stopwatch();
             sw.Start();
+            
             Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}_{dc.IsArchive}");
             _logger.Log($"Получил все элементы по идентификатору родителя {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
@@ -138,7 +146,7 @@ namespace Tenders.API.Services
             sw.Stop();
         }
 
-        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId, ConcurrentBag<FTPEntry> entriesToAdd)
+        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId, ISet<FTPEntry> entriesToAdd)
         {
             var sw = new Stopwatch();
             sw.Start();

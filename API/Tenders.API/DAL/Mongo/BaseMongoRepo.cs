@@ -50,6 +50,18 @@ namespace Tenders.API.DAL.Mongo
 
         public bool CreateMany(IEnumerable<T> Items)
         {
+            var key = new object();
+
+            Items
+                .AsParallel()
+                .ForAll(i =>
+                {
+                    i.GenerateQuickSearchString();
+                    if (!IdProvider.IsIdValid(i.Id))
+                        lock(key)
+                            i.Id = IdProvider.GenerateId();
+                });
+             
             Entities.InsertMany(Items);
             return true;
         }
@@ -104,5 +116,6 @@ namespace Tenders.API.DAL.Mongo
         {
             if (!IdProvider.IsIdValid(Id)) throw new ArgumentException("Некорректный идентификатор");
         }
+
     }
 }
