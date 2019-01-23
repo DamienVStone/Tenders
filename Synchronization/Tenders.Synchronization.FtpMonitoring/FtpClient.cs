@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Tenders.Core.Abstractions.Services;
 
 namespace FtpMonitoringService
@@ -34,16 +35,10 @@ namespace FtpMonitoringService
 
         public IEnumerable<FtpFile> ListDirectoryFiels(string dirPath, string username, string password)
         {
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(dirPath);
-            request.Credentials = new NetworkCredential(username, password);
-            request.EnableSsl = false;
-            request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-
             string responseText;
-            using (var response = (FtpWebResponse)request.GetResponse())
             using (var responseBody = new MemoryStream())
             {
-                response.GetResponseStream().CopyTo(responseBody);
+                _downloadFromFtp(dirPath, username, password, responseBody, WebRequestMethods.Ftp.ListDirectoryDetails);
                 responseText = Encoding.Default.GetString(responseBody.ToArray());
             };
 
@@ -52,20 +47,12 @@ namespace FtpMonitoringService
 
         public ISet<ZipArchiveEntry> GetArchiveEntries(string filePath, string username, string password)
         {
-            FtpWebRequest request = (FtpWebRequest)WebRequest.Create(filePath);
-            request.Credentials = new NetworkCredential(username, password);
-            request.EnableSsl = false;
-            request.Method = WebRequestMethods.Ftp.DownloadFile;
-
             ISet<ZipArchiveEntry> entries;
             var sw = new Stopwatch();
-            sw.Start();
-            using (var response = (FtpWebResponse)request.GetResponse())
             using (var responseBody = new MemoryStream())
             {
-                response.GetResponseStream().CopyTo(responseBody);
-                logger.Log($"Получаю архив {sw.Elapsed}");
-                sw.Restart();
+                _downloadFromFtp(filePath, username, password, responseBody, WebRequestMethods.Ftp.DownloadFile);
+                sw.Start();
                 var archive = new ZipArchive(responseBody, ZipArchiveMode.Read);
                 logger.Log($"Распаковываю архив {sw.Elapsed}");
                 sw.Restart();
@@ -75,6 +62,36 @@ namespace FtpMonitoringService
             }
             sw.Stop();
             return entries;
+        }
+
+        private void _downloadFromFtp(string path, string username, string password, Stream copyHere, string method)
+        {
+            var request = (FtpWebRequest)WebRequest.Create(path);
+            request.Credentials = new NetworkCredential(username, password);
+            request.EnableSsl = false;
+            request.Method = method;
+            FtpWebResponse response = null;
+            while (true)
+            {
+                try
+                {
+                    response = (FtpWebResponse)request.GetResponse();
+                    response.GetResponseStream().CopyTo(copyHere);
+                    return;
+                }
+                catch (Exception exp)
+                {
+                    logger.Log("Произошла ошибка в процессе запроса к FTP").Wait();
+                    logger.Log(exp.Message).Wait();
+                    logger.Log("Жду одну секунду").Wait();
+                    Thread.Sleep(1000);
+                    logger.Log("Повторяю запрос").Wait();
+                }
+                finally
+                {
+                    if (response != null) response.Dispose();
+                }
+            }
         }
 
         private FtpFile _lineToFile(string parentDir, string lineToFile)
