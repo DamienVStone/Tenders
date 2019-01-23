@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Tenders.API.DAL.Elastic.Interfaces;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Models;
@@ -100,6 +101,11 @@ namespace Tenders.API.DAL.Elastic
         }
 
         public bool CreateMany(IEnumerable<T> Items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> BulkInsert(IEnumerable<T> Items)
         {
             throw new NotImplementedException();
         }
