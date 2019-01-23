@@ -114,40 +114,40 @@ namespace Tenders.Integration.API.Services
 
         public async Task<T> GetNextPathForIndexing<T>(CancellationToken ct)
         {
-            var result = await httpClientService.GetAsync(configService.GetNextPathForIndexingUrl, ct);
-            return JsonConvert.DeserializeObject<T>(result.Text);
+            var result = await _retryableGet(configService.GetNextPathForIndexingUrl, ct);
+            return JsonConvert.DeserializeObject<T>(result);
         }
 
         public async Task<T> GetNextArchiveForIndexing<T>(CancellationToken ct)
         {
-            var result = await httpClientService.GetAsync(configService.GetNextArchiveForMonitoring, ct);
-            return JsonConvert.DeserializeObject<T>(result.Text);
+            var result = await _retryableGet(configService.GetNextArchiveForMonitoring, ct);
+            return JsonConvert.DeserializeObject<T>(result);
         }
 
         public async Task<bool> SendPathFailedNotice(string Id, CancellationToken ct)
         {
             var content = new StringContent("", Encoding.Unicode, MediaTypeNames.Application.Json);
-            var result = await httpClientService.PostAsync(configService.SendFailedPathNotice.AbsoluteUri+$"?id={Id}", content, ct);
+            var url = configService.SendFailedPathNotice.AbsoluteUri + $"?id={Id}";
+            var result = await _retryablePost(url, content, ct);
             return true;
         }
 
         public async Task<bool> SendArchiveFailedNotice(string Id, CancellationToken ct)
         {
             var content = new StringContent("", Encoding.Unicode, MediaTypeNames.Application.Json);
-            var result = await httpClientService.PostAsync(configService.SendFailedArchiveNotice.AbsoluteUri+$"?Id={Id}", content, ct);
+            var url = configService.SendFailedArchiveNotice.AbsoluteUri + $"?Id={Id}";
+            var t = await _retryablePost(url, content, ct);
             return true;
         }
 
         public async Task<string> SendFilesAsync(StringContent files, string pathId, CancellationToken ct)
         {
-            var result = await httpClientService.PostAsync(configService.SendFilesUrl(pathId), files, ct);
-            return result.Text;
+            return await _retryablePost(configService.SendFilesUrl(pathId).AbsoluteUri, files, ct);
         }
 
         public async Task<string> SendFileTreeAsync(StringContent files, string pathId, CancellationToken ct)
         {
-            var result = await httpClientService.PostAsync(configService.SendFileTreeUrl(pathId), files, ct);
-            return result.Text;
+            return await _retryablePost(configService.SendFileTreeUrl(pathId).AbsoluteUri, files, ct);
         }
 
         public async Task<bool> SendNewIndexedFiles(StringContent index, CancellationToken ct)
@@ -170,8 +170,46 @@ namespace Tenders.Integration.API.Services
 
         public async Task<T> GetPathById<T>(string id, CancellationToken ct)
         {
-            var res = await httpClientService.GetAsync(configService.GetPathById(id), ct);
-            return JsonConvert.DeserializeObject<T>(res.Text);
+            var res = await _retryableGet(configService.GetPathById(id), ct);
+            return JsonConvert.DeserializeObject<T>(res);
+        }
+
+        private async Task<string> _retryablePost(string url, StringContent content, CancellationToken ct)
+        {
+            while (true)
+            {
+                try
+                {
+                    var result = await httpClientService.PostAsync(url, content, ct);
+                    return result?.Text ?? "";
+                }
+                catch (Exception exp)
+                {
+                    await logger.Log($"Произошла ошибка в процессе отправки данных по адресу {url}");
+                    await logger.Log(exp.Message);
+                    await logger.Log("Жду одну секунду");
+                    Thread.Sleep(1000);
+                    await logger.Log($"Пытаюсь отправить повторно");
+                }
+            }
+        }
+
+        private async Task<string> _retryableGet(Uri uri, CancellationToken ct)
+        {
+            while (true)
+            {
+                try
+                {
+                    return (await httpClientService.GetAsync(uri, ct)).Text;
+                }catch(Exception exp)
+                {
+                    await logger.Log($"Произошла ошибка в процессе получения данных с адреса {uri}");
+                    await logger.Log(exp.Message);
+                    await logger.Log("Жду одну секунду");
+                    Thread.Sleep(1000);
+                    await logger.Log($"Пытаюсь получить повторно");
+                }
+            }
         }
     }
 }
