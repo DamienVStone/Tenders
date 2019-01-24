@@ -95,7 +95,7 @@ namespace Sberbank.Bidding
                 sc.AddSingleton<ISberbankHttpClientService, SberbankHttpClientService>();
                 sc.AddSingleton<ISberbankDataProvider, SberbankDataProvider>();
                 sc.AddSingleton<ISberbankConfigService, SberbankConfigService>();
-                sc.AddSingleton<ISberbankDeserializationService, SberbankDeserializationService>();
+                sc.AddSingleton<ISberbankXmlService, SberbankXmlService>();
                 sc.AddSingleton<IAPIDataProviderService, APIDataProviderService>();
                 sc.AddSingleton<IAPIConfigService, APIConfigService>();
                 sc.AddSingleton<IAPIHttpClientService, APIHttpClientService>();

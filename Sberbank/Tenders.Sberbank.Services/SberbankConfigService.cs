@@ -103,5 +103,15 @@ namespace Tenders.Sberbank.Services
                 .Replace("{{TRADE_ID}}", tradeId)
                 .Replace("{{MILLISECONDS}}", time);
         }
+
+        public string GetAgreementText(ILot lot)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public string GetDeclaration(ILot lot)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

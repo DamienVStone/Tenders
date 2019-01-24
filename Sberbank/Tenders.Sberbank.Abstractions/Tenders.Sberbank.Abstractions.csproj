@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Tenders.Core.Abstractions\Tenders.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\..\Core\Tenders.Core.Models\Tenders.Core.Models.csproj" />
   </ItemGroup>
 
 </Project>

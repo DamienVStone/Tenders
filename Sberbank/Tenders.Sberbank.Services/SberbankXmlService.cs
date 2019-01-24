@@ -4,16 +4,17 @@ using System.IO;
 using System.Xml.Serialization;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Sberbank.Abstractions.Models;
+using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
 using Tenders.Sberbank.Abstractions.Services;
 using Tenders.Sberbank.Models;
 
 namespace Tenders.Sberbank.Services
 {
-    public class SberbankDeserializationService : ISberbankDeserializationService
+    public class SberbankXmlService : ISberbankXmlService
     {
         private readonly ILoggerService loggerService;
 
-        public SberbankDeserializationService(
+        public SberbankXmlService(
             ILoggerService loggerService
             )
         {
@@ -66,6 +67,24 @@ namespace Tenders.Sberbank.Services
                 loggerService.Log(errorInfo.Error.ErrorMessage);
                 throw new Exception(errorInfo.Error.ErrorMessage, e);
             }
+        }
+
+        public IPurchaseRequest GetPurchaseRequest(string s)
+        {
+            return (IPurchaseRequest)new XmlSerializer(typeof(PurchaseRequest)).Deserialize(new StringReader(s));
+        }
+
+        public string GetXmlFromPurchaseRequest(IPurchaseRequest purchaseRequest)
+        {
+            var result = string.Empty;
+            using (var s = new MemoryStream())
+            {
+                new XmlSerializer(typeof(PurchaseRequest)).Serialize(s, purchaseRequest);
+                s.Position = 0;
+                result = new StreamReader(s).ReadToEnd();
+            }
+
+            return result;
         }
     }
 }
