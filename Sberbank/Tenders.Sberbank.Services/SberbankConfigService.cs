@@ -8,13 +8,14 @@ namespace Tenders.Sberbank.Services
 {
     public class SberbankConfigService : ISberbankConfigService
     {
-        public string AuthStep1Url { get; private set; }
-        public string AuthStep2Url { get; private set; }
-        public string AuthStep3Url { get; private set; }
-        public string PurchaseRequestListUrl { get; private set; }
-        public bool IsDebug { get; private set; }
-        public IAuctionInfo AuctionInfo { get; private set; }
-        public string UploadFileUrl { get; private set; }
+        public string AuthStep1Url { get; }
+        public string AuthStep2Url { get; }
+        public string AuthStep3Url { get; }
+        public string PurchaseRequestListUrl { get; }
+        public string SearchQueryUrl { get; }
+        public bool IsDebug { get; }
+        public IAuctionInfo AuctionInfo { get; }
+        public string UploadFileUrl { get; }
 
         private string _logonRegisterDataTemplate;
         private string _searchXmlTemplate;
@@ -37,6 +38,7 @@ namespace Tenders.Sberbank.Services
             AuthStep3Url = configService["sberbank.AuthStep3Url"];
             UploadFileUrl = configService["sberbank.UploadFileUrl"];
             PurchaseRequestListUrl = configService["sberbank.PurchaseRequestListUrl"];
+            SearchQueryUrl = configService["sberbank.SearchQueryUrl"];
             _logonRegisterDataTemplate = configService["sberbank.LogonRegisterDataTemplate"];
             _searchXmlTemplate = configService["sberbank.SearchXmlTemplate"];
             _tradePlaceUrlTemplate = configService["sberbank.TradePlaceUrlTemplate"];
@@ -62,7 +64,7 @@ namespace Tenders.Sberbank.Services
 
         public string GetSearchXml(ISearchParameters parameters)
         {
-            return _searchXmlTemplate.Replace("{{REG_NUMBER}}", parameters.Regnumber);
+            return _searchXmlTemplate.Replace("{{REG_NUMBER}}", parameters.NotificationNumber);
         }
 
         public string GetTradePlaceUrl(string tradeId, string asid)

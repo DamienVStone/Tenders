@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
-using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
+using Tenders.Sberbank.Abstractions.Models.Requesting;
 
 namespace Tenders.Sberbank.Models
 {

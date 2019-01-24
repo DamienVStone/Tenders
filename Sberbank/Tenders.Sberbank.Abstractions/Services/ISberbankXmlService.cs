@@ -1,5 +1,5 @@
 ﻿using Tenders.Sberbank.Abstractions.Models;
-using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
+using Tenders.Sberbank.Abstractions.Models.Requesting;
 
 namespace Tenders.Sberbank.Abstractions.Services
 {
@@ -12,6 +12,7 @@ namespace Tenders.Sberbank.Abstractions.Services
         ITradePlace GetTradePlace(string s);
         //void LoadXML(string xmlId, string xmlContainerId, HtmlDocument lotDocument);
         IPurchaseRequest GetPurchaseRequest(string s);
-        string GetXmlFromPurchaseRequest(IPurchaseRequest purchaseRequest);
+        string GetXml(IPurchaseRequest purchaseRequest);
+        string GetXml(IElasticRequest purchaseRequest);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 
-namespace Tenders.Sberbank.Abstractions.Models.PurchaseRequest
+namespace Tenders.Sberbank.Abstractions.Models.Requesting
 {
     public interface IAttachableFile
     {

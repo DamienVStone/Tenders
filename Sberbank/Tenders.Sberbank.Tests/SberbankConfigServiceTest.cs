@@ -41,7 +41,7 @@ namespace Tenders.Sberbank.Tests
 
             Assert.False(string.IsNullOrEmpty(service.GetSearchXml(new SearchParameters()
             {
-                Regnumber = "000000000000"
+                NotificationNumber = "000000000000"
             })));
         }
     }

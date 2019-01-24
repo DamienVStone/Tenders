@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Web;
-using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
+using Tenders.Sberbank.Abstractions.Models.Requesting;
 
 namespace Tenders.Core.Models
 {
