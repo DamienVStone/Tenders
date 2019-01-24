@@ -32,12 +32,14 @@ namespace Tenders.Sberbank.Abstractions.Services
         /// Ссылка на метод загрузки файлов
         /// </summary>
         string UploadFileUrl { get; }
-
         /// <summary>
         /// Флаг работы под отладкой
         /// </summary>
         bool IsDebug { get; }
-
+        /// <summary>
+        /// Ссылка на метод поиска в гостевой зоне
+        /// </summary>
+        string SearchQueryUrl { get; }
         /// <summary>
         /// Шаблон документа на подпись для авторизации на площадке
         /// </summary>

@@ -4,7 +4,7 @@ using System.IO;
 using System.Xml.Serialization;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Sberbank.Abstractions.Models;
-using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
+using Tenders.Sberbank.Abstractions.Models.Requesting;
 using Tenders.Sberbank.Abstractions.Services;
 using Tenders.Sberbank.Models;
 
@@ -74,12 +74,25 @@ namespace Tenders.Sberbank.Services
             return (IPurchaseRequest)new XmlSerializer(typeof(PurchaseRequest)).Deserialize(new StringReader(s));
         }
 
-        public string GetXmlFromPurchaseRequest(IPurchaseRequest purchaseRequest)
+        public string GetXml(IPurchaseRequest purchaseRequest)
         {
             var result = string.Empty;
             using (var s = new MemoryStream())
             {
                 new XmlSerializer(typeof(PurchaseRequest)).Serialize(s, purchaseRequest);
+                s.Position = 0;
+                result = new StreamReader(s).ReadToEnd();
+            }
+
+            return result;
+        }
+
+        public string GetXml(IElasticRequest model)
+        {
+            var result = string.Empty;
+            using (var s = new MemoryStream())
+            {
+                new XmlSerializer(typeof(ElasticRequest)).Serialize(s, model);
                 s.Position = 0;
                 result = new StreamReader(s).ReadToEnd();
             }

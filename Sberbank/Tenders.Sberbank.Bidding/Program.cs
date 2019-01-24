@@ -51,7 +51,7 @@ namespace Sberbank.Bidding
 
             var auctions = actionsService.SearchAsync(new SearchParameters()
             {
-                Regnumber = auctionInfo.Code
+                NotificationNumber = auctionInfo.Code
             }, ct)
             .ContinueWith(t =>
             {

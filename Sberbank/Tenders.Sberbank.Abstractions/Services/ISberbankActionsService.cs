@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Tenders.Sberbank.Abstractions.Models;
-using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
+using Tenders.Sberbank.Abstractions.Models.Requesting;
 
 namespace Tenders.Sberbank.Abstractions.Services
 {
@@ -18,11 +18,19 @@ namespace Tenders.Sberbank.Abstractions.Services
         Task AuthenticateAsync(CancellationToken ct);
 
         /// <summary>
-        /// Поиск процедуры (необходима авторизация)
+        /// Поиск процедур (необходима авторизация)
         /// </summary>
         /// <param name="parameters">Параметры поиска</param>
         /// <returns></returns>
         Task<ISearchResult> SearchAsync(ISearchParameters parameters, CancellationToken ct);
+
+        /// <summary>
+        /// Поиск процедур в гостевой зоне без авторизации
+        /// </summary>
+        /// <param name="parameters">Параметры поиска</param>
+        /// <returns></returns>
+        Task<ISearchResult> GuestSearchAsync(ISearchParameters parameters, CancellationToken ct);
+
         /// <summary>
         /// Получение данных о текущих торгах по аукциону
         /// </summary>

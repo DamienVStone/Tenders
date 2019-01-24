@@ -3,11 +3,12 @@ using System;
 using System.Linq;
 using Tenders.API.Attributes;
 using Tenders.API.DAL.Mongo;
+using Tenders.Core.Abstractions.Models;
 using Tenders.Core.Helpers;
 
 namespace Tenders.API.Models
 {
-    public class ModelBase
+    public class ModelBase : IModelBase
     {
         public ModelBase()
         {

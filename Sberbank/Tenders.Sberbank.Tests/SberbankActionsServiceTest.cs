@@ -59,7 +59,7 @@ namespace Tenders.Sberbank.Tests
             _authWithChecks(actionsService, ct);
             var result = await actionsService.SearchAsync(new SearchParameters()
             {
-                Regnumber = "0332100009818000063"
+                NotificationNumber = "0332100009818000063"
             }, ct);
             Assert.NotNull(result);
             Assert.NotEmpty(result.Entries);
@@ -73,7 +73,7 @@ namespace Tenders.Sberbank.Tests
 
             var auctions = await actionsService.SearchAsync(new SearchParameters()
             {
-                Regnumber = _auctionNumber
+                NotificationNumber = _auctionNumber
             }, ct);
             Assert.NotNull(auctions);
             Assert.NotEmpty(auctions.Entries);
@@ -91,7 +91,7 @@ namespace Tenders.Sberbank.Tests
 
             var auctions = await actionsService.SearchAsync(new SearchParameters()
             {
-                Regnumber = _auctionNumber
+                NotificationNumber = _auctionNumber
             }, ct);
             Assert.NotNull(auctions);
             Assert.NotEmpty(auctions.Entries);
@@ -140,6 +140,21 @@ namespace Tenders.Sberbank.Tests
                 },
                 ct
             ).Wait();
+        }
+
+        [Fact]
+        public void CanGuestSearch()
+        {
+            var from = DateTime.Now.Date;
+            var to = DateTime.Now.AddDays(1).Date;
+            var searchParams = new SearchParameters()
+            {
+                Text = "",
+                PublicDateFrom = from,
+                PublicDateTo = to
+            };
+            var result = actionsService.GuestSearchAsync(searchParams, ct).Result;
+
         }
 
         private static void _authWithChecks(ISberbankActionsService actionsService, CancellationToken ct)

@@ -12,9 +12,10 @@ using Tenders.Core.Helpers;
 using Tenders.Core.Models;
 using Tenders.Integration.API.Interfaces;
 using Tenders.Sberbank.Abstractions.Models;
-using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
+using Tenders.Sberbank.Abstractions.Models.Requesting;
 using Tenders.Sberbank.Abstractions.Services;
 using Tenders.Sberbank.Models;
+using Tenders.Sberbank.Models.Requesting;
 
 namespace Tenders.Sberbank.Services
 {
@@ -64,7 +65,7 @@ namespace Tenders.Sberbank.Services
 
         public async Task<ISearchResult> SearchAsync(ISearchParameters parameters, CancellationToken ct)
         {
-            await logger.Log("Поиск аукциона " + parameters.Regnumber);
+            await logger.Log("Поиск аукциона " + parameters.NotificationNumber);
             ct.ThrowIfCancellationRequested();
             var step1GetResult = await httpClientService.GetAsync(configService.PurchaseRequestListUrl, ct);
             _throwIfDocumentError(step1GetResult);
@@ -74,6 +75,31 @@ namespace Tenders.Sberbank.Services
             var result = sberbankXmlService.GetSearchResult(xmlFilterResult);
             await logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0));
             return result;
+        }
+
+        public async Task<ISearchResult> GuestSearchAsync(ISearchParameters parameters, CancellationToken ct)
+        {
+            await logger.Log("Поиск аукциона " + parameters.NotificationNumber);
+            ct.ThrowIfCancellationRequested();
+            var elasticRequest = new ElasticRequest();
+            elasticRequest.Init(parameters);
+            var formValues = new Dictionary<string, string>()
+            {
+                { "xmlData" ,  sberbankXmlService.GetXml(elasticRequest)},
+                { "orgId" , "0" },
+                { "targetPageCode" , "UnitedPurchaseList" },
+            };
+
+            var form = new FormUrlEncodedContent(formValues);
+            var postResult = await httpClientService.PostAsync(configService.SearchQueryUrl, form, ct);
+            var data = JsonConvert.DeserializeObject<Rootobject>(postResult.Text);
+            var result = new List<ISearchResultEntry>();
+            foreach (var item in data.Data.Data.hits.hits)
+            {
+                result.Add(item.)
+            }
+            return null;
+            //await logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0));
         }
 
         public async Task<ITradePlace> GetTradeDataAsync(ISearchResultEntry auction, CancellationToken ct)
@@ -175,7 +201,7 @@ namespace Tenders.Sberbank.Services
             purchaseRequest.Supplier.opfname = "Публичные акционерные общества";
             purchaseRequest.clientinfo = "Browser name: Chrome; Browser version: 71; OS: Windows";
             purchaseRequest.AddDocs(file);
-            var xmlResult = _xmlToLower(sberbankXmlService.GetXmlFromPurchaseRequest(purchaseRequest));
+            var xmlResult = _xmlToLower(sberbankXmlService.GetXml(purchaseRequest));
             var sign = await apiDataProvider.SignAsync(xmlResult, ct);
             var viewStateFieldCount = -1;
             int.TryParse(lotDocument.GetValueById("__VIEWSTATEFIELDCOUNT", true), out viewStateFieldCount);
@@ -272,7 +298,6 @@ namespace Tenders.Sberbank.Services
             await logger.Log($"Подача заявки на {lot.RegNumber} завершена");
         }
 
-
         // TODO: наверное стоит такие штуки перенести в DataProviderService
         private FormUrlEncodedContent _getSearchForm(HtmlDocument doc, ISearchParameters parameters)
         {
@@ -284,7 +309,7 @@ namespace Tenders.Sberbank.Services
                 { "__VIEWSTATE" , doc.GetValueById("__VIEWSTATE", true) },
                 { "__VIEWSTATEGENERATOR" , doc.GetValueById("__VIEWSTATEGENERATOR", true) },
                 { "ctl00$ctl00$phWorkZone$xmlFilter" , configService.GetSearchXml(parameters) },
-                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$tbxPurchaseCode" , parameters.Regnumber },
+                { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$tbxPurchaseCode" , parameters.NotificationNumber },
                 { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$tbSearch" , doc.GetValueById("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_tbSearch")},
                 { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$purchamountstart" , doc.GetValueById("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountstart") },
                 { "ctl00$ctl00$phWorkZone$phFilterZone$nbtPurchaseListFilter$purchamountend" , doc.GetValueById("ctl00_ctl00_phWorkZone_phFilterZone_nbtPurchaseListFilter_purchamountend") },
@@ -346,13 +371,13 @@ namespace Tenders.Sberbank.Services
                         .Replace(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"", string.Empty, StringComparison.InvariantCultureIgnoreCase)
                         .Replace(" xsi:type=\"xsd:string\" ", string.Empty, StringComparison.InvariantCultureIgnoreCase)
                         .Replace("\r\n", " ")
-                        .Replace(" />","/>")
-                        .Replace("  "," ")
-                        .Replace("  "," ")
-                        .Replace("  "," ")
-                        .Replace("  "," ")
-                        .Replace("  "," ")
-                        .Replace("  "," ")
+                        .Replace(" />", "/>")
+                        .Replace("  ", " ")
+                        .Replace("  ", " ")
+                        .Replace("  ", " ")
+                        .Replace("  ", " ")
+                        .Replace("  ", " ")
+                        .Replace("  ", " ")
                         .Replace("> ", ">"); // Потом отрефакторю, пока неизвестно сработает ли
             //.Replace("  ", string.Empty);
 
