@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Core.DI;
+using Tenders.Core.Models;
 using Tenders.Core.Services;
 using Tenders.Integration.API.Interfaces;
 using Tenders.Integration.API.Services;
@@ -33,7 +34,7 @@ namespace Tenders.Sberbank.Tests
                 sc.AddSingleton<ISberbankHttpClientService, SberbankHttpClientService>();
                 sc.AddSingleton<ISberbankDataProvider, SberbankDataProvider>();
                 sc.AddSingleton<ISberbankConfigService, SberbankConfigService>();
-                sc.AddSingleton<ISberbankDeserializationService, SberbankDeserializationService>();
+                sc.AddSingleton<ISberbankXmlService, SberbankXmlService>();
                 sc.AddSingleton<IAPIDataProviderService, APIDataProviderService>();
                 sc.AddSingleton<IAPIConfigService, APIConfigService>();
                 sc.AddSingleton<IAPIHttpClientService, APIHttpClientService>();
@@ -116,9 +117,29 @@ namespace Tenders.Sberbank.Tests
         }
 
         [Fact]
-        public void CanUploadDocument()
+        public void CanUploadAndSignDocument()
         {
             _authWithChecks(actionsService, ct);
+            var file = actionsService.UploadFileAsync(@"C:\ASDocs\Add.docs.zip", "ctl00$phDataZone$Upload", ct).Result;
+            Assert.NotNull(file);
+            Assert.True(file.IsUploaded);
+            Assert.False(string.IsNullOrEmpty(file.UploadedSign));
+            Assert.False(string.IsNullOrEmpty(file.UploadedSignFingerprint));
+        }
+
+        [Fact]
+        public void CanRequest()
+        {
+            _authWithChecks(actionsService, ct);
+            actionsService.MakeRequest(
+                new Lot()
+                {
+                    Url = new Uri("http://www.sberbank-ast.ru/tradezone/supplier/PurchaseRequestEF.aspx?purchID=6394901"),
+                    RegNumber = "0340200003318017799",
+                    Text = "Оказание услуг по обязательному страхованию гражданской ответственности владельцев транспортных средств (ОСАГО)"
+                },
+                ct
+            ).Wait();
         }
 
         private static void _authWithChecks(ISberbankActionsService actionsService, CancellationToken ct)

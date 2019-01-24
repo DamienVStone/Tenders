@@ -76,5 +76,7 @@ namespace Tenders.Sberbank.Abstractions.Services
         /// <param name="time"></param>
         /// <returns></returns>
         string GetAsyncRefreshData(string tradeId, string time);
+        string GetAgreementText(ILot lot);
+        string GetDeclaration(ILot lot);
     }
 }

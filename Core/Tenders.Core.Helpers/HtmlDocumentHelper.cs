@@ -13,7 +13,11 @@ namespace Tenders.Core.Helpers
             var result = string.Empty;
             try
             {
-                result = HttpUtility.HtmlDecode(d.GetElementbyId(id).GetAttributeValue("value", string.Empty));
+                var text = d?.GetElementbyId(id)?.GetAttributeValue("value", string.Empty);
+                if (text == null)
+                    return null;
+
+                result = HttpUtility.HtmlDecode(text);
             }
             catch (System.Exception ex)
             {
@@ -29,7 +33,11 @@ namespace Tenders.Core.Helpers
             var result = string.Empty;
             try
             {
-                result = HttpUtility.HtmlDecode(d.GetElementbyId(id).InnerText.Trim());
+                var text = d?.GetElementbyId(id)?.InnerText?.Trim();
+                if (text == null)
+                    return null;
+
+                result = HttpUtility.HtmlDecode(text);
             }
             catch (System.Exception ex)
             {
@@ -71,13 +79,23 @@ namespace Tenders.Core.Helpers
 
         public static string GetValueByXPath(this HtmlDocument d, string xPath, bool ignoreErrors = false, bool deepSearch = false)
         {
+            return GetValueByXPath(d?.DocumentNode, xPath, ignoreErrors, deepSearch);
+        }
+
+        public static string GetValueByXPath(this HtmlNode node, string xPath, bool ignoreErrors = false, bool deepSearch = false)
+        {
             var result = string.Empty;
             try
             {
-                var node = d.DocumentNode.SelectSingleNode(xPath);
-                result = node.GetAttributeValue("value", string.Empty);
+                var targetNode = node?.SelectSingleNode(xPath);
+                if (targetNode == null)
+                {
+                    return null;
+                }
+
+                result = targetNode.GetAttributeValue("value", string.Empty);
                 if (deepSearch && string.IsNullOrEmpty(result))
-                    result = node.InnerText;
+                    result = targetNode.InnerText;
             }
             catch (System.Exception ex)
             {

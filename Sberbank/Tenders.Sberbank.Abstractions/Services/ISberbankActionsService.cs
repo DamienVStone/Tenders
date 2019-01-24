@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Tenders.Sberbank.Abstractions.Models;
+using Tenders.Sberbank.Abstractions.Models.PurchaseRequest;
 
 namespace Tenders.Sberbank.Abstractions.Services
 {
@@ -36,5 +37,14 @@ namespace Tenders.Sberbank.Abstractions.Services
         /// <param name="price">Сумма</param>
         /// <param name="tradeData">Данные об аукционе</param>
         Task<ITradePlace> BidAsync(decimal price, string ASID, ITradePlace tradeData, CancellationToken ct);
+
+        /// <summary>
+        /// Загружает файл на площадку
+        /// </summary>
+        /// <param name="formData">Данные формы - переделать на путь к файлу</param>
+        /// <param name="ct">токен отмены</param>
+        /// <returns></returns>
+        Task<IAttachableFile> UploadFileAsync(string filePath, string controlName, CancellationToken ct);
+        Task MakeRequest(ILot lot, CancellationToken ct);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
@@ -94,15 +93,14 @@ namespace Tenders.Integration.API.Services
             return true;
         }
 
-        public async Task<string> SignAsync(string data, CancellationToken ct)
+        public async Task<SignResponse> SignAsync(string data, CancellationToken ct)
         {
             await logger.Log("Подписание документа");
             var content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Data", data) });
             var result = await httpClientService.PostAsync(configService.SignText, content, ct);
             await logger.Log("Документ подписан");
             return JsonConvert
-                .DeserializeObject<StringResponse>(result.Text)
-                .Data;
+                .DeserializeObject<SignResponse>(result.Text);
         }
 
         public async Task SyncronizeByKeyAsync(string key, CancellationToken ct)

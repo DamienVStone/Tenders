@@ -61,7 +61,9 @@ namespace Tenders.Integration.API.Tests
             Assert.NotNull(task);
             var result = task.Result;
             Assert.False(cts.IsCancellationRequested);
-            Assert.False(string.IsNullOrEmpty(result));
+            Assert.NotNull(result);
+            Assert.False(string.IsNullOrEmpty(result.Data));
+            Assert.False(string.IsNullOrEmpty(result.Fingerprint));
         }
 
         [Fact]
