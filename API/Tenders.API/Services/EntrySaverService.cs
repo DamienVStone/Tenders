@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Enums;
 using Tenders.API.Models;
@@ -27,72 +28,81 @@ namespace Tenders.API.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public void SaveFTPEntriesTree(string PathId, FTPEntriesTreeParam rootEntry)
+        public async Task<bool> SaveFTPEntriesTree(string PathId, FTPEntriesTreeParam rootEntry)
         {
-            var entriesToAdd = new ConcurrentBag<FTPEntry>();
+            var entriesToAdd = new HashSet<FTPEntry>();
             var sw = new Stopwatch();
             sw.Start();
-            var entry = 
-                _entryRepo.ExistsByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive)? 
-                _entryRepo.GetByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive) : null;
+            //var entry = 
+            //    _entryRepo.ExistsByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive)? 
+            //    _entryRepo.GetByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive) : null;
+            FTPEntry entry = null;
             var res = _putEntry(entry, rootEntry, null, PathId, entriesToAdd);
-            _logger.Log($"Сохранил корень: {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            await _logger.Log($"Сохранил корень: {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
             _saveTree(res, rootEntry.Children, PathId, entriesToAdd);
-            _logger.Log($"Обошел дерево {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            await _logger.Log($"Обошел дерево {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
-            if(entriesToAdd.Count > 0) _entryRepo.CreateMany(entriesToAdd);
-            _logger.Log($"Записал новые файлы в базу {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            if (entriesToAdd.Count > 0) await _entryRepo.BulkInsert(entriesToAdd);
+            await _logger.Log($"Записал новые файлы в базу {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Stop();
+            return true;
         }
 
-        public int SaveRootEntriesWithoutChildren(string PathId, IEnumerable<FTPEntryParam> Entries)
+        public async Task<int> SaveRootEntriesWithoutChildren(string PathId, IEnumerable<FTPEntryParam> Entries)
         {
-            ISet<FTPEntry> pathFilesWithNoParents = new HashSet<FTPEntry>();
+            //ISet<FTPEntry> pathFilesWithNoParents = new HashSet<FTPEntry>();
             // Постранично получаю вообще все файлы из директории
-            var found = 0;
-            var i = 0;
-            do
-            {
-                var foundEntries = _entryRepo.GetByPath(i++ * 1000, 1000, PathId);
-                pathFilesWithNoParents.UnionWith(foundEntries);
-                found = foundEntries.Count();
-            } while (found >= 1000);
+            //var found = 0;
+            //var i = 0;
+            //do
+            //{
+            //    var foundEntries = _entryRepo.GetByPath(i++ * 1000, 1000, PathId);
+            //    pathFilesWithNoParents.UnionWith(foundEntries);
+            //    found = foundEntries.Count();
+            //} while (found >= 1000);
 
-            pathFilesWithNoParents.AsParallel().ForAll(p => p.State = StateFile.Pending);
-            var dbFiles = pathFilesWithNoParents.ToDictionary(f => $"{f.Name}_{f.IsDirectory}_{f.IsArchive}");
-            var key = new object();
+
+            var entriesToCreate = new HashSet<FTPEntry>();
+
+            //pathFilesWithNoParents.AsParallel().ForAll(p => p.State = StateFile.Pending);
+            //var dbFiles = pathFilesWithNoParents.ToDictionary(f => $"{f.Name}_{f.IsDirectory}_{f.IsArchive}");
+            //var updateKey = new object();
+            var createKey = new object();
             Entries
                 .AsParallel()
                 .ForAll(f =>
                 {
-                    var k = $"{f.Name}_{f.IsDirectory}_{f.IsArchive}";
-                    if (dbFiles.Keys.Contains(k))
-                    {
-                        //Файл существует в базе
-                        FTPEntry dbFile;
-                        lock(key)dbFile = dbFiles[k];
-                        if (dbFile.Size != f.Size || !dbFile.Modified.Equals(f.DateModified))
-                        {
-                            lock (key)
-                            {
-                                dbFile.Name = f.Name;
-                                dbFile.Size = f.Size;
-                                dbFile.State = StateFile.Modified;
-                            }
-                            _entryRepo.Update(dbFile);
-                        }
-                        else
-                        {
-                            lock (key) dbFile.State = StateFile.Indexed;
-                            
-                        }
-                    }
-                    else
+                    //var k = $"{f.Name}_{f.IsDirectory}_{f.IsArchive}";
+                    //if (dbFiles.Keys.Contains(k))
+                    //{
+                    //    //Файл существует в базе
+                    //    FTPEntry dbFile;
+                    //    lock(updateKey)dbFile = dbFiles[k];
+                    //    if (dbFile.Size != f.Size || !dbFile.Modified.Equals(f.DateModified))
+                    //    {
+                    //        lock (updateKey)
+                    //        {
+                    //            dbFile.Name = f.Name;
+                    //            dbFile.Size = f.Size;
+                    //            dbFile.State = StateFile.Modified;
+                    //        }
+                    //        _entryRepo.Update(dbFile);
+                    //    }
+                    //    else
+                    //    {
+                    //        lock (updateKey) dbFile.State = StateFile.Indexed;
+                    //        //не обновляю в базе сознтельно!
+                    //    }
+                    //}
+                    //else
                     {
                         //Файл не существует в базе
+                        string id;
+                        lock (createKey) id = ObjectId.GenerateNewId().ToString();
                         var newFile = new FTPEntry
                         {
+                            Id = id,
                             Name = f.Name,
                             Modified = f.DateModified,
                             Size = f.Size,
@@ -102,48 +112,55 @@ namespace Tenders.API.Services
                             IsArchive = f.IsArchive
                         };
 
-                        _entryRepo.Create(newFile);
+                        lock (createKey) entriesToCreate.Add(newFile);
                     }
                 });
 
-            //Удаляю все файлы которых уже нет на FTP сервере
-            var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => f.Id).ToArray();
-            var delFailed = 0;
-            foreach (var entry in forDelete)
-            {
-                if (!_entryRepo.Delete(entry.ToString())) delFailed++;
-            }
+            if (entriesToCreate.Count > 0)
+                //_entryRepo.CreateMany(entriesToCreate);
+                await _entryRepo.BulkInsert(entriesToCreate);
 
-            return delFailed;
+            //Удаляю все файлы которых уже нет на FTP сервере
+            //var forDelete = dbFiles.Values.Where(f => f.State == StateFile.Pending).Select(f => f.Id).ToArray();
+            //var delFailed = 0;
+            //foreach (var entry in forDelete)
+            //{
+            //    if (!_entryRepo.Delete(entry.ToString())) delFailed++;
+            //}
+
+            //return delFailed;
+            return 0;
         }
 
-        private void _saveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId, ConcurrentBag<FTPEntry> entriesToAdd)
-        {   
+        private void _saveTree(string parentId, IEnumerable<FTPEntriesTreeParam> inputChildren, string pathId, ISet<FTPEntry> entriesToAdd)
+        {
             if (inputChildren == null || inputChildren.Count() == 0) return;
             var sw = new Stopwatch();
             sw.Start();
-            Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}_{dc.IsArchive}");
-            _logger.Log($"Получил все элементы по идентификатору родителя {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
-            sw.Restart();
+
+            //Dictionary<string, FTPEntry> dbChildren = _entryRepo.GetByParentId(parentId).ToDictionary(dc => $"{dc.Name}_{dc.IsDirectory}_{dc.IsArchive}");
+            //_logger.Log($"Получил все элементы по идентификатору родителя {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            //sw.Restart();
             var i = 0;
-            foreach(var c in inputChildren)
+            foreach (var c in inputChildren)
             {
                 var key = $"{c.Name}_{c.IsDirectory}_{c.IsArchive}";
-                var res = _putEntry(dbChildren.ContainsKey(key) ? dbChildren[key] : null, c, parentId, pathId, entriesToAdd);
+                //var res = _putEntry(dbChildren.ContainsKey(key) ? dbChildren[key] : null, c, parentId, pathId, entriesToAdd);
+                var res = _putEntry(null, c, parentId, pathId, entriesToAdd);
                 if (c.Children == null || c.Children.Count() == 0) continue;
                 _saveTree(res, c.Children, pathId, entriesToAdd);
                 i++;
             }
-            _logger.Log($"Цикл по детям {i} за {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}.{sw.Elapsed.Milliseconds}");
+            _logger.Log($"Цикл по детям {i} за {sw.Elapsed}");
             sw.Stop();
         }
 
-        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId, ConcurrentBag<FTPEntry> entriesToAdd)
+        private string _putEntry(FTPEntry o, FTPEntriesTreeParam n, string parent, string pathId, ISet<FTPEntry> entriesToAdd)
         {
             var sw = new Stopwatch();
             sw.Start();
             string res;
-            if (o == null)
+            //if (o == null)
             {
                 res = _idProvider.GenerateId();
                 var entry = new FTPEntry()
@@ -160,23 +177,23 @@ namespace Tenders.API.Services
                 };
                 entriesToAdd.Add(entry);
             }
-            else
-            {
-                var modified = n.Size != o.Size || n.Modified != o.Modified;
-                if (modified)
-                {
-                    o.Size = n.Size;
-                    o.Modified = n.Modified;
-                    o.State = StateFile.Modified;
+            //else
+            //{
+            //    var modified = n.Size != o.Size || n.Modified != o.Modified;
+            //    if (modified)
+            //    {
+            //        o.Size = n.Size;
+            //        o.Modified = n.Modified;
+            //        o.State = StateFile.Modified;
 
-                    _entryRepo.Update(o);
-                }
-                res = o.Id;
-            }
+            //        _entryRepo.Update(o);
+            //    }
+            //    res = o.Id;
+            //}
             _logger.Log($"Добавил элемент {sw.ElapsedMilliseconds}");
             sw.Stop();
             return res ?? throw new InvalidOperationException($"Ошибка при сохранении пути {n.Name}. Идентификатор сохраненного объекта оказался null");
         }
-        
+
     }
 }

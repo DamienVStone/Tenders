@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Models;
 using Tenders.Core.Abstractions.Services;
@@ -50,7 +51,20 @@ namespace Tenders.API.DAL.Mongo
 
         public bool CreateMany(IEnumerable<T> Items)
         {
+            var key = new object();
+
+            Items
+                .AsParallel()
+                .ForAll(i =>
+                {
+                    i.GenerateQuickSearchString();
+                    if (!IdProvider.IsIdValid(i.Id))
+                        lock (key)
+                            i.Id = IdProvider.GenerateId();
+                });
+
             Entities.InsertMany(Items);
+            
             return true;
         }
 
@@ -103,6 +117,12 @@ namespace Tenders.API.DAL.Mongo
         protected void CheckId(string Id)
         {
             if (!IdProvider.IsIdValid(Id)) throw new ArgumentException("Некорректный идентификатор");
+        }
+
+        public async Task<bool> BulkInsert(IEnumerable<T> Items)
+        {
+            await Entities.InsertManyAsync(Items);
+            return true;
         }
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Tenders.API.DAL.Interfaces;
 using Tenders.API.Enums;
 using Tenders.API.Models;
@@ -42,14 +43,14 @@ namespace Tenders.API.Controllers
         /// <param name="file">Массив файлов для добавления</param>
         /// <returns>200OK или ошибку, если что-то пошло не так</returns>
         [HttpPost]
-        public IActionResult Post([FromQuery]string pathId, [FromBody]IEnumerable<FTPEntryParam> rootInputFiles)
+        public async Task<IActionResult> Post([FromQuery]string pathId, [FromBody]IEnumerable<FTPEntryParam> rootInputFiles)
         {
-            if (rootInputFiles.Count() == 0) return BadRequest("Нет файлов для добавления");
+            if (rootInputFiles.Count() == 0) return Ok("Нет файлов для добавления");
             if (string.IsNullOrWhiteSpace(pathId)) return BadRequest("Не указан идентификатор пути");
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
 
-            var delFailed = _treeSaverService.SaveRootEntriesWithoutChildren(pathId, rootInputFiles);
+            var delFailed = await _treeSaverService.SaveRootEntriesWithoutChildren(pathId, rootInputFiles);
 
             return Ok("Все файлы успешно добавлены." + (delFailed > 0 ? $" Не удалось удалить файлов: {delFailed}" : ""));
         }
@@ -60,13 +61,13 @@ namespace Tenders.API.Controllers
         /// <param name="fileTree">Объект, хранящий дерево файлов и корень</param>
         /// <returns>200OK если индексация файлов прошла без ошибок</returns>
         [HttpPost("AddFileTree")]
-        public IActionResult AddFileTree([FromQuery]string pathId, [FromBody]FTPEntriesTreeParam entries)
+        public async Task<IActionResult> AddFileTree([FromQuery]string pathId, [FromBody]FTPEntriesTreeParam entries)
         {
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
             var sw = new Stopwatch();
-            _treeSaverService.SaveFTPEntriesTree(pathId, entries);
-            _logger.Log($"Сохранил дерево файлов {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            var b = await _treeSaverService.SaveFTPEntriesTree(pathId, entries);
+            await _logger.Log($"Сохранил дерево файлов {sw.Elapsed}");
             sw.Stop();
             return Ok("");
         }
