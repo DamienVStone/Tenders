@@ -3,11 +3,6 @@ using Tenders.Sberbank.Abstractions.Models;
 
 namespace Tenders.Sberbank.Models
 {
-    public class SearchResult : ISearchResult
-    {
-        public ISearchResultEntry[] Entries { get; set; }
-    }
-
     [XmlType(AnonymousType = true)]
     [XmlRoot(ElementName = "data", Namespace = "", IsNullable = false)]
     public class data

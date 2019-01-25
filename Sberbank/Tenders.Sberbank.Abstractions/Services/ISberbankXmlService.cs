@@ -1,4 +1,5 @@
-﻿using Tenders.Sberbank.Abstractions.Models;
+﻿using System.Collections.Generic;
+using Tenders.Sberbank.Abstractions.Models;
 using Tenders.Sberbank.Abstractions.Models.Requesting;
 
 namespace Tenders.Sberbank.Abstractions.Services
@@ -8,7 +9,7 @@ namespace Tenders.Sberbank.Abstractions.Services
     /// </summary>
     public interface ISberbankXmlService
     {
-        ISearchResult GetSearchResult(string xmlFilterResult);
+        IEnumerable<ISearchResultEntry> GetSearchResult(string xmlFilterResult);
         ITradePlace GetTradePlace(string s);
         //void LoadXML(string xmlId, string xmlContainerId, HtmlDocument lotDocument);
         IPurchaseRequest GetPurchaseRequest(string s);

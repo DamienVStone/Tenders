@@ -4,7 +4,7 @@ namespace Tenders.Sberbank.Abstractions.Models
 {
     public interface IRequestProcess : IProcess
     {
-        string LotId { get; set; }
+        int BidOrder { get; set; }
         PurchaseRequestResult Result { get; set; }
     }
 }

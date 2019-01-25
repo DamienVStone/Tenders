@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -63,7 +65,7 @@ namespace Tenders.Sberbank.Services
             await logger.Log("Авторизован как: " + step3PostResult.GetTextById("ctl00_loginctrl_link"));
         }
 
-        public async Task<ISearchResult> SearchAsync(ISearchParameters parameters, CancellationToken ct)
+        public async Task<IEnumerable<ISearchResultEntry>> SearchAsync(ISearchParameters parameters, CancellationToken ct)
         {
             await logger.Log("Поиск аукциона " + parameters.NotificationNumber);
             ct.ThrowIfCancellationRequested();
@@ -73,11 +75,11 @@ namespace Tenders.Sberbank.Services
             _throwIfDocumentError(step2PostResult);
             var xmlFilterResult = HttpUtility.HtmlDecode(step2PostResult.GetTextById("ctl00_ctl00_phWorkZone_xmlData"));
             var result = sberbankXmlService.GetSearchResult(xmlFilterResult);
-            await logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0));
+            await logger.Log("Найдено аукционов: " + (result?.Count() ?? 0));
             return result;
         }
 
-        public async Task<ISearchResult> GuestSearchAsync(ISearchParameters parameters, CancellationToken ct)
+        public async Task<IEnumerable<ILot>> GuestSearchAsync(ISearchParameters parameters, CancellationToken ct)
         {
             await logger.Log("Поиск аукциона " + parameters.NotificationNumber);
             ct.ThrowIfCancellationRequested();
@@ -92,13 +94,35 @@ namespace Tenders.Sberbank.Services
 
             var form = new FormUrlEncodedContent(formValues);
             var postResult = await httpClientService.PostAsync(configService.SearchQueryUrl, form, ct);
-            var data = JsonConvert.DeserializeObject<Rootobject>(postResult.Text);
-            var result = new List<ISearchResultEntry>();
-            foreach (var item in data.Data.Data.hits.hits)
-            {
-                result.Add(item.)
-            }
-            return null;
+            var data = JsonConvert.DeserializeObject<GuestSearchResponse>(postResult.Text);
+            var result = data
+                .Hits
+                .Where(c =>
+                {
+                    // TODO: реализовать сервис проверки по фильтрам второго порядка
+                    var text = c?.fields?.purchName?.ToArray()[0];
+                    //return FilterHelper.CheckText(_secondFilters, text);
+                    return true;
+                })
+                .Select(c =>
+                {
+                    var dt = DateTime.Now.Date.AddHours(1).AddMinutes(1).AddSeconds(1); // чтобы распознать если вдруг не спарсилось
+                    var sum = 0m;
+                    return new Lot()
+                    {
+                        ExternalId = c._id,
+                        PublishDate = DateTime.TryParse(c?.fields?.PublicDate?.ToArray()[0], out dt) ? dt : DateTime.Now,
+                        Sum = decimal.TryParse(c?.fields?.purchAmount?.ToArray()[0].ToString(), out sum) ? sum : 0m,
+                        Text = c?.fields?.purchName?.ToArray()[0],
+                        Url = new Uri(c.fields?.CreateRequestHrefTerm?.ToArray()[0]),
+                        NotificationNumber = c?.fields?.purchCodeTerm?.ToArray()[0],
+                        Description = string.Empty,
+                        // TODO: Сделать справочник площадок
+                        ETP = "ETP_SBAST"
+                    };
+                });
+
+            return result;
             //await logger.Log("Найдено аукционов: " + (result?.Entries?.Length ?? 0));
         }
 
@@ -179,7 +203,7 @@ namespace Tenders.Sberbank.Services
 
         public async Task MakeRequest(ILot lot, CancellationToken ct)
         {
-            await logger.Log($"Подача заявки на {lot.RegNumber}");
+            await logger.Log($"Подача заявки на {lot.NotificationNumber}");
             var file = await UploadFileAsync(@"C:\ASDocs\Add.docs.zip", "ctl00$phDataZone$Upload", ct);
             var lotDocument = await httpClientService.GetAsync(lot.Url, ct);
             _throwIfDocumentError(lotDocument);
@@ -195,7 +219,7 @@ namespace Tenders.Sberbank.Services
                 bankcode = "SBR",
                 bankname = "Публичное акционерное общество \"Сбербанк России\""
             };
-            purchaseRequest.reqagreement = $"Настоящим участник аукциона подтверждает свое согласие поставить товар,выполнить работы и/или оказать услуги на условиях, предусмотренных документацией об электронном аукционе: {lot.Text}, Извещение № {lot.RegNumber}.";
+            purchaseRequest.reqagreement = $"Настоящим участник аукциона подтверждает свое согласие поставить товар,выполнить работы и/или оказать услуги на условиях, предусмотренных документацией об электронном аукционе: {lot.Text}, Извещение № {lot.NotificationNumber}.";
             purchaseRequest.reqagreementanswer = "Согласен";
             purchaseRequest.Supplier.opfid = "12247";
             purchaseRequest.Supplier.opfname = "Публичные акционерные общества";
@@ -295,7 +319,7 @@ namespace Tenders.Sberbank.Services
             //lotDocument.SetValueById("ctl00_ctl00_phWorkZone_phDocumentZone_nbtPurchaseRequest_reqAgreement", configService.GetAgreementText(lot));
             //lotDocument.SetValueById("ctl00_ctl00_phWorkZone_phDocumentZone_nbtPurchaseRequest_reqDeclarationRequirements", configService.GetDeclaration(lot));
             //var FileAttach2tblDoc = lotDocument.GetElementbyId("ctl00$ctl00$phWorkZone$phDocumentZone$nbtPurchaseRequest$FileAttach2tblDoc");
-            await logger.Log($"Подача заявки на {lot.RegNumber} завершена");
+            await logger.Log($"Подача заявки на {lot.NotificationNumber} завершена");
         }
 
         // TODO: наверное стоит такие штуки перенести в DataProviderService
