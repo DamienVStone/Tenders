@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IListResponse } from 'src/app/models/ilist-response';
 import { IFtpEntry } from '../models/iftp-entry';
 import { FtpEntryService } from '../services/ftp-entry.service';
 import { IFilterOptions, FilterOptions } from 'src/app/models/ifilter-options';
-import { tap } from 'rxjs/operators';
+import { tap, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { NotificationService } from 'src/app/services/notification.service';
+import { I18nService } from 'src/app/services/i18n.service';
+import { MatPaginator } from '@angular/material';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-ftp-entry-list',
@@ -18,18 +21,33 @@ export class FtpEntryListComponent implements OnInit {
   dataSource: IFtpEntry[];
   dataLength = 0;
   displayedColumns: string[] = ['id', 'name', 'size', 'modified', 'state', 'path', 'parent', 'isDirectory', 'isArchive'];
+  searchControl = new FormControl();
 
-
-  constructor(private ftpentryService: FtpEntryService, public notificationService: NotificationService) { }
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  constructor(private ftpentryService: FtpEntryService, public notificationService: NotificationService, private i18n: I18nService) { }
 
   ngOnInit() {
+    this.i18n.matPaginator(this.paginator);
+    this.paginator.page
+      .pipe(tap(c => {
+        this.filterOptions.page = c.pageIndex;
+        this.filterOptions.pageSize = c.pageSize;
+      }))
+      .pipe(switchMap(c => this.refreshList()))
+      .subscribe();
+
+    this.searchControl.valueChanges
+      .pipe(debounceTime(500))
+      .pipe(distinctUntilChanged())
+      .pipe(tap(filter => this.filterOptions.quickSearch = filter.trim().toUpperCase()))
+      .pipe(switchMap(r => this.refreshList()))
+      .subscribe();
+
     this.refreshList().subscribe();
-    console.log(this.dataSource);
   }
 
   refreshList(): Observable<IListResponse<IFtpEntry[]>> {
     this.isListLoading = true;
-
     var list = this.ftpentryService.get(this.filterOptions).pipe(tap(result => {
       this.dataSource = result.data;
       this.dataLength = result.count;
