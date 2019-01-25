@@ -24,7 +24,6 @@ namespace Tenders.Sberbank.Services
     public class SberbankActionsService : ISberbankActionsService
     {
         private readonly ISberbankHttpClientService httpClientService;
-        private readonly ISberbankDataProvider dataProvider;
         private readonly ISberbankConfigService configService;
         private readonly ISberbankXmlService sberbankXmlService;
         private readonly IAPIDataProviderService apiDataProvider;
@@ -32,7 +31,6 @@ namespace Tenders.Sberbank.Services
 
         public SberbankActionsService(
             ISberbankHttpClientService httpClientService,
-            ISberbankDataProvider dataProvider,
             ISberbankConfigService configService,
             ISberbankXmlService sberbankXmlService,
             IAPIDataProviderService apiDataProvider,
@@ -40,7 +38,6 @@ namespace Tenders.Sberbank.Services
             )
         {
             this.httpClientService = httpClientService ?? throw new ArgumentNullException(nameof(httpClientService));
-            this.dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
             this.apiDataProvider = apiDataProvider ?? throw new ArgumentNullException(nameof(apiDataProvider));
             this.configService = configService ?? throw new ArgumentNullException(nameof(configService));
             this.sberbankXmlService = sberbankXmlService ?? throw new ArgumentNullException(nameof(sberbankXmlService));

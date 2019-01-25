@@ -33,7 +33,6 @@ namespace Tenders.Sberbank.Tests
                 Container.Registration.Register(sc);
                 sc.AddSingleton<ISberbankActionsService, SberbankActionsService>();
                 sc.AddSingleton<ISberbankHttpClientService, SberbankHttpClientService>();
-                sc.AddSingleton<ISberbankDataProvider, SberbankDataProvider>();
                 sc.AddSingleton<ISberbankConfigService, SberbankConfigService>();
                 sc.AddSingleton<ISberbankXmlService, SberbankXmlService>();
                 sc.AddSingleton<IAPIDataProviderService, APIDataProviderService>();
