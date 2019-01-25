@@ -2,11 +2,10 @@ table {
     width: 100%;
   }
   
-  tr.error {
+  tr.corrupted {
     background-color: rgba($color: #8f2323, $alpha: 1.0);
   }
-  
-  tr.row {
-    cursor: pointer;
+
+  tr.indexed {
+    background-color: rgba($color:#238f5d , $alpha: 1.0);
   }
-  
