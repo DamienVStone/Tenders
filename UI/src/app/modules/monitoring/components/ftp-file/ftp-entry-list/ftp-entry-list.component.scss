@@ -1,0 +1,12 @@
+table {
+    width: 100%;
+  }
+  
+  tr.error {
+    background-color: rgba($color: #8f2323, $alpha: 1.0);
+  }
+  
+  tr.row {
+    cursor: pointer;
+  }
+  

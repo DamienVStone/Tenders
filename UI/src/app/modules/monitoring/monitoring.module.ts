@@ -7,7 +7,6 @@ import { MonitoringHomeComponent } from './components/monitoring-home/monitoring
 import { MaterialModule } from 'src/app/material-module';
 import { FtpPathListComponent } from './components/ftp-path/ftp-path-list/ftp-path-list.component';
 import { FtpPathDetailComponent } from './components/ftp-path/ftp-path-detail/ftp-path-detail.component';
-import { IFtpFileComponent } from './components/ftp-file/models/iftp-file/iftp-file.component';
 import { FtpEntryListComponent } from './components/ftp-file/ftp-entry-list/ftp-entry-list.component';
 
 @NgModule({
@@ -16,8 +15,7 @@ import { FtpEntryListComponent } from './components/ftp-file/ftp-entry-list/ftp-
     MonitoringHomeComponent,
     FtpPathListComponent,
     FtpPathDetailComponent,
-    FtpEntryListComponent,
-    IFtpFileComponent
+    FtpEntryListComponent
   ],
   imports: [
     CommonModule,
