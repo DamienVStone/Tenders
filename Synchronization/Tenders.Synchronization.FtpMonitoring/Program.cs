@@ -166,7 +166,7 @@ namespace FtpMonitoringService
             await logger.Log($"Все архивы обработаны");
         }
 
-        private static async Task _monitorArchive(FtpFile f, FtpPath p, CancellationToken ct)
+        private static async Task<bool> _monitorArchive(FtpFile f, FtpPath p, CancellationToken ct)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -180,11 +180,15 @@ namespace FtpMonitoringService
             await logger.Log($"Дерево файлов построено {sw1.Elapsed}");
             sw1.Restart();
             var data = JsonConvert.SerializeObject(f);
-            var res = apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, ct).Result;
-            await logger.Log($"Дерево файлов сериализовано и архив отправлен на сервер {sw1.Elapsed}");
+            await logger.Log($"Дерево файлов сериализовано {sw1.Elapsed}, отправляю на сервер");
+            sw1.Restart();
+            var res = await apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, ct);
+            await logger.Log($"Дерево файлов отправлено на сервер {sw1.Elapsed}");
             sw1.Stop();
             await logger.Log($"Архив {f.Name} обработан ОБЩЕЕ ВРЕМЯ АРХИВА: {sw.Elapsed}");
             sw.Stop();
+
+            return true;
         }
 
         private static void _initContainer()
