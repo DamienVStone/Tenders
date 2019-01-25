@@ -5,9 +5,10 @@ namespace Tenders.Sberbank.Models.Requesting
     /// <summary>
     /// Ответ поиска в гостевой зоне
     /// </summary>
-    public class Rootobject
+    public class GuestSearchResponse
     {
         public string result { get; set; }
+        public Hit[] Hits { get { return Data.Data.hits.hits; } }
         public _data Data { get { return JsonConvert.DeserializeObject<_data>(data); } }
         public string data { get; set; }
     }

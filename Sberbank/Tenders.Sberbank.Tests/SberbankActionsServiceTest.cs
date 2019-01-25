@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Tenders.Core.Abstractions.Services;
 using Tenders.Core.DI;
@@ -62,25 +63,25 @@ namespace Tenders.Sberbank.Tests
                 NotificationNumber = "0332100009818000063"
             }, ct);
             Assert.NotNull(result);
-            Assert.NotEmpty(result.Entries);
-            Assert.True(result.Entries.Length == 1);
+            Assert.NotEmpty(result);
+            Assert.True(result.Count() == 1);
         }
 
         [Fact]
         public async void IsTradePlaceDataRequestSuccessTest()
         {
             _authWithChecks(actionsService, ct);
-
+            // TODO: Отрефакторить похожие куски!!!
             var auctions = await actionsService.SearchAsync(new SearchParameters()
             {
                 NotificationNumber = _auctionNumber
             }, ct);
             Assert.NotNull(auctions);
-            Assert.NotEmpty(auctions.Entries);
-            Assert.True(auctions.Entries.Length == 1);
+            Assert.NotEmpty(auctions);
+            Assert.True(auctions.Count() == 1);
             Assert.False(cts.IsCancellationRequested);
 
-            var auction = auctions.Entries[0];
+            var auction = auctions.First();
             var tradeData = await actionsService.GetTradeDataAsync(auction, ct);
         }
 
@@ -94,11 +95,11 @@ namespace Tenders.Sberbank.Tests
                 NotificationNumber = _auctionNumber
             }, ct);
             Assert.NotNull(auctions);
-            Assert.NotEmpty(auctions.Entries);
-            Assert.True(auctions.Entries.Length == 1);
+            Assert.NotEmpty(auctions);
+            Assert.True(auctions.Count() == 1);
             Assert.False(cts.IsCancellationRequested);
 
-            var auction = auctions.Entries[0];
+            var auction = auctions.First();
 
             ITradePlace tradeData;
             try
@@ -135,7 +136,7 @@ namespace Tenders.Sberbank.Tests
                 new Lot()
                 {
                     Url = new Uri("http://www.sberbank-ast.ru/tradezone/supplier/PurchaseRequestEF.aspx?purchID=6394901"),
-                    RegNumber = "0340200003318017799",
+                    NotificationNumber = "0340200003318017799",
                     Text = "Оказание услуг по обязательному страхованию гражданской ответственности владельцев транспортных средств (ОСАГО)"
                 },
                 ct
@@ -149,12 +150,12 @@ namespace Tenders.Sberbank.Tests
             var to = DateTime.Now.AddDays(1).Date;
             var searchParams = new SearchParameters()
             {
-                Text = "",
+                Text = "страхование осаго осгоп",
                 PublicDateFrom = from,
                 PublicDateTo = to
             };
-            var result = actionsService.GuestSearchAsync(searchParams, ct).Result;
 
+            var result = actionsService.GuestSearchAsync(searchParams, ct).Result;
         }
 
         private static void _authWithChecks(ISberbankActionsService actionsService, CancellationToken ct)

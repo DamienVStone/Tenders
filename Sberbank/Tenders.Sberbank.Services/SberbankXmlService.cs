@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using Tenders.Core.Abstractions.Services;
@@ -21,13 +22,10 @@ namespace Tenders.Sberbank.Services
             this.loggerService = loggerService ?? throw new ArgumentNullException(nameof(loggerService));
         }
 
-        public ISearchResult GetSearchResult(string s)
+        public IEnumerable<ISearchResultEntry> GetSearchResult(string s)
         {
             var result = (data)new XmlSerializer(typeof(data)).Deserialize(new StringReader(s));
-            return new SearchResult()
-            {
-                Entries = result.Entries
-            };
+            return result.Entries;
         }
 
         public ITradePlace GetTradePlace(string s)

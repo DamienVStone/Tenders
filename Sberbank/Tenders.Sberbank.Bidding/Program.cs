@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tenders.Core.Abstractions.Services;
@@ -60,7 +61,7 @@ namespace Sberbank.Bidding
                 return t.Result;
             }).Result;
 
-            var auction = auctions.Entries[0];
+            var auction = auctions.First();
             var tradeData = _waitTradePlace(auction, ct).Result;
             if (tradeData == null)
             {

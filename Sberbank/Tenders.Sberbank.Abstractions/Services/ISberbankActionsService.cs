@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Tenders.Sberbank.Abstractions.Models;
 using Tenders.Sberbank.Abstractions.Models.Requesting;
@@ -22,14 +23,14 @@ namespace Tenders.Sberbank.Abstractions.Services
         /// </summary>
         /// <param name="parameters">Параметры поиска</param>
         /// <returns></returns>
-        Task<ISearchResult> SearchAsync(ISearchParameters parameters, CancellationToken ct);
+        Task<IEnumerable<ISearchResultEntry>> SearchAsync(ISearchParameters parameters, CancellationToken ct);
 
         /// <summary>
         /// Поиск процедур в гостевой зоне без авторизации
         /// </summary>
         /// <param name="parameters">Параметры поиска</param>
         /// <returns></returns>
-        Task<ISearchResult> GuestSearchAsync(ISearchParameters parameters, CancellationToken ct);
+        Task<IEnumerable<ILot>> GuestSearchAsync(ISearchParameters parameters, CancellationToken ct);
 
         /// <summary>
         /// Получение данных о текущих торгах по аукциону
