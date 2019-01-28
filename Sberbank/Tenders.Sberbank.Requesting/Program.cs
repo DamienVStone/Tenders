@@ -52,26 +52,33 @@ namespace Tenders.Sberbank.Requesting
             await apiService.Authenticate(ct);
             await actionsService.AuthenticateAsync(ct);
 
-            while (true)
+            for (int i = 0; i < 30; i++)
             {
                 var localActionsService = Container.GetService<ISberbankActionsService>();
-
-                var from = DateTime.Now.Date;
-                var to = DateTime.Now.AddDays(1).Date;
-                var searchParameters = new SearchParameters
-                {
-                    Text = "страхование осаго осгоп",
-                    PublicDateFrom = from,
-                    PublicDateTo = to
-                };
-
-                var lots = localActionsService.GuestSearchAsync(searchParameters, ct);
-
-                // TODO
-                // 1. Кеш поданных
-                // 2. Подача
-                // 3. Отправка в управление аукционами
             }
+
+            //while (true)
+            //{
+            //    var localActionsService = Container.GetService<ISberbankActionsService>();
+
+            //    var from = DateTime.Now.Date;
+            //    var to = DateTime.Now.AddDays(1).Date;
+            //    var searchParameters = new SearchParameters
+            //    {
+            //        Text = "страхование осаго осгоп",
+            //        PublicDateFrom = from,
+            //        PublicDateTo = to
+            //    };
+
+            //    var lots = localActionsService.GuestSearchAsync(searchParameters, ct);
+
+            //    // TODO
+            //    // 1. Кеш поданных
+            //    // 2. Подача
+            //    // 3. Отправка в управление аукционами
+            //}
+
+            Console.ReadLine();
         }
     }
 }

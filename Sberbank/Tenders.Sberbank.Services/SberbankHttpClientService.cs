@@ -30,8 +30,9 @@ namespace Tenders.Sberbank.Services
         {
             if (sberbankConfigService.IsDebug)
                 return null;
-
-            return await proxyService.GetProxy(ct);
+            var result = await proxyService.GetProxy(ct);
+            await logger.Log($"Получен прокси: {result.Address.ToString()}");
+            return result;
         }
 
         protected override void SetDefaultHeaders(HttpClient client)
