@@ -28,7 +28,7 @@ namespace FtpMonitoringService.Models
             Name = name;
             Size = size;
             IsDirectory = false;
-            IsArchive = name.EndsWith(".zip");
+            IsArchive = name.Trim().ToLowerInvariant().EndsWith(".zip");
         }
 
         public FtpFile AddChild(string name)
