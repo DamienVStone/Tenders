@@ -95,7 +95,7 @@ namespace Tenders.API.DAL.Mongo
         public FTPEntry GetRandomNewOrModifiedArchive()
         {
             return Entities
-                .Find(f => f.IsActive && (f.State == StateFile.New || f.State == StateFile.Modified))
+                .Find(f => f.IsActive && f.IsArchive && (f.State == StateFile.New || f.State == StateFile.Modified))
                 .Limit(1)
                 .FirstOrDefault();
         }
