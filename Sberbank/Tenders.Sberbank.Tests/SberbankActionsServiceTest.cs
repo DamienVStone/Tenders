@@ -134,8 +134,8 @@ namespace Tenders.Sberbank.Tests
             actionsService.MakeRequest(
                 new Lot()
                 {
-                    Url = new Uri("http://www.sberbank-ast.ru/tradezone/supplier/PurchaseRequestEF.aspx?purchID=6394901"),
-                    NotificationNumber = "0340200003318017799",
+                    Url = new Uri("http://www.sberbank-ast.ru/tradezone/supplier/PurchaseRequestEF.aspx?purchID=6403806"),
+                    NotificationNumber = "0171100000719000001",
                     Text = "Оказание услуг по обязательному страхованию гражданской ответственности владельцев транспортных средств (ОСАГО)"
                 },
                 ct
