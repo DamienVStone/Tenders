@@ -12,14 +12,14 @@ namespace FtpMonitoringService.Models
         public readonly bool IsDirectory;
         public readonly string Name;
         public readonly long Size;
-        public bool IsArchive;
+        public readonly bool IsArchive;
         public IEnumerable<FtpFile> Children => _children.Values;
 
         public FtpFile(string name)
         {
             Name = name;
             IsDirectory = true;
-            IsArchive = name.EndsWith(".zip");
+            IsArchive = name.Trim().ToLowerInvariant().EndsWith(".zip");
         }
 
         public FtpFile(string name, long size, DateTimeOffset modified)

@@ -107,7 +107,7 @@ namespace Tenders.API.Services
                             Modified = f.DateModified,
                             Size = f.Size,
                             Path = PathId,
-                            IsDirectory = false, // в корне котолога нет директорий. директории только внутри зипников.
+                            IsDirectory = false, // в корне каталога нет директорий. директории только внутри зипников.
                             Parent = null,
                             IsArchive = f.IsArchive
                         };
