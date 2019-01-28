@@ -134,7 +134,7 @@ namespace FtpMonitoringService
                     path.Password = creds[1];
 #endif
                     var file = new FtpFile(archive.Name, archive.Size, archive.Modified);
-                    await _monitorArchive(file, path, ct);
+                    await _monitorArchive(file, path, archive.Id, ct);
                 }
                 catch (Exception exp)
                 {
@@ -166,7 +166,7 @@ namespace FtpMonitoringService
             await logger.Log($"Все архивы обработаны");
         }
 
-        private static async Task<bool> _monitorArchive(FtpFile f, FtpPath p, CancellationToken ct)
+        private static async Task<bool> _monitorArchive(FtpFile f, FtpPath p, string rootId, CancellationToken ct)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -182,7 +182,7 @@ namespace FtpMonitoringService
             var data = JsonConvert.SerializeObject(f);
             await logger.Log($"Дерево файлов сериализовано {sw1.Elapsed}, отправляю на сервер");
             sw1.Restart();
-            var res = await apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, ct);
+            var res = await apiDataProvider.SendFileTreeAsync(new StringContent(data, Encoding.UTF8, MediaTypeNames.Application.Json), p.Id, rootId, ct);
             await logger.Log($"Дерево файлов отправлено на сервер {sw1.Elapsed}");
             sw1.Stop();
             await logger.Log($"Архив {f.Name} обработан ОБЩЕЕ ВРЕМЯ АРХИВА: {sw.Elapsed}");

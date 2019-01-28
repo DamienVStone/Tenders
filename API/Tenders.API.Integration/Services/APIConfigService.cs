@@ -63,9 +63,9 @@ namespace Tenders.Integration.API.Services
 
         private string _sendFileTreeUrl;
 
-        public Uri SendFileTreeUrl(string pathId)
+        public Uri SendFileTreeUrl(string pathId, string rootId)
         {
-            return new Uri(_sendFileTreeUrl + $"?pathId={pathId}");
+            return new Uri(_sendFileTreeUrl + $"?pathId={pathId}&rootId={rootId}");
         }
 
         private string _getPathByIdUrl;

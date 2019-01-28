@@ -143,9 +143,9 @@ namespace Tenders.Integration.API.Services
             return await _retryablePost(configService.SendFilesUrl(pathId).AbsoluteUri, files, ct);
         }
 
-        public async Task<string> SendFileTreeAsync(StringContent files, string pathId, CancellationToken ct)
+        public async Task<string> SendFileTreeAsync(StringContent files, string pathId, string rootId, CancellationToken ct)
         {
-            return await _retryablePost(configService.SendFileTreeUrl(pathId).AbsoluteUri, files, ct);
+            return await _retryablePost(configService.SendFileTreeUrl(pathId, rootId).AbsoluteUri, files, ct);
         }
 
         public async Task<bool> SendNewIndexedFiles(StringContent index, CancellationToken ct)

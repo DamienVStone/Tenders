@@ -28,7 +28,7 @@ namespace Tenders.API.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<bool> SaveFTPEntriesTree(string PathId, FTPEntriesTreeParam rootEntry)
+        public async Task<bool> SaveFTPEntriesTree(string PathId, string RootId, FTPEntriesTreeParam rootEntry)
         {
             var entriesToAdd = new HashSet<FTPEntry>();
             var sw = new Stopwatch();
@@ -36,11 +36,11 @@ namespace Tenders.API.Services
             //var entry = 
             //    _entryRepo.ExistsByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive)? 
             //    _entryRepo.GetByNameAndPathAndIsDirectoryAndIsArchive(rootEntry.Name, PathId, rootEntry.IsDirectory, rootEntry.IsArchive) : null;
-            FTPEntry entry = null;
-            var res = _putEntry(entry, rootEntry, null, PathId, entriesToAdd);
-            await _logger.Log($"Сохранил корень: {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
+            //FTPEntry entry = null;
+            //var res = _putEntry(entry, rootEntry, null, PathId, entriesToAdd);
+            //await _logger.Log($"Сохранил корень: {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
-            _saveTree(res, rootEntry.Children, PathId, entriesToAdd);
+            _saveTree(RootId, rootEntry.Children, PathId, entriesToAdd);
             await _logger.Log($"Обошел дерево {sw.Elapsed.Minutes}:{sw.Elapsed.Seconds}");
             sw.Restart();
             if (entriesToAdd.Count > 0) await _entryRepo.BulkInsert(entriesToAdd);

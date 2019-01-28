@@ -22,7 +22,7 @@ namespace Tenders.Integration.API.Interfaces
         Task<bool> SendPathFailedNotice(string Id, CancellationToken ct);
         Task<bool> SendArchiveFailedNotice(string Id, CancellationToken ct);
         Task<string> SendFilesAsync(StringContent files, string pathId, CancellationToken ct);
-        Task<string> SendFileTreeAsync(StringContent files, string pathId, CancellationToken ct);
+        Task<string> SendFileTreeAsync(StringContent files, string pathId, string rootId, CancellationToken ct);
         Task<bool> SendNewIndexedFiles(StringContent index, CancellationToken ct);
         Task<IEnumerable<T>> GetCurrentIndexAsync<T>(CancellationToken ct);
         Task<IEnumerable<T>> GetUpdatedTenderPlansAsync<T>(CancellationToken ct);

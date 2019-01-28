@@ -65,7 +65,7 @@ namespace Tenders.Integration.API.Interfaces
         /// <summary>
         /// Url для отправки дерева файлов
         /// </summary>
-        Uri SendFileTreeUrl(string pathId);
+        Uri SendFileTreeUrl(string pathId, string rootId);
 
         /// <summary>
         /// Токен безопасности для доступа к старому API

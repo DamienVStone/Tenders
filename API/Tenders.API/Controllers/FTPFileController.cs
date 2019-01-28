@@ -61,12 +61,12 @@ namespace Tenders.API.Controllers
         /// <param name="fileTree">Объект, хранящий дерево файлов и корень</param>
         /// <returns>200OK если индексация файлов прошла без ошибок</returns>
         [HttpPost("AddFileTree")]
-        public async Task<IActionResult> AddFileTree([FromQuery]string pathId, [FromBody]FTPEntriesTreeParam entries)
+        public async Task<IActionResult> AddFileTree([FromQuery]string pathId, [FromQuery]string rootId, [FromBody]FTPEntriesTreeParam entries)
         {
             if (!_idProvider.IsIdValid(pathId)) return BadRequest("Неверный идентификатор пути");
             if (!_pathRepo.Exists(pathId)) return BadRequest("Путь не найден");
             var sw = new Stopwatch();
-            var b = await _treeSaverService.SaveFTPEntriesTree(pathId, entries);
+            var b = await _treeSaverService.SaveFTPEntriesTree(pathId, rootId, entries);
             await _logger.Log($"Сохранил дерево файлов {sw.Elapsed}");
             sw.Stop();
             return Ok("");

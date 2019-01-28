@@ -7,6 +7,6 @@ namespace Tenders.API.Services.Interfaces
     public interface IEntrySaverService
     {
         Task<int> SaveRootEntriesWithoutChildren(string PathId, IEnumerable<FTPEntryParam> Entries);
-        Task<bool> SaveFTPEntriesTree(string PathId, FTPEntriesTreeParam RootEntry);
+        Task<bool> SaveFTPEntriesTree(string PathId, string rootId, FTPEntriesTreeParam RootEntry);
     }
 }
